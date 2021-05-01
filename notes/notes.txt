@@ -1,0 +1,12 @@
+## To-do
+
+## Remember:
+1. used backages should probably be stated.
+2. showing code and running code without double labour.
+3. formatting text in code style.
+4. change the theme (cannot just be copied)..
+5. linking to people / other pages.
+6. prediction vs. fitting (we should have prediction as well).
+7. sub-section for sidebar?
+8. should we have the cache thing?
+9. "overthinking" both for math-ish and for R code.
