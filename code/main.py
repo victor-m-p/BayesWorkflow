@@ -19,11 +19,13 @@ st.set_page_config(
 
 st.image("../img/bayes_bois.png", width = 100)
 
+## basic preprocessing. 
+d = pd.read_csv("../data/hh_budget.csv")
+
 # other layout options?
 # 1. taking less space
 # 2. perhaps not
 choice = st.sidebar.radio('Sections:',["Dev", "Introduction", "Specification", "Validation", "Visualization", "Model Comparison"])
-
 
 if choice == "Dev":
     '''
@@ -65,26 +67,53 @@ if choice == "Dev":
     '''
     
     '''
-    ## Option 1. 
+    ## Option 1: in succession
     '''
 
     st.code(py_code1, language = 'Python')
     st.code(R_code1, language = 'R')
     
     '''
-    ## Option 2. 
+    ## Option 2: side by side
     '''
 
     col1, col2 = st.beta_columns(2)
 
     with col1:
         st.header("R")
-        st.code(R_code1, language = "R")
+        st.code(R_code1, language = "r")
     
     with col2: 
         st.header("Python")
         st.code(py_code1, language = "Python")
     
+    
+    '''
+    ## Option 3: st.echo()
+    '''
+    
+    with st.echo():
+        # Everything inside this block will be both printed to the screen
+        # and executed.
+
+        def sns_plot(data):
+            return sns.lineplot(data = data, 
+                                x = "Year",
+                                y = "Wealth",
+                                hue = "Country")
+
+        greeting = "Explorative plot" 
+        p1 = sns_plot(d)
+
+        st.write(greeting, p1)
+    
+    expander = st.beta_expander("Notes")
+    expander.write(f"Does this render?")
+    '''
+    # Call R
+    '''
+    import subprocess
+    subprocess.run(["Rscript", "R_test.R"]) # does run the script but does not capture/print. 
     '''
     # Expander functionality
 

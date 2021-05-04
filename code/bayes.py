@@ -7,6 +7,5 @@ import matplotlib.pyplot as plt
 import pymc3 as pm 
 import seaborn as sns 
 import arviz as az
-import sklearn as sk 
 
-# 
+# simulate our own data. 

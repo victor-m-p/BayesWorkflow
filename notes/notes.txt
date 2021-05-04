@@ -10,3 +10,11 @@
 7. sub-section for sidebar?
 8. should we have the cache thing?
 9. "overthinking" both for math-ish and for R code.
+
+
+## R: call R from python
+1. rpy2: https://github.com/rpy2/rpy2
+2. subprocesses: https://stackoverflow.com/questions/89228/how-to-execute-a-program-or-call-a-system-command-from-python/89243#89243
+
+## problems with R:
+1. plots from command line: https://github.com/cscheid/rplot/blob/master/rplot

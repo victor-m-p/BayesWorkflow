@@ -1,0 +1,17 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+
+pacman::p_load(tidyverse)
+
+d = read_csv("../data/hh_budget.csv")
+
+d %>% ggplot(aes(x = Year, y = Wealth, color = Country)) +
+  geom_line()
+
+print("Hello")
+```
+
