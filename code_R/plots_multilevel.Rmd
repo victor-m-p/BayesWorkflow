@@ -40,14 +40,14 @@ load the models
 ```{r}
 
 # prior fits
-m_pooled_strict_prior <- readRDS("../models_R/m_pooled_strict_prior.rds")
-m_pooled_reasonable_prior <- readRDS("../models_R/m_pooled_reasonable_prior.rds")
-m_pooled_vague_prior <- readRDS("../models_R/m_pooled_vague_prior.rds")
+m_multilevel_strict_prior <- readRDS("../models_R/m_multilevel_strict_prior.rds")
+m_multilevel_reasonable_prior <- readRDS("../models_R/m_multilevel_reasonable_prior.rds")
+m_multilevel_vague_prior <- readRDS("../models_R/m_multilevel_vague_prior.rds")
 
 # sampled models
-m_pooled_strict_fit <- readRDS("../models_R/m_pooled_strict_fit.rds")
-m_pooled_reasonable_fit <- readRDS("../models_R/m_pooled_reasonable_fit.rds")
-m_pooled_vague_fit <- readRDS("../models_R/m_pooled_vague_fit.rds")
+m_multilevel_strict_fit <- readRDS("../models_R/m_multilevel_strict_fit.rds")
+m_multilevel_reasonable_fit <- readRDS("../models_R/m_multilevel_reasonable_fit.rds")
+m_multilevel_vague_fit <- readRDS("../models_R/m_multilevel_vague_fit.rds")
 
 ```
 
@@ -57,25 +57,25 @@ prior predictive checks
 ```{r}
 
 # strict model 
-pooled_strict_prior_pred <- pp_check(m_pooled_strict_prior, 
+multilevel_strict_prior_pred <- pp_check(m_multilevel_strict_prior, 
                                      nsamples = 100) +
   labs(title = "R/brms: prior predictive check") 
 
-save_plot(path = "../plots_R/pooled_strict_prior_pred.png")
+save_plot(path = "../plots_R/multilevel_strict_prior_pred.png")
 
 # reasonable model
-pooled_reasonable_prior_pred <- pp_check(m_pooled_reasonable_prior, 
+multilevel_reasonable_prior_pred <- pp_check(m_multilevel_reasonable_prior, 
                                          nsamples = 100) + 
   labs(title = "R/brms: prior predictive check")
 
-save_plot(path = "../plots_R/pooled_reasonable_prior_pred.png")
+save_plot(path = "../plots_R/multilevel_reasonable_prior_pred.png")
 
 # vague model
-pooled_vague_prior_pred <- pp_check(m_pooled_vague_prior, 
+multilevel_vague_prior_pred <- pp_check(m_multilevel_vague_prior, 
                                     nsamples = 100) + 
   labs(title = "R/brms: prior predictive check")
 
-save_plot(path = "../plots_R/pooled_vague_prior_pred.png")
+save_plot(path = "../plots_R/multilevel_vague_prior_pred.png")
 
 ```
 
@@ -84,24 +84,24 @@ posterior predictive
 ```{r}
 
 # strict model 
-pooled_strict_posterior_pred <- pp_check(m_pooled_strict_fit, 
+multilevel_strict_posterior_pred <- pp_check(m_multilevel_strict_fit, 
                                          nsamples = 100) + 
   labs(title = "R/brms: posterior predictive check") 
 
-save_plot(path = "../plots_R/pooled_strict_posterior_pred.png")
+save_plot(path = "../plots_R/multilevel_strict_posterior_pred.png")
 
 # reasonable model
-pooled_reasonable_posterior_pred <- pp_check(m_pooled_reasonable_fit, 
+multilevel_reasonable_posterior_pred <- pp_check(m_multilevel_reasonable_fit, 
                                          nsamples = 100) +
   labs(title = "R/brms: posterior predictive check")
 
-save_plot(path = "../plots_R/pooled_reasonable_posterior_pred.png")
+save_plot(path = "../plots_R/multilevel_reasonable_posterior_pred.png")
 
 # vague model
-pooled_vague_posterior_pred <- pp_check(m_pooled_vague_fit, 
+multilevel_vague_posterior_pred <- pp_check(m_multilevel_vague_fit, 
                                     nsamples = 100) + 
   labs(title = "R/brms: posterior predictive check")
 
-save_plot(path = "../plots_R/pooled_vague_posterior_pred.png")
+save_plot(path = "../plots_R/multilevel_vague_posterior_pred.png")
 
 ```
