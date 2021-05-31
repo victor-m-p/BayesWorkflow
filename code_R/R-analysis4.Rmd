@@ -1,0 +1,298 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+setup
+
+```{r}
+
+# working directory 
+setwd("~/BayesWorkflow/code_r")
+
+# packages
+pacman::p_load(tidyverse, 
+               brms)
+
+```
+
+data simulation.
+
+```{r setup, include=FALSE}
+
+# how we would create the data in R
+set.seed(44)
+n_id = 10
+n_time = 10
+d <- tibble(
+    id = rep(1:n_id, each = n_time),
+    a_real = rep(rnorm(n_id, mean = 1, sd = 0.5), each = n_time),
+    b_real = rep(rnorm(n_id, mean = 0.3, sd = 0.2), each = n_time),
+    time = rep(0:(n_time-1), n_id),
+    eps_real = rnorm(n_id*n_time, mean = 0, sd = 0.5),
+    y = a_real + b_real * time + eps_real
+) 
+
+```
+
+load data from python
+
+```{r}
+
+# load data
+train <- read_csv("../data/train.csv")
+test <- read_csv("../data/test.csv")
+
+# make sure that data format is okay
+train <- train %>%
+  mutate(idx = as_factor(idx))
+
+# plot training data
+p1 <- train %>%
+    ggplot(aes(x = t, y = y, color = idx)) + 
+    geom_point() + 
+    geom_smooth(method = "lm", se = FALSE)
+
+#p2 <- train %>% 
+#  ggplot(aes(x = t, y = y)) + 
+#  geom_point() + 
+#  geom_smooth(method = "lm", se = FALSE)
+
+ggsave("../plots_R/p1.png",
+       units = "in", # same as matplotlib
+       width = 10,
+       height = 7)
+
+
+```
+
+
+fit (gaussian) models. 
+
+NB: should use update: 
+https://rdrr.io/cran/brms/man/update.brmsfit.html
+
+```{r}
+
+# fit a model
+f0 <- bf(y ~ t) # complete pooling 
+f1 <- bf(y ~ t + (1+t|id)) # random intercept & slope.  
+
+# fit the first model
+get_prior(formula = f0,
+          data = train,
+          family = gaussian,
+          
+)
+
+# set priors: here we only have sigma - not SD. 
+prior_f0 <- c(
+  prior(normal(0, 0.5), class = b),
+  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = sigma)
+)
+
+# fit the prior
+m0_prior <- brm(
+  formula = f0, # model formula
+  family = gaussian, # likelihood function
+  data = train, # data
+  prior = prior_f0, # prior
+  sample_prior = "only", # only sample prior. 
+  file_refit = "on_change", # refits file on change.
+  backend = "cmdstanr", # faster than rstan. 
+  file = "../models_R/m0_prior", # save the model. 
+  threads = threading(2), # within chain parallelization. 
+  control = list(adapt_delta = .99,
+                 max_treedepth = 20)
+)
+
+# pp 
+pp_check(m0_prior, nsamples = 100)
+
+# fit the posterior
+m0_post <- brm(
+  formula = f0, # model formula
+  family = gaussian, # likelihood function
+  data = train, # data
+  prior = prior_f0, # prior
+  sample_prior = TRUE, # only sample prior. 
+  backend = "cmdstanr", # faster than rstan. 
+  file = "../models_R/m0_prior", # save the model. 
+  threads = threading(2), # within chain parallelization. 
+  control = list(adapt_delta = .99,
+                 max_treedepth = 20)
+)
+
+# check it:
+
+
+# try the model with only intercepts
+get_prior(formula = f1,
+          data = d, 
+          family = gaussian)
+
+# specify prior
+prior_f1 <- c(
+  prior(normal(0, .3), class = b),
+  prior(normal(1, .5), class = Intercept),
+  prior(normal(0, .5), class = sd),
+  prior(normal(0, .5), class = sigma)
+)
+
+# fit prior model
+m1_prior <- fit_mod(
+  formula = f1,
+  family = gaussian,
+  data = d,
+  prior = prior_f1,
+  sample_prior = "only",
+  file = "../models/m1_prior"
+)
+
+# fit model (go back to prior pred).
+m1_post <- fit_mod(
+  formula = f1,
+  family = gaussian,
+  data = d,
+  prior = prior_f1,
+  sample_prior = T,
+  file = "../models/m1_post"
+)
+
+# prediction within groups (how will they continue to develop). 
+get_prior(formula = f2,
+          data = d,
+          family = gaussian)
+
+# set priors
+prior_f2 <- c(
+    prior(normal(0, .3), class = b),
+    prior(lkj(2), class = cor),
+    prior(normal(1, .5), class = Intercept),
+    prior(normal(0, .5), class = sd),
+    prior(normal(0, .5), class = sigma)
+)
+
+# fit prior model
+m2_prior <- fit_mod(
+  formula = f2,
+  family = gaussian,
+  data = d,
+  prior = prior_f2,
+  sample_prior = "only",
+  file = "../models/m2_prior")
+
+# fit the posterior 
+m2_post <- fit_mod(
+  formula = f2,
+  family = gaussian,
+  data = d,
+  prior = prior_f2,
+  sample_prior = T,
+  file = "../models/m2_post"
+)
+
+## pp checks 
+#### priors
+pp_check(m0_prior, nsamples = 50) # ok
+pp_check(m1_prior, nsamples = 50) # ok
+pp_check(m2_prior, nsamples = 50) # pl - a bit skewed.. 
+
+#### posteriors
+pp_check(m0_post, nsamples = 50) # ok, but not quite good. 
+pp_check(m1_post, nsamples = 50) # same. 
+pp_check(m2_post, nsamples = 50) # looks very good! 
+
+## other checks 
+
+## loo
+m0_post <- add_criterion(m0_post, criterion = c("loo", "bayes_R2"))
+m1_post <- add_criterion(m1_post, criterion = c("loo", "bayes_R2"))
+m2_post <- add_criterion(m2_post, criterion = c("loo", "bayes_R2"))
+
+## there is strong support for the random effects structure. 
+loo_compare(m0_post, m1_post, m2_post)
+loo_model_weights(m0_post, m1_post, m2_post) # 100% weight. (pareto-k?)
+
+```
+
+test student-t model. 
+
+```{r}
+
+# student-t 
+f3 <- bf(y ~ time + (1+time|id)) # random intercept & slope.  
+
+# check data
+get_prior(formula = f3,
+          data = d,
+          family = student)
+
+# set priors
+prior_f3 <- c(
+    prior(normal(0, .3), class = b),
+    prior(lkj(2), class = cor),
+    prior(normal(1, .5), class = Intercept),
+    prior(normal(0, .5), class = sd),
+    prior(normal(0, .5), class = sigma),
+    prior(gamma(2, 0.1), class = nu)
+)
+
+# fit prior model
+m3_prior <- fit_mod(
+  formula = f3,
+  family = student,
+  data = d,
+  prior = prior_f3,
+  sample_prior = "only",
+  file = "../models/m3_prior")
+
+# fit the posterior 
+m3_post <- fit_mod(
+  formula = f3,
+  family = student,
+  data = d,
+  prior = prior_f3,
+  sample_prior = T,
+  file = "../models/m3_post"
+)
+
+
+# pp
+pp_check(m3_prior, nsamples = 50)
+pp_check(m3_post, nsamples = 50)
+
+## loo
+m3_post <- add_criterion(m3_post, criterion = c("loo", "bayes_R2"))
+loo_compare(m2_post, m3_post) # m2 best. 
+loo_model_weights(m2_post, m3_post) # 100%. 
+
+```
+
+parameter recovery?
+
+```{r}
+
+# all underestimate the effects, but m2 clearly closest. 
+# think it is because we have long tails.
+# these values are furthest from the main bulk of the data, 
+# and thus they are "shrunk" the most. 
+# would be nice to visualize shrinkage! 
+m0_post
+m1_post
+m2_post
+m3_post
+
+```
+
+How does the data look in predictive posterior?
+
+
+visualization?
+
+```{r}
+
+```
+
+prediction?

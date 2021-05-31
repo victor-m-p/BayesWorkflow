@@ -1,0 +1,385 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+
+pacman::p_load(tidyverse, brms)
+
+```
+
+Data: 
+Agent based model (from McElreath)
+
+```{r}
+
+
+# each year. 
+one_year = function(d, N = 20, age_marry = 18, age_retire = 65,
+                    b_shape1 = 2, b_shape2 = 4){
+  
+  ## people can get married 
+  d1 <- d %>%
+    mutate(
+      lucky = rbinom(n(), 1, happiness/5),
+      married = ifelse(married == 0 & age >= age_marry,
+                      lucky, married),
+      age = age + 1) 
+  
+  ## old people go to spain 
+  d1 <- d1 %>%
+    filter(age <= age_retire) 
+  
+  # new births 
+  birth <- tibble(age = 0,
+                  happiness = rbeta(n = N, shape1 = b_shape1, 
+                                    shape2 = b_shape2),
+                  married = 0,
+                  lucky = 0)  
+  
+  d2 <- rbind(d1, birth)
+  
+  return(d2)
+  
+}
+
+```
+
+check dbeta
+
+```{r}
+x = rbeta(20, 2, 4)
+tibble(x = rbeta(2400, 4, 8)) %>%
+  ggplot(aes(x = x)) +  
+  geom_density()
+
+```
+
+
+```{r}
+
+# N per year 
+N <- 20
+age_marry <- 18
+age_retire <- 65 # current retirement age in Denmark. 
+nsim <- 1000
+b_shape1 = 3
+b_shape2 = 5
+
+# starting data 
+d <- tibble(
+  age = 0,
+  happiness = rbeta(n = N, shape1 = b_shape1, shape2 = b_shape2),
+  married = 1,
+  lucky = 0)
+
+# run a lot of times 
+for (i in 1:nsim){
+  d <- one_year(d, N = N, age_marry = age_marry, 
+                age_retire = age_retire, 
+                b_shape1 = b_shape1, 
+                b_shape2 = b_shape2)
+}
+
+# married to factor 
+d <- d %>% 
+  mutate(married = as_factor(married))
+
+```
+
+two negative correlations.
+
+```{r}
+
+# explorative plots
+d %>%
+  ggplot(aes(x = age, y = happiness, color = married)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+subset only adults 
+
+```{r}
+
+d2 <- d %>%
+  filter(age >= age_marry) %>% #only adults
+  mutate(A = (age-age_marry)/(age_retire-age_marry)) #scale. 
+
+```
+
+plot again
+
+```{r}
+# explorative plots
+d2 %>%
+  ggplot(aes(x = age, y = happiness, color = married)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+# outcome distribution
+d2 %>% 
+  ggplot(aes(x = happiness)) + 
+  geom_density()
+
+d2 %>% 
+  ggplot(aes(x = happiness)) + 
+  geom_histogram(binwidth = 0.02)
+```
+
+function for fitting models. 
+
+```{r}
+
+fit_mod <- function(formula,
+                    family,
+                    data,
+                    prior,
+                    sample_prior,
+                    file){
+  
+  b <- brm(
+  formula = formula,
+  family = family,
+  data = data,
+  prior = prior,
+  cores = 4, chains = 2, 
+  sample_prior = sample_prior,
+  backend = "cmdstanr",
+  file = file,
+  file_refit = "on_change",
+  threads = threading(2),
+  control = list(adapt_delta = .99,
+                 max_treedepth = 20)
+  )
+  
+  return(b)
+
+}
+
+```
+
+Hypothesis 1: age & married 
+Likelihood fun: gaussian. 
+
+```{r}
+# model formula 
+f0 <- bf(happiness ~ 1 + A + married)
+
+## getting recommended priors from stan (check out here: link). 
+get_prior(formula = f0,
+          data = d2, 
+          family = gaussian)
+
+# set priors 
+prior_f0 <- c(
+  prior(normal(0.5, 0.2), class = Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = sigma)
+)
+
+# prior checks 
+m0_prior <- fit_mod(
+  formula = f0, 
+  family = gaussian,
+  data = d2, 
+  prior = prior_f0,
+  sample_prior = "only",
+  file = "../models/m0_prior"
+)
+
+## pp checks 
+pp_check(m0_prior, nsamples = 50)
+
+## try to fit it 
+m0_post <- fit_mod(
+  formula = f0, 
+  family = gaussian,
+  data = d2,
+  prior = prior_f0,
+  sample_prior = TRUE,
+  file = "../models/m0_post"
+)
+
+## pp check again
+pp_check(m0_post, nsamples = 50)
+
+## age negatively related. 
+m0_post
+
+```
+
+Hypothesis 2: age only.
+Likelihood fun: Gaussian. 
+
+```{r}
+# formula 
+# perhaps comment on intercept. 
+f1 <- bf(happiness ~ 1 + A)
+
+# prior recommendations from stan. 
+get_prior(formula = f1, 
+          data = d2,
+          family = gaussian)
+
+# prior considerations
+prior_f1 <- c(
+  prior(normal(0.5, 0.2), class = Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = sigma)
+)
+# prior check
+m1_prior <- fit_mod(
+  formula = f1, 
+  family = gaussian,
+  data = d2,
+  prior = prior_f1, 
+  sample_prior = "only",
+  file = "../models/m1_prior"
+)
+
+## pp check
+pp_check(m1_prior, nsamples = 50)
+
+## also 
+m1_post <- fit_mod(
+  formula = f1, 
+  family = gaussian,
+  data = d2,
+  prior = prior_f1, 
+  sample_prior = TRUE,
+  file = "../models/m1_post"
+)
+
+## pp check
+pp_check(m1_post, nsamples = 50)
+
+## no relationship. 
+m1_post
+
+```
+
+hypothesis 2: only age. 
+likelihood fun: student-t
+
+```{r}
+
+# notice, same as f1. 
+f2 <- bf(happiness ~ 1 + A)
+
+######## f2: only age (student-t) --> does not quite do the trick. 
+get_prior(formula = f2, 
+          family = student, 
+          data = d2)
+
+# set prior
+prior_f2 <- c(
+  prior(normal(0.5, 0.2), class = Intercept),
+  prior(normal(0, 0.2), class = b), 
+  prior(exponential(1), class = sigma),
+  prior(gamma(2, 0.1), class = nu)
+)
+
+# check priors 
+m2_prior <- fit_mod(
+  formula = f2, 
+  family = student, 
+  data = d2,
+  prior = prior_f2, 
+  sample_prior = "only",
+  file = "../models/m2_prior"
+)
+  
+# pp check
+pp_check(m2_prior, nsamples = 50)
+
+# fit model
+m2_post <- fit_mod(
+  formula = f2,
+  family = student,
+  data = d2,
+  prior = prior_f2,
+  sample_prior = T,
+  file = "../models/m2_post"
+)
+
+# pp check
+pp_check(m2_post, nsamples = 50)
+
+```
+
+Model comparison
+
+```{r}
+
+# m1 & m2 
+m1_post <- add_criterion(m1_post, criterion = c("loo", "bayes_R2"))
+m2_post <- add_criterion(m2_post, criterion = c("loo", "bayes_R2"))
+
+# compare
+loo_compare(m1_post, m2_post)
+
+# model weights 
+loo_model_weights(m1_post, m2_post)
+
+```
+
+
+
+hypothesis 2: only age. 
+likelihood fun: lognormal. 
+
+```{r}
+
+# notice: same as f1 & f2. 
+f3 <- bf(happiness ~ 1 + A)
+
+# get priors 
+# NB: the same as for Gaussian!!! 
+get_prior(formula = f3, 
+          family = lognormal,
+          data = d2) 
+
+
+# set priors
+# what do I do with beta?
+prior_f3 <- c(
+  prior(normal(0.5, 0.2), class = Intercept), 
+  prior(normal(0, 0.2), class = b),
+  prior(exponential(1), class = sigma) # mean = sd of Intercept??
+)
+
+
+# run prior model
+m3_prior <- fit_mod(
+  formula = f3, 
+  family = lognormal, 
+  data = d2,
+  prior = prior_f3,
+  sample_prior = "only",
+  file = "../models/m3_prior"
+)
+
+# pp check
+# clearly fucked. 
+pp_check(m3_prior)
+
+# try to fit for now anyways
+m3_post <- fit_mod(
+  formula = f3,
+  family = lognormal,
+  data = d2,
+  prior = prior_f3,
+  sample_prior = T,
+  file = "../models/m3_post"
+)
+
+# pp check - also not good. 
+pp_check(m3_post, nsamples = 50)
+
+m3_post
+
+```
+

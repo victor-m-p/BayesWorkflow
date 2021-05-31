@@ -1,0 +1,145 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+
+pacman::p_load(tidyverse, brms)
+
+```
+
+Data: 
+Agent based model (from McElreath)
+
+```{r}
+
+
+# each year. 
+one_year = function(d, N = 20, age_marry = 18, age_retire = 65){
+  
+  ## people can get married 
+  d1 <- d %>%
+    mutate(
+      lucky = rbinom(n(), 1, happiness/5),
+      married = ifelse(married == 0 & age >= age_marry,
+                      lucky, married),
+      age = age + 1) 
+  
+  ## old people go to spain 
+  d1 <- d1 %>%
+    filter(age <= age_retire) 
+  
+  # new births 
+  birth <- tibble(age = 0,
+                  happiness = runif(N, 0, 1),
+                  married = 0,
+                  lucky = 0)  
+  
+  d2 <- rbind(d1, birth)
+  
+  return(d2)
+  
+}
+
+```
+
+```{r}
+
+# N per year 
+N <- 20 
+age_marry <- 18
+age_retire <- 65
+nsim <- 1000
+
+# starting data 
+d <- tibble(
+  age = 0,
+  happiness = runif(N, 0, 1),
+  married = 1,
+  lucky = 0)
+
+# run a lot of times 
+for (i in 1:nsim){
+  d <- one_year(d)
+}
+
+# married to factor 
+d <- d %>% 
+  mutate(married = as_factor(married))
+
+```
+
+two negative correlations.
+
+```{r}
+
+d %>%
+  ggplot(aes(x = age, y = happiness, color = married)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+subset only adults 
+
+```{r}
+
+d2 <- d %>%
+  filter(age >= age_marry) %>% #only adults
+  mutate(A = (age-age_marry)/(age_retire-age_marry)) #scale. 
+
+```
+
+plot again
+
+```{r}
+
+d2 %>%
+  ggplot(aes(x = age, y = happiness, color = married)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+model this 
+
+```{r}
+
+# formulas 
+## with or without intercept.
+f0 <- bf(happiness ~ 1 + A + married)
+f1 <- bf(happiness ~ 1 + A)
+
+
+# get prior
+## getting recommended priors from stan (check out here: link). 
+get_prior(formula = f0,
+          data = d2, 
+          family = gaussian)
+
+get_prior(formula = f1, 
+          data = d2,
+          family = gaussian)
+
+# set priors 
+## we need to consider these of course
+prior_f0 <- c(
+  prior(normal(0.5, 0.2), class = Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = sigma)
+)
+
+prior_f1 <- c(
+  prior(normal(0.5, 0.2), class = Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = sigma)
+)
+
+# sample the prior
+m0_prior <- brm(
+  
+)
+
+```
+

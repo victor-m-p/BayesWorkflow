@@ -18,3 +18,18 @@
 
 ## problems with R:
 1. plots from command line: https://github.com/cscheid/rplot/blob/master/rplot
+
+## New ideas
+1. Why streamlit not Shiny
+2. be very clear about who the target group is and what they should get out of this product.
+
+## Technical:
+1. pre-render models with different priors.
+2. Mikkels link.
+3. priors influence on model comparison.
+4. update without refit in R. (save & load properly in PyMC3).
+5. stanvars.
+6. brug cache.
+7. eval() for displaying output.
+8. check the thing with running other code while it is running (brms).
+9. consider a function which both does prior "only" and prior TRUE. 
