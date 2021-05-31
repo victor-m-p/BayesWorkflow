@@ -1,0 +1,51 @@
+digraph {
+	subgraph cluster150 {
+		y_pred [label="y_pred
+~
+StudentT" style=filled]
+		idx_shared [label="idx_shared
+~
+Data" shape=box style="rounded, filled"]
+		t_shared [label="t_shared
+~
+Data" shape=box style="rounded, filled"]
+		label=150 labeljust=r labelloc=b style=rounded
+	}
+	sigma [label="sigma
+~
+HalfNormal"]
+	beta_hyper [label="beta_hyper
+~
+Normal"]
+	v [label="v
+~
+Gamma"]
+	beta_sigma_hyper [label="beta_sigma_hyper
+~
+HalfNormal"]
+	alpha_hyper [label="alpha_hyper
+~
+Normal"]
+	alpha_sigma_hyper [label="alpha_sigma_hyper
+~
+HalfNormal"]
+	subgraph cluster15 {
+		beta [label="beta
+~
+Normal"]
+		alpha [label="alpha
+~
+Normal"]
+		label=15 labeljust=r labelloc=b style=rounded
+	}
+	alpha_hyper -> alpha
+	alpha_sigma_hyper -> alpha
+	beta_hyper -> beta
+	beta_sigma_hyper -> beta
+	sigma -> y_pred
+	v -> y_pred
+	alpha -> y_pred
+	idx_shared -> y_pred
+	t_shared -> y_pred
+	beta -> y_pred
+}

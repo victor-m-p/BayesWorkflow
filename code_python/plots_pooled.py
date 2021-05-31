@@ -10,6 +10,7 @@ import arviz as az
 import pickle
 import fun_models as fm
 import fun_helper as fh
+import dataframe_image as dfi
 
 ### load data ###
 with open('../data/train.pickle', 'rb') as f:
@@ -34,10 +35,11 @@ idata_pooled_strict = az.from_netcdf("../models_python/idata_pooled_strict.nc")
 idata_pooled_reasonable = az.from_netcdf("../models_python/idata_pooled_reasonable.nc")
 idata_pooled_vague = az.from_netcdf("../models_python/idata_pooled_vague.nc")
 
-'''
-## kruschke diagram
-pm.model_to_graphviz(m_pooled_reasonable) # has to be rendered real-time.
-'''
+fh.plot_plate(
+    compiled_model = m_pooled_reasonable,
+    model_type = "pooled"
+)
+
 
 ## plot prior predictive & save.
 fh.prior_pred(
@@ -83,22 +85,40 @@ fh.posterior_pred(
     n_draws = 100
 )
 
-'''
 ## Plot traces
+fh.plot_trace(
+    m_idata = idata_pooled_strict,
+    model_type = "pooled",
+    prior_level = "strict"
+)
 
-In PyMC3 I additionally like to plot the traces
+fh.plot_trace(
+    m_idata = idata_pooled_reasonable,
+    model_type = "pooled",
+    prior_level = "reasonable"
+)
 
-'''
+fh.plot_trace(
+    m_idata = idata_pooled_vague,
+    model_type = "pooled",
+    prior_level = "vague"
+)
 
-'''
-## plot traces 
-az.plot_trace(idata_pooled_strict)
-figure = plt.gcf()
-#figure.set_size_inches(10, 7)
-plt.savefig("../plots_python/pooled_strict_trace.jpeg", dpi=300, transparent=False,
-            facecolor=figure.get_facecolor(), edgecolor='none')
+## Plot summary
+fh.export_summary(
+    m_idata = idata_pooled_strict,
+    model_type = "pooled",
+    prior_level = "strict"
+)
 
-az.plot_trace(idata_pooled_reasonable)
-az.plot_trace(idata_pooled_vague)
+fh.export_summary(
+    m_idata = idata_pooled_reasonable,
+    model_type = "pooled",
+    prior_level = "reasonable"
+)
 
-'''
+fh.export_summary(
+    m_idata = idata_pooled_vague,
+    model_type = "pooled",
+    prior_level = "vague"
+)

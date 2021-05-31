@@ -253,6 +253,25 @@ elif choice == "Complete Pooling (model 1)":
     
     
     '''
+    # Plate Notation 
+    
+    There are many reasons why a prior predictive check can be bad
+    
+    (including of course, bad priors). Something that is really nice in
+    
+    pyMC3 though is that you can check whether you actually specified the
+    
+    model as you intended to. Your model is shown in plate notation,
+    
+    which can seem confusing, and which I think is less intuitive than the
+    
+    really nice Kruschke diagrams/plots (link). However, it is still useful. 
+    
+    '''
+    
+    st.image("../plots_python/pooled_plate.png")
+    
+    '''
     # Posterior Predictive checks 
     '''
     
@@ -273,30 +292,59 @@ elif choice == "Complete Pooling (model 1)":
         
     
     '''
-    # Check sampling
+    # Check traces (sampling)
     
-    col1, col2 = st.beta_columns(2)
+    When I am working in pyMC3 I like to check my traces at this point. 
     
-    with col1:
-        pass
-        
-    with col2: 
-        st.image("../img/bayes_bois.png")
+    This is just one of the things that seems easier to me in pyMC3, 
     
-    expander = st.beta_expander("See code")
-    
-    with expander: 
-        
-        ## create two columns
-        col1, col2 = st.beta_columns(2)
-        
-        with col1: 
-            st.write("R code goes here")
-        
-        with col2: 
-            st.write("Python code goes here")
+    so I will only here show the pyMC3 code and output. 
     '''
-            
+    
+    selection3 = st.radio(
+        "Choose prior level for trace plot", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level3 = translation_dct.get(selection3)
+    
+    st.image(f"../plots_python/pooled_{prior_level3}_plot_trace.jpeg")
+    
+    '''
+    
+    For all prior levels we see healthy traces to the right (catterpillars),
+    
+    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
+    
+    However, notice that the values for our parameters differ based on our priors.
+    
+    The models fitted with either "Very Weak" or "Generic" priors are close, 
+    
+    but the "Specific" priors bias the model heavily towards our priors. 
+    
+    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
+    
+    for more details on Arviz' plot_trace() and customization.  
+    '''
+    
+    '''
+    # Summary
+    
+    We are now happy with our prior- and posterior predictive checks
+    
+    & with our sampling and chains. 
+    
+    We can now get an overview with the summary method. 
+    '''
+    
+    selection4 = st.radio(
+        "Choose prior level for summary", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level4 = translation_dct.get(selection4)
+    
+    st.image(f"../plots_python/pooled_{prior_level4}_summary.png")
 
 elif choice == "Multilevel (model 2)":
     

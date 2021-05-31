@@ -25,27 +25,27 @@ y_train = train.y.values
 n_train = len(np.unique(idx_train))
 
 ## compile all the models ##
-m_student_restrictive = fm.student(t_train, idx_train, y_train, n_train, 0.05)
+m_student_strict = fm.student(t_train, idx_train, y_train, n_train, 0.05)
 m_student_reasonable = fm.student(t_train, idx_train, y_train, n_train, 0.5)
 m_student_vague = fm.student(t_train, idx_train, y_train, n_train, 5)
 
 ## sample all the models ##
-idata_student_restrictive = fh.sample_mod(m_student_restrictive) # fails spectacularly. 
+idata_student_strict = fh.sample_mod(m_student_strict) # fails spectacularly. 
 idata_student_reasonable = fh.sample_mod(m_student_reasonable) # great
 idata_student_vague = fh.sample_mod(m_student_vague) # great
 
 ## plot traces 
-az.plot_trace(idata_student_restrictive)
+az.plot_trace(idata_student_strict)
 az.plot_trace(idata_student_reasonable)
 az.plot_trace(idata_student_vague)
 
 ## updating checks for all models 
-fh.updating_check(idata_student_restrictive)
+fh.updating_check(idata_student_strict)
 fh.updating_check(idata_student_reasonable)
 fh.updating_check(idata_student_vague)
 
 ## save all the models 
-idata_student_restrictive.to_netcdf("../models_python/idata_student_restrictive.nc")
+idata_student_strict.to_netcdf("../models_python/idata_student_strict.nc")
 idata_student_reasonable.to_netcdf("../models_python/idata_student_reasonable.nc")
 idata_student_vague.to_netcdf("../models_python/idata_student_vague.nc")
 

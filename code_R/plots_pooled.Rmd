@@ -12,7 +12,10 @@ setwd("~/BayesWorkflow/code_r")
 
 # packages
 pacman::p_load(tidyverse, 
-               brms)
+               brms,
+               kableExtra, 
+               magick, 
+               webshot)
 
 ```
 
@@ -109,6 +112,48 @@ pooled_vague_posterior_pred <- pp_check(m_pooled_vague_fit,
   labs(title = "R/brms: prior predictive check")
 
 save_plot(path = "../plots_R/pooled_vague_posterior_pred.png")
+
+```
+
+summary (first convenience function).
+This does not work well for the moment.
+(1) omits row.
+(2) poor quality. 
+
+```{r}
+
+# convenience function
+plot_kable <- function(model_fit, file){
+  
+  fixed <- round(summary(model_fit)$fixed, 3) %>%
+    as_tibble()
+  
+  family <- round(summary(model_fit)$spec_pars, 3) %>%
+    as_tibble()
+  
+  rbind(fixed, family) %>%
+    kbl() %>%
+    kable_paper(full_width = F) %>%
+    as_image(width = 8, file = file)
+  
+}
+
+# now plot/save them 
+plot_kable(
+  m_pooled_strict_fit,
+  "../plots_R/pooled_strict_summary.png"
+  )
+
+plot_kable(
+  m_pooled_reasonable_fit,
+  "../plots_R/pooled_reasonable_summary.png"
+  )
+
+plot_kable(
+  m_pooled_vague_fit, 
+  "../plots_R/pooled_vague_summary.png"
+  )
+
 
 ```
 

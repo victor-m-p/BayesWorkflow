@@ -10,6 +10,7 @@ import pandas as pd
 import pymc3 as pm
 import matplotlib.pyplot as plt
 import arviz as az
+import dataframe_image as dfi
 
 # train test split
 def train_test(d, split_column, train_size = .75):
@@ -26,8 +27,8 @@ def train_test(d, split_column, train_size = .75):
 def sample_mod(
     model, 
     posterior_draws = 2000, 
-    post_pred_draws = 1000,
-    prior_pred_draws = 500):
+    post_pred_draws = 4000,
+    prior_pred_draws = 4000):
     
     with model: 
         trace = pm.sample(
@@ -40,6 +41,13 @@ def sample_mod(
         m_idata = az.from_pymc3(trace = trace, posterior_predictive=post_pred, prior=prior_pred)
     
     return m_idata
+
+# kruschke/plate diagram
+def plot_plate(compiled_model, model_type): 
+    g = pm.model_to_graphviz(compiled_model) 
+    g.render(
+        f"../plots_python/{model_type}_plate",
+        format = "png")
 
 # prior predictive
 def prior_pred(m_idata, model_type, prior_level, n_draws = 100): 
@@ -63,6 +71,22 @@ def posterior_pred(m_idata, model_type, prior_level, n_draws):
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_posterior_pred.jpeg",
                 dpi = 300)
 
+# plot trace
+def plot_trace(m_idata, model_type, prior_level):
+    #fig, ax = plt.subplots()
+    az.plot_trace(m_idata)
+    #fig.suptitle("Python/pyMC3: trace plot")
+    #fig.tight_layout() 
+    plt.savefig(f"../plots_python/{model_type}_{prior_level}_plot_trace.jpeg")
+    
+# export summary
+def export_summary(m_idata, model_type, prior_level):
+    summary = az.summary(m_idata)
+    dfi.export(
+        summary,
+        f"../plots_python/{model_type}_{prior_level}_summary.png"
+    )    
+
 # updating checks
 def updating_check(m_idata, n_prior = 100, n_posterior = 100): 
     fig, axes = plt.subplots(nrows = 2)
@@ -70,5 +94,4 @@ def updating_check(m_idata, n_prior = 100, n_posterior = 100):
     az.plot_ppc(m_idata, group = "prior", num_pp_samples = n_prior, ax = axes[0])
     az.plot_ppc(m_idata, num_pp_samples = n_posterior, ax = axes[1])
     plt.draw()
-
 
