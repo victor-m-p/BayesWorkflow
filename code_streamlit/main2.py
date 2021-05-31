@@ -354,6 +354,12 @@ elif choice == "Multilevel (model 2)":
     1. Random intercepts ($\alpha$) &
     
     2. Random slopes ($\beta$)
+    
+    NB: not taking into account (in the pyMC3 model) the correlation 
+    
+    between intercepts and slopes (which is the "lkj(1)" parameter in brms).
+    
+    For more, see: https://docs.pymc.io/notebooks/multilevel_modeling.html
     '''
     # put in the actual stuff here.
     st.latex(r''' 

@@ -17,6 +17,9 @@ pacman::p_load(tidyverse,
                magick, 
                webshot)
 
+# load functions from fun_helper.R
+source("fun_helper.R")
+
 ```
 
 load data and ensure correct format.
@@ -48,18 +51,6 @@ m_pooled_vague_fit <- readRDS("../models_R/m_pooled_vague_fit.rds")
 
 ```
 
-convenience function for saving plots
-
-```{r}
-
-save_plot <- function(path){
-  ggsave(path,
-         units = "in",
-         height = 7,
-         width = 10)
-}
-  
-```
 
 prior predictive checks
 
@@ -114,46 +105,3 @@ pooled_vague_posterior_pred <- pp_check(m_pooled_vague_fit,
 save_plot(path = "../plots_R/pooled_vague_posterior_pred.png")
 
 ```
-
-summary (first convenience function).
-This does not work well for the moment.
-(1) omits row.
-(2) poor quality. 
-
-```{r}
-
-# convenience function
-plot_kable <- function(model_fit, file){
-  
-  fixed <- round(summary(model_fit)$fixed, 3) %>%
-    as_tibble()
-  
-  family <- round(summary(model_fit)$spec_pars, 3) %>%
-    as_tibble()
-  
-  rbind(fixed, family) %>%
-    kbl() %>%
-    kable_paper(full_width = F) %>%
-    as_image(width = 8, file = file)
-  
-}
-
-# now plot/save them 
-plot_kable(
-  m_pooled_strict_fit,
-  "../plots_R/pooled_strict_summary.png"
-  )
-
-plot_kable(
-  m_pooled_reasonable_fit,
-  "../plots_R/pooled_reasonable_summary.png"
-  )
-
-plot_kable(
-  m_pooled_vague_fit, 
-  "../plots_R/pooled_vague_summary.png"
-  )
-
-
-```
-

@@ -1,0 +1,168 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+set-up
+
+```{r}
+
+# working directory 
+setwd("~/BayesWorkflow/code_r")
+
+# packages
+pacman::p_load(tidyverse, 
+               brms)
+
+# load functions from fun_models.R
+source("fun_models.R")
+
+```
+
+load data and ensure correct format.
+
+```{r}
+
+# load data
+train <- read_csv("../data/train.csv")
+
+# make sure that data format is okay
+train <- train %>%
+  mutate(idx = as_factor(idx))
+
+```
+
+specify formula. 
+
+```{r}
+
+#formula 
+f_multilevel <- bf(y ~ 1 + t + (1+t|idx)) # complete pooling 
+
+```
+
+Get priors and set priors. 
+
+```{r}
+
+# fit the first model
+get_prior(formula = f_multilevel,
+          data = train,
+          family = gaussian,
+          
+)
+
+# set priors: three levels.
+prior_multilevel_strict <- c(
+  prior(normal(0, 0.05), class = b),
+  prior(normal(1.5, 0.05), class = Intercept),
+  prior(normal(0, 0.05), class = sd),
+  prior(normal(0, 0.05), class = sigma),
+  prior(lkj(1), class = cor)
+)
+
+prior_multilevel_reasonable <- c(
+  prior(normal(0, 0.5), class = b),
+  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = sd),
+  prior(normal(0, 0.5), class = sigma),
+  prior(lkj(1), class = cor)
+)
+
+prior_multilevel_vague <- c(
+  prior(normal(0, 5), class = b),
+  prior(normal(1.5, 5), class = Intercept),
+  prior(normal(0, 5), class = sd),
+  prior(normal(0, 5), class = sigma),
+  prior(lkj(1), class = cor)
+)
+
+```
+
+Now we compile models and check prior predictive.
+
+```{r}
+
+# compile the models
+m_multilevel_strict_prior <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_strict,
+  sample_prior = "only",
+  file = "../models_R/m_multilevel_strict_prior"
+)
+
+m_multilevel_reasonable_prior <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_reasonable,
+  sample_prior = "only",
+  file = "../models_R/m_multilevel_reasonable_prior"
+)
+
+m_multilevel_vague_prior <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_vague,
+  sample_prior = "only",
+  file = "../models_R/m_multilevel_vague_prior"
+)
+
+```
+
+check the prior predictive checks
+
+```{r}
+
+pp_check(m_multilevel_strict_prior, nsamples = 100)
+pp_check(m_multilevel_reasonable_prior, nsamples = 100)
+pp_check(m_multilevel_vague_prior, nsamples = 100)
+
+```
+
+fit the models 
+
+```{r}
+
+# fit the models
+m_multilevel_strict_fit <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_strict,
+  sample_prior = TRUE,
+  file = "../models_R/m_multilevel_strict_fit"
+)
+
+m_multilevel_reasonable_fit <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_reasonable,
+  sample_prior = TRUE,
+  file = "../models_R/m_multilevel_reasonable_fit"
+)
+
+m_multilevel_vague_fit <- fit_mod(
+  formula = f_multilevel,
+  family = gaussian,
+  data = train,
+  prior = prior_multilevel_vague,
+  sample_prior = TRUE,
+  file = "../models_R/m_multilevel_vague_fit"
+)
+
+```
+
+posterior predictive checks 
+
+```{r}
+
+pp_check(m_multilevel_strict_fit, nsamples = 100)
+pp_check(m_multilevel_reasonable_fit, nsamples = 100)
+pp_check(m_multilevel_vague_fit, nsamples = 100)
+
+```
