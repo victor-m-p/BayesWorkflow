@@ -1,0 +1,314 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+set-up
+
+```{r}
+
+# working directory 
+setwd("~/BayesWorkflow/code_r")
+
+# packages
+pacman::p_load(tidyverse, 
+               brms,
+               kableExtra, 
+               magick, 
+               webshot)
+
+# load functions from fun_helper.R
+# source("fun_helper.R")
+
+```
+
+load data 
+
+```{r}
+
+# load data
+train <- read_csv("../data/train.csv")
+
+# make sure that data format is okay
+train <- train %>%
+  mutate(idx = as_factor(idx))
+
+```
+
+load models 
+
+```{r}
+# prior fits
+m_pooled_prior <- readRDS("../models_R/m_pooled_reasonable_prior.rds")
+m_multilevel_prior <- readRDS("../models_R/m_multilevel_reasonable_prior.rds")
+m_student_prior <- readRDS("../models_R/m_student_reasonable_prior.rds")
+
+# sampled models
+m_pooled_posterior <- readRDS("../models_R/m_pooled_reasonable_fit.rds")
+m_multilevel_posterior <- readRDS("../models_R/m_multilevel_reasonable_fit.rds")
+m_student_posterior <- readRDS("../models_R/m_student_reasonable_fit.rds")
+
+```
+
+http://mjskay.github.io/tidybayes/
+fitted and predicted. 
+with intervals (not draws). 
+Check recoded/McElreath for the difference (CH4). 
+
+Making it as functions: 
+functions for pooled. 
+
+```{r}
+
+# prediction intervals for pooled model. 
+plot_predicted_pooled <- function(fit, title, data = train, n_time = 100){
+  
+  data %>%
+    data_grid(t = seq_range(t, n = n_time)) %>%
+    add_predicted_draws(fit) %>%
+    ggplot(aes(x = t, y = y)) +
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8),
+                     color = "#08519C") +
+    geom_jitter(data = data, 
+                color = "navyblue", 
+                shape = 1, 
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() +
+    ggtitle(title)
+  
+}
+
+# posterior fit intervals for pooled model.
+plot_fitted_pooled <- function(fit, title, data = train, n_time = 100){
+  
+  data %>%
+    data_grid(t = seq_range(t, n = n_time)) %>%
+    add_fitted_draws(fit) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), 
+                    color = "#08519C") +
+    geom_jitter(data = data, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle(title)
+  
+}
+
+# Kruschke style. 
+plot_fit_draws_pooled <- function(fit, title, data = train, n_time = 100){
+     
+  data %>% 
+    data_grid(t = seq_range(t, n = n_time)) %>%
+    add_fitted_draws(fit, n = 100) %>%
+    ggplot(aes(x = t, y = y)) + 
+    geom_jitter(data = train, 
+                color = "navyblue",
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    geom_line(aes(y = .value, group = .draw), 
+              alpha = 1/20, 
+              color = "#08519C") +
+    ggtitle(title)
+}
+
+# testing them. 
+plot_predicted_pooled(fit = m_pooled_posterior, 
+                      title = "Prediction Interval (.95, .8) for pooled model",
+                      data = train,
+                      n_time = 100)
+
+plot_fitted_pooled(fit = m_pooled_posterior,
+                   title = "Fixed effect draws (.95, .8) for pooled model",
+                   data = train,
+                   n_time = 100)
+
+plot_fit_draws_pooled(fit = m_pooled_posterior,
+                      title = "Fixed effect draws (Kruschke style) for pooled model",
+                      data = train,
+                      n_time = 100)
+
+```
+
+functions for multilevel and student
+
+```{r}
+
+plot_predicted_groups <- function(fit, title, data = train, n_time = 100){
+  
+  data %>%
+    data_grid(t = seq_range(t, n = n_time), idx) %>%
+    add_predicted_draws(fit) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), 
+                    color = "#08519C") +
+    geom_jitter(data = data, 
+                color = "navyblue", 
+                shape = 1, 
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() +
+    ggtitle(title)
+
+}
+
+plot_fitted_groups <- function(fit, title, data = train, n_time = 100){
+  
+  data %>%
+    data_grid(t = seq_range(t, n = 50), idx) %>%
+    add_fitted_draws(fit,
+                     re_formula = NA) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), 
+                    color = "#08519C") +
+    geom_jitter(data = data, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() +
+    ggtitle(title)
+  
+}
+
+# test the two functions
+plot_predicted_groups(fit = m_multilevel_posterior,
+                      title = "Prediction Interval (.95, .8) for Multilevel Model")
+
+plot_predicted_groups(fit = m_student_posterior,
+                      title = "Prediction Intervals (.95, .8) for Student-t Model")
+
+plot_fitted_groups(fit = m_multilevel_posterior,
+                   title = "Fixed effect draws (.95, .8) for Multilevel Model")
+
+plot_fitted_groups(fit = m_student_posterior,
+                   title = "Fixed effect draws (.95, .8) for Student-t Model")
+
+```
+
+
+HPDI (highest posterior density intervals). 
+
+What we have working. 
+Could go for HPDI (highest posterior density interval)
+as e.g. Richard McElreath advocates. 
+Can give a better sense of non-normally distributed 
+parameters (e.g. multimodal). See: http://mjskay.github.io/tidybayes/articles/tidybayes.html
+
+```{r}
+
+# pooled 
+mcmc_plot(m_pooled_posterior,
+          pars = c("b_Intercept",
+                   "b_t",
+                   "sigma"),
+          fixed = T) 
+
+# multilevel
+mcmc_plot(m_multilevel_posterior,
+          pars = c("b_Intercept",
+                   "b_t",
+                   "sigma"),
+          fixed = T)
+
+# student
+mcmc_plot(m_student_posterior,
+          pars = c("b_Intercept",
+                   "b_t",
+                   "sigma"),
+          fixed = T)
+
+```
+
+KRUSCHKE STYLE (for plots of individual).
+could try to select just some factor levels. 
+They don't look pooled here. 
+We can either fix it or just don't care... 
+
+```{r}
+
+# fitted pooled 
+train %>% 
+  data_grid(t = seq_range(t, n = 50)) %>%
+  add_fitted_draws(m_pooled_posterior, n = 100) %>%
+  ggplot(aes(x = t, y = y)) + 
+  geom_jitter(data = train, color = "#2874a6",
+              alpha = 0.5, size = 2, width = 0.1) + 
+  scale_fill_brewer() + 
+  geom_line(aes(y = .value, group = .draw), alpha = 1/20, 
+            color = "#08519C") 
+
+# fitted multilevel (for idx). 
+train %>%
+  data_grid(t = seq_range(t, n = 50), idx) %>%
+  add_fitted_draws(m_multilevel_posterior, 
+                   RE_formula = NA, 
+                   n = 100) %>%
+  ggplot(aes(x = t, y = y)) + 
+  geom_jitter(data = train, color = "#2874a6", alpha = 0.5, size = 2, width = 0.1) + 
+  scale_fill_brewer() + 
+  geom_line(aes(y = .value, group = .draw), alpha = 1/20, color = "#08519C") +
+  facet_wrap(~ idx)
+
+```
+
+Predictions
+
+```{r}
+
+# read test data
+test <- read_csv("../data/test.csv")
+
+# make sure that data format is okay
+test <- test %>%
+  mutate(idx = as_factor(idx))
+
+```
+
+
+```{r}
+
+# only for multilevel (because it is best). 
+plot_predicted_groups <- function(fit, title, data = train, n_time = 100){
+  
+  data %>%
+    data_grid(t = seq_range(t, n = n_time), idx) %>%
+    add_predicted_draws(fit) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), 
+                    color = "#08519C") +
+    geom_jitter(data = data, 
+                color = "navyblue", 
+                shape = 1, 
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() +
+    ggtitle(title)
+
+}
+
+# how is the group going to continue doing. 
+plot_predicted_groups(m_multilevel_posterior,
+                      "test",
+                      data = test)
+
+# what about this one kid... 
+
+```
+

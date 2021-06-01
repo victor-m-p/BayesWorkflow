@@ -105,3 +105,28 @@ pooled_vague_posterior_pred <- pp_check(m_pooled_vague_fit,
 save_plot(path = "../plots_R/pooled_vague_posterior_pred.png")
 
 ```
+
+check chains
+
+```{r}
+
+# strict model
+save_chains(
+  fit = m_pooled_strict_fit,
+  path = "../plots_R/pooled_strict_plot_trace.png"
+)
+
+# reasonable model
+save_chains(
+  fit = m_pooled_reasonable_fit,
+  path = "../plots_R/pooled_reasonable_plot_trace.png"
+)
+
+# vague model
+save_chains(
+  fit = m_pooled_vague_fit,
+  path = "../plots_R/pooled_vague_plot_trace.png"
+)
+
+```
+

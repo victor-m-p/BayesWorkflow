@@ -146,6 +146,8 @@ elif choice == "Simulation & EDA":
     
 elif choice == "Complete Pooling (model 1)":
     
+    model_context = "pooled"
+    
     # python model (fun_models.py)
     py_model = '''
     with pm.Model() as m1:
@@ -215,7 +217,8 @@ elif choice == "Complete Pooling (model 1)":
     # Compile model
     '''
     
-    col1, col2 = st.beta_columns(2)
+    
+    #col1, col2 = st.beta_columns(2)
     
     
     '''
@@ -246,10 +249,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_level1 = translation_dct.get(selection1)
 
     with col1_prior: 
-        st.image(f"../plots_python/pooled_{prior_level1}_prior_pred.jpeg")
+        st.image(f"../plots_python/{model_context}_{prior_level1}_prior_pred.jpeg")
         
     with col2_prior: 
-        st.image(f"../plots_R/pooled_{prior_level1}_prior_pred.png")
+        st.image(f"../plots_R/{model_context}_{prior_level1}_prior_pred.png")
     
     
     '''
@@ -269,7 +272,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    st.image("../plots_python/pooled_plate.png")
+    st.image(f"../plots_python/{model_context}_plate.png")
     
     '''
     # Posterior Predictive checks 
@@ -285,10 +288,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_level2 = translation_dct.get(selection2)
     
     with col1_posterior:
-        st.image(f"../plots_python/pooled_{prior_level2}_posterior_pred.jpeg")
+        st.image(f"../plots_python/{model_context}_{prior_level2}_posterior_pred.jpeg")
         
     with col2_posterior:
-        st.image(f"../plots_R/pooled_{prior_level2}_posterior_pred.png")
+        st.image(f"../plots_R/{model_context}_{prior_level2}_posterior_pred.png")
         
     
     '''
@@ -308,7 +311,7 @@ elif choice == "Complete Pooling (model 1)":
     
     prior_level3 = translation_dct.get(selection3)
     
-    st.image(f"../plots_python/pooled_{prior_level3}_plot_trace.jpeg")
+    st.image(f"../plots_python/{model_context}_{prior_level3}_plot_trace.jpeg")
     
     '''
     
@@ -344,9 +347,12 @@ elif choice == "Complete Pooling (model 1)":
     
     prior_level4 = translation_dct.get(selection4)
     
-    st.image(f"../plots_python/pooled_{prior_level4}_summary.png")
+    st.image(f"../plots_python/{model_context}_{prior_level4}_summary.png")
+
 
 elif choice == "Multilevel (model 2)":
+    
+    model_context = "multilevel"
     
     r'''
     Multilevel model with: 
@@ -370,12 +376,96 @@ elif choice == "Multilevel (model 2)":
     \sigma \sim HalfNormal(0, 1)
     ''')
     
-elif choice == "Student-t (model 3)":
+    '''
+    # Prior Predictive checks
     
     '''
-    Multilevel model (as above) with Student-t likelihood function.
+    selection1 = st.radio(
+        "Choose prior level for prior predictive", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
     
-    Notice that only the top row is different. 
+    col1_prior, col2_prior = st.beta_columns(2)
+    
+    translation_dct = {
+        'Very Weak (sd = 5)': 'vague',
+        'Generic (sd = 0.5)': 'reasonable',
+        'Specific (sd = 0.05)': 'strict'}
+    
+    prior_level1 = translation_dct.get(selection1)
+
+    with col1_prior: 
+        st.image(f"../plots_python/{model_context}_{prior_level1}_prior_pred.jpeg")
+        
+    with col2_prior: 
+        st.image(f"../plots_R/{model_context}_{prior_level1}_prior_pred.png")
+    
+    '''
+    # Plate notation
+    
+    Here they should be able to compare with the old one (for pooled). 
+    
+    '''
+    
+    st.image(f"../plots_python/{model_context}_plate.png")
+    
+    '''
+    # Posterior Predictive checks 
+    '''
+    
+    selection2 = st.radio(
+        "Choose prior level for posterior predictive", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_posterior, col2_posterior = st.beta_columns(2)
+    
+    prior_level2 = translation_dct.get(selection2)
+    
+    with col1_posterior:
+        st.image(f"../plots_python/{model_context}_{prior_level2}_posterior_pred.jpeg")
+        
+    with col2_posterior:
+        st.image(f"../plots_R/{model_context}_{prior_level2}_posterior_pred.png")
+    
+    '''
+    # Check traces (sampling)
+    
+    '''
+    selection3 = st.radio(
+        "Choose prior level for trace plot", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level3 = translation_dct.get(selection3)
+    
+    st.image(f"../plots_python/{model_context}_{prior_level3}_plot_trace.jpeg")
+    
+    '''
+    
+    # Summary
+    
+    check how this looks in R. 
+    
+    '''
+    selection4 = st.radio(
+        "Choose prior level for summary", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level4 = translation_dct.get(selection4)
+    
+    st.image(f"../plots_python/{model_context}_{prior_level4}_summary.png")
+    
+    
+elif choice == "Student-t (model 3)":
+    
+    model_context = "student"
+    
+    r'''
+    Still multilevel (random slopes and intercepts).
+    
+    Notice that only top row has changed. 
     '''
     # put in the actual stuff here.
     st.latex(r''' 
@@ -385,9 +475,135 @@ elif choice == "Student-t (model 3)":
     \beta \sim Normal(0, 1) \\
     \sigma \sim HalfNormal(0, 1)
     ''')
+    
+    '''
+    # Prior Predictive checks
+    
+    '''
+    selection1 = st.radio(
+        "Choose prior level for prior predictive", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_prior, col2_prior = st.beta_columns(2)
+    
+    translation_dct = {
+        'Very Weak (sd = 5)': 'vague',
+        'Generic (sd = 0.5)': 'reasonable',
+        'Specific (sd = 0.05)': 'strict'}
+    
+    prior_level1 = translation_dct.get(selection1)
+
+    with col1_prior: 
+        st.image(f"../plots_python/{model_context}_{prior_level1}_prior_pred.jpeg")
+        
+    with col2_prior: 
+        st.image(f"../plots_R/{model_context}_{prior_level1}_prior_pred.png")
+    
+    '''
+    # Plate notation
+    
+    Here they should be able to compare with the old one (for pooled). 
+    
+    '''
+    
+    st.image(f"../plots_python/{model_context}_plate.png")
+    
+    '''
+    # Posterior Predictive checks 
+    '''
+    
+    selection2 = st.radio(
+        "Choose prior level for posterior predictive", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_posterior, col2_posterior = st.beta_columns(2)
+    
+    prior_level2 = translation_dct.get(selection2)
+    
+    with col1_posterior:
+        st.image(f"../plots_python/{model_context}_{prior_level2}_posterior_pred.jpeg")
+        
+    with col2_posterior:
+        st.image(f"../plots_R/{model_context}_{prior_level2}_posterior_pred.png")
+    
+    '''
+    # Check traces (sampling)
+    
+    '''
+    selection3 = st.radio(
+        "Choose prior level for trace plot", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level3 = translation_dct.get(selection3)
+    
+    st.image(f"../plots_python/{model_context}_{prior_level3}_plot_trace.jpeg")
+    
+    '''
+    
+    # Summary
+    
+    check how this looks in R. 
+    
+    '''
+    selection4 = st.radio(
+        "Choose prior level for summary", 
+        ("Very Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_level4 = translation_dct.get(selection4)
+    
+    st.image(f"../plots_python/{model_context}_{prior_level4}_summary.png")
 
 elif choice == "Model Comparison":
-    pass
+    
+    '''
+    # Model comparison
+    
+    I like to compare models in two ways: 
+    
+    1. Using information criteria (loo). 
+    
+    2. Using posterior predictive checks (& potentially predictions on unseen data). 
+    
+    If you want to know more check the 'Concept-Guru' section. 
+    
+    NB: WE NEED BOTH PREDICTIVE AND FIT!! (different uncertainty)...
+    (CH4 in recoded for this difference) (CH 12 in recoded for multilevel).
+    Depends on whether we want to plot plausible average height or 
+    whether we want to plot simulated heights of individuals. 
+    Obviously there will be more variability in the second one 
+    (see recoded CH4 and McElreath). 
+    
+    '''
+    
+    expander = st.beta_expander("Concept-Guru: Model Comparison")
+    
+    with expander: 
+        
+        '''
+        The second one always works. Since Bayesian models are always generative (see McElreath)
+        
+        we can simulate/generate new data based on our fitted distributions over parameters
+        
+        and our likelihood function. 
+        
+        The first is typically invalid if we want to compare models with different
+        
+        likelihood functions. In our specific case however (Gaussian and Student-t) however,
+        
+        it is valid (find source). 
+        '''
+    
+    
+    '''
+    # Information criterion (loo)
+    
+    '''
+    
+    st.image("../plots_python/loo_comparison.png")
 
 elif choice == "Prediction": 
     pass

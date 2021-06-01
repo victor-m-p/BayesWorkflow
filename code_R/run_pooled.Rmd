@@ -24,11 +24,13 @@ load data and ensure correct format.
 ```{r}
 
 # load data
-train <- read_csv("../data/train.csv")
+train <- read_csv("../data/train.csv") %>%
+  glimpse()
 
 # make sure that data format is okay
 train <- train %>%
-  mutate(idx = as_factor(idx))
+  mutate(idx = as_factor(idx)) %>%
+  select(c(t, y)) # select relevant columns. 
 
 ```
 
@@ -160,3 +162,4 @@ pp_check(m_pooled_reasonable_fit, nsamples = 100)
 pp_check(m_pooled_vague_fit, nsamples = 100)
 
 ```
+
