@@ -1,3 +1,5 @@
+# https://discourse.pymc.io/t/creating-hierarchical-models-using-3-dimensional-xarray-data/5900/8
+
 ## packages ##
 import numpy as np
 import pandas as pd
@@ -12,13 +14,6 @@ import fun_models as fm
 import fun_helper as fh
 import dataframe_image as dfi
 import xarray as xr
-
-import xarray as xr
-import arviz as az
-import pymc3 as pm
-import numpy as np
-
-######### own stuff ###########
 
 ### load data ###
 with open('../data/train.pickle', 'rb') as f:
@@ -43,6 +38,7 @@ dims = coords.keys()
 # data in correct format. 
 t_train = train.t.values.reshape((n_idx, n_time))
 y_train = train.y.values.reshape((n_idx, n_time))
+idx_train = train.idx.values.reshape((n_idx, n_time))
 
 # gather dataset 
 dataset = xr.Dataset(
@@ -50,15 +46,14 @@ dataset = xr.Dataset(
     'y_data': (dims, y_train)},
     coords = coords)
 
-idx_train = train.idx.values.reshape((n_idx, n_time))
-t_data = dataset['t_data']
-y_data = dataset['y_data']
+#t_data = dataset['t_data']
+#y_data = dataset['y_data']
 
 with pm.Model(coords = coords) as model:
     
     # Inputs
-    idx_shared = pm.Data('idx_', idx_train, dims = dims)
-    t_shared = pm.Data('t_', t_data, dims = dims)
+    idx_ = pm.Data('idx_shared', idx_train, dims = dims)
+    t_ = pm.Data('t_shared', t_train, dims = dims)
 
     # hyper-priors
     alpha_hyper = pm.Normal("alpha_hyper", mu = 1.5, sigma = 0.5)
@@ -71,7 +66,7 @@ with pm.Model(coords = coords) as model:
     beta = pm.Normal("beta", mu = beta_hyper, sigma = beta_sigma_hyper, dims = "idx")
     
     # expected value per participant at each time-step
-    mu = alpha[idx_shared] + beta[idx_shared] * t_shared
+    mu = alpha[idx_] + beta[idx_] * t_
 
     # model error
     sigma = pm.HalfNormal("sigma", sigma = 0.5)
@@ -79,7 +74,7 @@ with pm.Model(coords = coords) as model:
     # likelihood
     y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y_train, dims = dims)
 
-# 
+# sample posterior 
 with model: 
     m_idata = pm.sample(
         2000, 
@@ -88,7 +83,7 @@ with model:
         return_inferencedata=True
     )
 
-# try posterior predictive
+# sample posterior predictive
 with model:
     post_pred = pm.sample_posterior_predictive(
         m_idata,
@@ -176,11 +171,11 @@ az.plot_hdi(
 with open('../data/test.pickle', 'rb') as f:
     test = pickle.load(f)
 
-# get unique stuff.  
+# get unique values for shared. 
 t_unique_test = np.unique(test.t.values)
 idx_unique_test = np.unique(test.idx.values)
 
-# get n of unique for shapes
+# get n unique for shapes. 
 n_time_test = len(t_unique_test)
 n_idx_test = len(idx_unique_test)
 
@@ -196,7 +191,7 @@ prediction_coords = {
 }
 
 with model:
-    pm.set_data({"t_": t_test, "idx_": idx_test})
+    pm.set_data({"t_shared": t_test, "idx_shared": idx_test})
     stl_pred = pm.fast_sample_posterior_predictive(
         m_idata.posterior, random_seed=32
     )
