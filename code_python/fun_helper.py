@@ -23,17 +23,18 @@ def train_test(d, split_column, train_size = .75):
     test = d[d[split_column] > min_val+length]
     return train, test
 
-# sampling models
+# sampling models -- should not be in one step. 
 def sample_mod(
     model, 
-    posterior_draws = 2000, 
+    tune_draw = 2000, 
     post_pred_draws = 4000,
     prior_pred_draws = 4000):
     
     with model: 
         trace = pm.sample(
             return_inferencedata = False, 
-            draws = posterior_draws,
+            draws = tune_draw,
+            tune = tune_draw,
             target_accept = .99,
             max_treedepth = 20) # tuning!
         post_pred = pm.sample_posterior_predictive(trace, samples = post_pred_draws)

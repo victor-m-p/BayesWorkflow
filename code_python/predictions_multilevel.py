@@ -56,17 +56,17 @@ with pm.Model(coords = coords) as model:
     t_ = pm.Data('t_shared', t_train, dims = dims)
 
     # hyper-priors
-    alpha_hyper = pm.Normal("alpha_hyper", mu = 1.5, sigma = 0.5)
-    alpha_sigma_hyper = pm.HalfNormal("alpha_sigma_hyper", sigma = 0.5)
-    beta_hyper = pm.Normal("beta_hyper", mu = 0, sigma = 0.5)
-    beta_sigma_hyper = pm.HalfNormal("beta_sigma_hyper", sigma = 0.5)
+    alpha = pm.Normal("alpha", mu = 1.5, sigma = 0.5)
+    alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = 0.5)
+    beta = pm.Normal("beta", mu = 0, sigma = 0.5)
+    beta_sigma = pm.HalfNormal("beta_sigma", sigma = 0.5)
     
     # varying intercepts & slopes
-    alpha = pm.Normal("alpha", mu = alpha_hyper, sigma = alpha_sigma_hyper, dims = "idx")
-    beta = pm.Normal("beta", mu = beta_hyper, sigma = beta_sigma_hyper, dims = "idx")
+    alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+    beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
     
     # expected value per participant at each time-step
-    mu = alpha[idx_] + beta[idx_] * t_
+    mu = alpha_varying[idx_] + beta_varying[idx_] * t_
 
     # model error
     sigma = pm.HalfNormal("sigma", sigma = 0.5)
@@ -77,7 +77,7 @@ with pm.Model(coords = coords) as model:
 # sample posterior 
 with model: 
     m_idata = pm.sample(
-        2000, 
+        draws = 2000, 
         tune=2000, 
         random_seed=32, 
         return_inferencedata=True
@@ -89,12 +89,8 @@ with model:
         m_idata,
         var_names = [
             "y_pred", 
-            "alpha", 
-            "beta",
-            "alpha_hyper",
-            "alpha_sigma_hyper",
-            "beta_hyper",
-            "beta_sigma_hyper"])
+            "alpha",
+            "beta"])
     idata_aux = az.from_pymc3(posterior_predictive=post_pred)
     
 m_idata.extend(idata_aux)
@@ -139,7 +135,7 @@ az.plot_hdi(
 # we need title & legend. 
 
 #### fixed approach #### 
-y_fixed = (ppc.alpha_hyper.values + ppc.beta_hyper.values * t_unique[:, None]).T
+y_fixed = (ppc.alpha.values + ppc.beta.values * t_unique[:, None]).T
 
 # plot it with the data
 fig, ax = plt.subplots(figsize = (10, 7))

@@ -9,14 +9,13 @@ references:
 import pymc3 as pm
 import numpy as np
 
-
 # pooled
-def pooled(t, idx, y, sigma): 
+def pooled(t, y, coords, dims, sigma = 0.5): 
     
-    with pm.Model() as m:
+    with pm.Model(coords=coords) as m:
         
         # shared variables
-        t_shared = pm.Data('t_shared', t)
+        t_ = pm.Data('t_shared', t, dims = dims)
         
         # specify priors for parameters & model error
         beta = pm.Normal("beta", mu = 0, sigma = sigma)
@@ -24,7 +23,7 @@ def pooled(t, idx, y, sigma):
         sigma = pm.HalfNormal("sigma", sigma = sigma)
         
         # calculate mu
-        mu = alpha + beta * t_shared
+        mu = alpha + beta * t_
         
         # likelihood
         y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y)
@@ -32,62 +31,65 @@ def pooled(t, idx, y, sigma):
     return m
         
 # random intercepts and slopes
-def multilevel(t, idx, y, n_id, sigma): 
+def multilevel(t, idx, y, n_id, coords, dims, sigma = 0.5): 
     
-    with pm.Model() as m: 
+    with pm.Model(coords=coords) as m: 
         
-        # shared variables
-        t_shared = pm.Data('t_shared', t)
-        idx_shared = pm.Data('idx_shared', idx)
-        
+        # Inputs
+        idx_ = pm.Data('idx_shared', idx, dims = dims)
+        t_ = pm.Data('t_shared', t, dims = dims)
+
         # hyper-priors
-        alpha_hyper = pm.Normal("alpha_hyper", mu = 1.5, sigma = sigma)
-        alpha_sigma_hyper = pm.HalfNormal("alpha_sigma_hyper", sigma = sigma)
-        beta_hyper = pm.Normal("beta_hyper", mu = 0, sigma = sigma)
-        beta_sigma_hyper = pm.HalfNormal("beta_sigma_hyper", sigma = sigma)
+        alpha = pm.Normal("alpha", mu = 1.5, sigma = 0.5)
+        alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = 0.5)
+        beta = pm.Normal("beta", mu = 0, sigma = 0.5)
+        beta_sigma = pm.HalfNormal("beta_sigma", sigma = 0.5)
         
         # varying intercepts & slopes
-        alpha = pm.Normal("alpha", mu = alpha_hyper, sigma = alpha_sigma_hyper, shape = n_id)
-        beta = pm.Normal("beta", mu = beta_hyper, sigma = beta_sigma_hyper, shape = n_id)
+        alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+        beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
         
         # expected value per participant at each time-step
-        mu = alpha[idx_shared] + beta[idx_shared] * t_shared
-        
+        mu = alpha_varying[idx_] + beta_varying[idx_] * t_
+
         # model error
-        sigma = pm.HalfNormal("sigma", sigma = sigma)
+        sigma = pm.HalfNormal("sigma", sigma = 0.5)
         
         # likelihood
-        y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y)
+        y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y, dims = dims)
+
 
     return m
 
 # random intercepts and slopes (student-t)
-def student(t, idx, y, n_id, sigma): 
+def student(t, idx, y, n_id, coords, dims, sigma = 0.5): 
     
-    with pm.Model() as m: 
+    with pm.Model(coords=coords) as m: 
         
-        # shared variables
-        t_shared = pm.Data('t_shared', t)
-        idx_shared = pm.Data('idx_shared', idx)
-        
+        # Inputs
+        idx_ = pm.Data('idx_shared', idx, dims = dims)
+        t_ = pm.Data('t_shared', t, dims = dims)
+
         # hyper-priors
-        alpha_hyper = pm.Normal("alpha_hyper", mu = 1.5, sigma = sigma)
-        alpha_sigma_hyper = pm.HalfNormal("alpha_sigma_hyper", sigma = sigma)
-        beta_hyper = pm.Normal("beta_hyper", mu = 0, sigma = sigma)
-        beta_sigma_hyper = pm.HalfNormal("beta_sigma_hyper", sigma = sigma)
+        alpha = pm.Normal("alpha", mu = 1.5, sigma = 0.5)
+        alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = 0.5)
+        beta = pm.Normal("beta", mu = 0, sigma = 0.5)
+        beta_sigma = pm.HalfNormal("beta_sigma", sigma = 0.5)
         
         # varying intercepts & slopes
-        alpha = pm.Normal("alpha", mu = alpha_hyper, sigma = alpha_sigma_hyper, shape = n_id)
-        beta = pm.Normal("beta", mu = beta_hyper, sigma = beta_sigma_hyper, shape = n_id)
-        v = pm.Gamma("v", alpha = 2, beta = 0.1)
+        alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+        beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
         
         # expected value per participant at each time-step
-        mu = alpha[idx_shared] + beta[idx_shared] * t_shared
+        mu = alpha_varying[idx_] + beta_varying[idx_] * t_
+
+        # nu
+        v = pm.Gamma("v", alpha = 2, beta = 0.1)
         
         # model error
-        sigma = pm.HalfNormal("sigma", sigma = sigma)
+        sigma = pm.HalfNormal("sigma", sigma = 0.5)
         
         # likelihood
-        y_pred = pm.StudentT("y_pred", nu = v, mu = mu, sigma = sigma, observed = y)
-    
+        y_pred = pm.StudentT("y_pred", nu = v, mu = mu, sigma = sigma, observed = y, dims = dims)
+        
     return m
