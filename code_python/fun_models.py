@@ -31,7 +31,7 @@ def pooled(t, y, coords, dims, sigma = 0.5):
     return m
         
 # random intercepts and slopes
-def multilevel(t, idx, y, n_id, coords, dims, sigma = 0.5): 
+def multilevel(t, idx, y, coords, dims, sigma = 0.5): 
     
     with pm.Model(coords=coords) as m: 
         
@@ -62,7 +62,7 @@ def multilevel(t, idx, y, n_id, coords, dims, sigma = 0.5):
     return m
 
 # random intercepts and slopes (student-t)
-def student(t, idx, y, n_id, coords, dims, sigma = 0.5): 
+def student(t, idx, y, coords, dims, sigma = 0.5): 
     
     with pm.Model(coords=coords) as m: 
         

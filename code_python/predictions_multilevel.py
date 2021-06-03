@@ -78,8 +78,9 @@ with pm.Model(coords = coords) as model:
 with model: 
     m_idata = pm.sample(
         draws = 2000, 
-        tune=2000, 
-        random_seed=32, 
+        tune = 2000, 
+        random_seed = 32, 
+        chains = 2,
         return_inferencedata=True
     )
 
@@ -103,9 +104,9 @@ ppc = m_idata.posterior_predictive
 
 # preprocessing 
 y_pred = ppc["y_pred"].mean(axis = 0).values
-y_pred_reshape = y_pred.reshape((4000*n_idx, n_time))
+y_pred_reshape = y_pred.reshape((4000*n_idx, n_time)) # 4000 = 2000 (draws) * 2 (chains)
 y_mean = y_pred.mean(axis = (0, 1))
-
+    
 # plot it with the data. 
 fig, ax = plt.subplots()
 
@@ -132,6 +133,13 @@ az.plot_hdi(
     hdi_prob = 0.95
 )
 
+ax.legend()
+fig.suptitle("Python/pyMC3: prior predictive check")
+fig.tight_layout()
+figure = plt.gcf()
+figure.set_size_inches(10, 7)
+plt.savefig(f"../plots_python/test.jpeg",
+            dpi = 300)
 # we need title & legend. 
 
 #### fixed approach #### 

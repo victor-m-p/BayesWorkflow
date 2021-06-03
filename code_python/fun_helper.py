@@ -23,6 +23,7 @@ def train_test(d, split_column, train_size = .75):
     test = d[d[split_column] > min_val+length]
     return train, test
 
+'''
 # sampling models -- should not be in one step. 
 def sample_mod(
     model, 
@@ -42,6 +43,7 @@ def sample_mod(
         m_idata = az.from_pymc3(trace = trace, posterior_predictive=post_pred, prior=prior_pred)
     
     return m_idata
+'''
 
 # kruschke/plate diagram
 def plot_plate(compiled_model, model_type): 
@@ -88,6 +90,63 @@ def export_summary(m_idata, model_type, prior_level):
         f"../plots_python/{model_type}_{prior_level}_summary.png"
     )    
 
+# plot hdi & save
+def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_prob = (.95, .8)):
+    
+    # take out ppc 
+    if kind == "full" or kind == "fixed":
+        ppc = m_idata.posterior_predictive
+    elif kind == "predictions": 
+        ppc = m_idata.predictions
+    
+    # unpack tuple & get unique t. 
+    high, low = hdi_prob
+    t_unique = np.unique(t)
+    n_time = len(t_unique)
+    
+    # take out data from ppc.
+    y_pred = ppc["y_pred"].mean(axis = 0).values
+    y_mean = y_pred.mean(axis = (0, 1))
+
+    # here the plots differ
+    if kind == "full" or kind == "predictions": 
+        outcome = y_pred.reshape((4000*n_idx, n_time)) # 4000 = 2000 (draws) * 2 (chains)
+    elif kind == "fixed": 
+        outcome = (ppc.alpha.values + ppc.beta.values * t_unique[:, None]).T
+    
+    # set-up plot
+    fig, ax = plt.subplots(figsize = (10, 7))  
+
+    # plot data
+    ax.plot(t.flatten(), y.flatten(), 'o')
+    
+    # plot mean
+    ax.plot(t_unique, y_mean)
+    
+    # plot lower interval
+    az.plot_hdi(
+        t_unique,
+        outcome,
+        ax = ax,
+        fill_kwargs={'alpha': 0.4, "label": f"{low*100}% HPD intervals"},
+        hdi_prob = low)
+    
+    # plot higher interval
+    az.plot_hdi(
+        t_unique,
+        outcome,
+        ax = ax,
+        fill_kwargs = {'alpha': 0.3, "label": f"{high*100}% HDI intervals"},
+        hdi_prob = high)
+    
+    # add legend, title and formatting. 
+    ax.legend()
+    fig.suptitle(f"Python/pyMC3: Prediction Intervals ({kind})")
+    fig.tight_layout()
+    plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_{kind}.jpeg",
+                dpi = 300)
+    
+'''
 # updating checks
 def updating_check(m_idata, n_prior = 100, n_posterior = 100): 
     fig, axes = plt.subplots(nrows = 2)
@@ -95,4 +154,4 @@ def updating_check(m_idata, n_prior = 100, n_posterior = 100):
     az.plot_ppc(m_idata, group = "prior", num_pp_samples = n_prior, ax = axes[0])
     az.plot_ppc(m_idata, num_pp_samples = n_posterior, ax = axes[1])
     plt.draw()
-
+'''

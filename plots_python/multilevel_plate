@@ -1,47 +1,47 @@
 digraph {
-	subgraph cluster150 {
-		idx_shared [label="idx_shared
-~
-Data" shape=box style="rounded, filled"]
-		t_shared [label="t_shared
-~
-Data" shape=box style="rounded, filled"]
+	subgraph "cluster15 x 10" {
 		y_pred [label="y_pred
 ~
 Normal" style=filled]
-		label=150 labeljust=r labelloc=b style=rounded
-	}
-	alpha_hyper [label="alpha_hyper
+		t_shared [label="t_shared
 ~
-Normal"]
-	alpha_sigma_hyper [label="alpha_sigma_hyper
+Data" shape=box style="rounded, filled"]
+		idx_shared [label="idx_shared
+~
+Data" shape=box style="rounded, filled"]
+		label="15 x 10" labeljust=r labelloc=b style=rounded
+	}
+	alpha_sigma [label="alpha_sigma
 ~
 HalfNormal"]
-	beta_hyper [label="beta_hyper
+	alpha [label="alpha
 ~
 Normal"]
+	beta [label="beta
+~
+Normal"]
+	beta_sigma [label="beta_sigma
+~
+HalfNormal"]
 	sigma [label="sigma
 ~
 HalfNormal"]
-	beta_sigma_hyper [label="beta_sigma_hyper
-~
-HalfNormal"]
 	subgraph cluster15 {
-		beta [label="beta
+		alpha_varying [label="alpha_varying
 ~
 Normal"]
-		alpha [label="alpha
+		beta_varying [label="beta_varying
 ~
 Normal"]
 		label=15 labeljust=r labelloc=b style=rounded
 	}
-	alpha_sigma_hyper -> alpha
-	alpha_hyper -> alpha
-	beta_sigma_hyper -> beta
-	beta_hyper -> beta
-	alpha -> y_pred
+	alpha -> alpha_varying
+	alpha_sigma -> alpha_varying
+	beta -> beta_varying
+	beta_sigma -> beta_varying
 	idx_shared -> y_pred
+	alpha_varying -> y_pred
 	t_shared -> y_pred
-	beta -> y_pred
 	sigma -> y_pred
+	beta_varying -> y_pred
 }
