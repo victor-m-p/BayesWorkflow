@@ -20,6 +20,7 @@ n_chains = 2
 target_accept = .8 ### CHANGE 
 max_treedepth = 10 ### CHANGE 
 prior_draws = 500
+RANDOM_SEED = 42
 
 ### load data ###
 train = pd.read_csv("../data/train.csv")
@@ -89,7 +90,8 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
             chains = n_chains,
             return_inferencedata = True,
             target_accept = target_accept,
-            max_treedepth = max_treedepth)
+            max_treedepth = max_treedepth,
+            random_seed = RANDOM_SEED)
     m_idata.extend(idata_posterior) # we can extend our existing idata.
     
     # check trace

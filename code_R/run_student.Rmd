@@ -2,7 +2,6 @@
 title: "Untitled"
 output: html_document
 ---
-
 set-up
 
 ```{r}
@@ -12,10 +11,22 @@ setwd("~/BayesWorkflow/code_r")
 
 # packages
 pacman::p_load(tidyverse, 
-               brms)
+               brms,
+               modelr,
+               tidybayes)
 
 # load functions from fun_models.R
 source("fun_models.R")
+source("fun_helper.R")
+
+```
+
+global arguments
+
+```{r}
+
+# Only this is flexible at the moment. Not as nice as the python setup. 
+n_pp = 100
 
 ```
 
@@ -24,10 +35,7 @@ load data and ensure correct format.
 ```{r}
 
 # load data
-train <- read_csv("../data/train.csv")
-
-# make sure that data format is okay
-train <- train %>%
+train <- read_csv("../data/train.csv") %>%
   mutate(idx = as_factor(idx))
 
 ```
@@ -53,7 +61,7 @@ get_prior(formula = f_student,
 )
 
 # set priors: three levels.
-prior_student_strict <- c(
+prior_student_specific <- c(
   prior(normal(0, 0.05), class = b),
   prior(normal(1.5, 0.05), class = Intercept),
   prior(normal(0, 0.05), class = sd),
@@ -62,7 +70,7 @@ prior_student_strict <- c(
   prior(gamma(2, 0.1), class = nu) # same as in python. 
 )
 
-prior_student_reasonable <- c(
+prior_student_generic <- c(
   prior(normal(0, 0.5), class = b),
   prior(normal(1.5, 0.5), class = Intercept),
   prior(normal(0, 0.5), class = sd),
@@ -71,7 +79,7 @@ prior_student_reasonable <- c(
   prior(gamma(2, 0.1), class = nu)
 )
 
-prior_student_vague <- c(
+prior_student_weak <- c(
   prior(normal(0, 5), class = b),
   prior(normal(1.5, 5), class = Intercept),
   prior(normal(0, 5), class = sd),
@@ -87,31 +95,31 @@ Now we compile models and check prior predictive.
 ```{r}
 
 # compile the models
-m_student_strict_prior <- fit_mod(
+m_student_specific_prior <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_strict,
+  prior = prior_student_specific,
   sample_prior = "only",
-  file = "../models_R/m_student_strict_prior"
+  file = "../models_R/m_student_specific_prior"
 )
 
-m_student_reasonable_prior <- fit_mod(
+m_student_generic_prior <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_reasonable,
+  prior = prior_student_generic,
   sample_prior = "only",
-  file = "../models_R/m_student_reasonable_prior"
+  file = "../models_R/m_student_generic_prior"
 )
 
-m_student_vague_prior <- fit_mod(
+m_student_weak_prior <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_vague,
+  prior = prior_student_weak,
   sample_prior = "only",
-  file = "../models_R/m_student_vague_prior"
+  file = "../models_R/m_student_weak_prior"
 )
 
 ```
@@ -120,9 +128,26 @@ check the prior predictive checks
 
 ```{r}
 
-pp_check(m_student_strict_prior, nsamples = 100)
-pp_check(m_student_reasonable_prior, nsamples = 100)
-pp_check(m_student_vague_prior, nsamples = 100)
+# specific model 
+student_specific_prior_pred <- pp_check(m_student_specific_prior, 
+                                     nsamples = 100) +
+  labs(title = "R/brms: prior predictive check") 
+
+save_plot(path = "../plots_R/student_specific_prior_pred.png")
+
+# generic model
+student_generic_prior_pred <- pp_check(m_student_generic_prior, 
+                                         nsamples = 100) + 
+  labs(title = "R/brms: prior predictive check")
+
+save_plot(path = "../plots_R/student_generic_prior_pred.png")
+
+# weak model
+student_weak_prior_pred <- pp_check(m_student_weak_prior, 
+                                    nsamples = 100) + 
+  labs(title = "R/brms: prior predictive check")
+
+save_plot(path = "../plots_R/student_weak_prior_pred.png")
 
 ```
 
@@ -131,31 +156,55 @@ fit the models
 ```{r}
 
 # fit the models
-m_student_strict_fit <- fit_mod(
+m_student_specific_fit <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_strict,
+  prior = prior_student_specific,
   sample_prior = TRUE,
-  file = "../models_R/m_student_strict_fit"
+  file = "../models_R/m_student_specific_fit"
 )
 
-m_student_reasonable_fit <- fit_mod(
+m_student_generic_fit <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_reasonable,
+  prior = prior_student_generic,
   sample_prior = TRUE,
-  file = "../models_R/m_student_reasonable_fit"
+  file = "../models_R/m_student_generic_fit"
 )
 
-m_student_vague_fit <- fit_mod(
+m_student_weak_fit <- fit_mod(
   formula = f_student,
   family = student,
   data = train,
-  prior = prior_student_vague,
+  prior = prior_student_weak,
   sample_prior = TRUE,
-  file = "../models_R/m_student_vague_fit"
+  file = "../models_R/m_student_weak_fit"
+)
+
+```
+
+plot trace
+
+```{r}
+
+# specific model
+save_chains(
+  fit = m_student_specific_fit,
+  path = "../plots_R/student_specific_plot_trace.png"
+)
+
+# generic model
+save_chains(
+  fit = m_student_generic_fit,
+  path = "../plots_R/student_generic_plot_trace.png"
+)
+
+# weak model
+save_chains(
+  fit = m_student_weak_fit,
+  path = "../plots_R/student_weak_plot_trace.png"
 )
 
 ```
@@ -164,8 +213,124 @@ posterior predictive checks
 
 ```{r}
 
-pp_check(m_student_strict_fit, nsamples = 100)
-pp_check(m_student_reasonable_fit, nsamples = 100)
-pp_check(m_student_vague_fit, nsamples = 100)
+# specific model 
+student_specific_posterior_pred <- pp_check(m_student_specific_fit, 
+                                         nsamples = 100) + 
+  labs(title = "R/brms: posterior predictive check") 
+
+save_plot(path = "../plots_R/student_specific_posterior_pred.png")
+
+# generic model
+student_generic_posterior_pred <- pp_check(m_student_generic_fit, 
+                                         nsamples = 100) +
+  labs(title = "R/brms: posterior predictive check")
+
+save_plot(path = "../plots_R/student_generic_posterior_pred.png")
+
+# weak model
+student_weak_posterior_pred <- pp_check(m_student_weak_fit, 
+                                    nsamples = 100) + 
+  labs(title = "R/brms: posterior predictive check")
+
+save_plot(path = "../plots_R/student_weak_posterior_pred.png")
 
 ```
+
+### HDI vs data ### 
+
+fixed effects HDI vs. data
+
+```{r}
+
+# specific
+fixed_interval_groups(fit = m_student_specific_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/student_specific_FI.png")
+
+# generic
+fixed_interval_groups(fit = m_student_generic_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/student_generic_FI.png")
+
+# weak
+fixed_interval_groups(fit = m_student_weak_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/student_weak_FI.png")
+
+```
+
+prediction intervals
+
+```{r}
+
+# specific
+prediction_interval_groups(fit = m_student_specific_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/student_specific_PI.png")
+
+# generic
+prediction_interval_groups(fit = m_student_generic_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/student_generic_PI.png")
+
+# weak
+prediction_interval_groups(fit = m_student_weak_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/student_weak_PI.png")
+
+```
+
+### MCMC (hdi for parameters) ###
+
+```{r}
+
+# for consistency with python. 
+# does not do anything at the moment..
+width = 7
+height = 4
+
+# specific
+mcmc_hdi(fit = m_student_specific_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/student_specific_hdi_param.png",
+          width = width,
+          height = height)
+
+# generic
+mcmc_hdi(fit = m_student_generic_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/student_generic_hdi_param.png",
+          width = width,
+          height = height)
+
+# weak
+mcmc_hdi(fit = m_student_weak_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/student_generic_hdi_param.png",
+          width = width,
+          height = height)
+
+```
+
+

@@ -14,12 +14,13 @@ fit_mod <- function(formula,
     sample_prior = sample_prior,
     cores = 4, chains = 2, 
     backend = "cmdstanr",
-    iter = 3000, warmup = 1000,
+    iter = 4000, warmup = 2000, # consistency with python
     file = file,
     file_refit = "on_change",
     threads = threading(2),
-    control = list(adapt_delta = .99, # perhaps just .95
-                   max_treedepth = 20)
+    seed = 42,
+    control = list(adapt_delta = .99, ### CHANGE
+                   max_treedepth = 20) ### CHANGE
   )
   
   return(b)
