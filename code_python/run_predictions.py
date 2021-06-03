@@ -14,8 +14,7 @@ import dataframe_image as dfi
 import xarray as xr
 
 ### load data ###
-with open('../data/train.pickle', 'rb') as f:
-    train = pickle.load(f)
+train = pd.read_csv("../data/train.csv")
 
 ### preprocessing ###
 # t & idx unique

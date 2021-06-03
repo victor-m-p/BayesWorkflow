@@ -1,0 +1,24 @@
+digraph {
+	subgraph "cluster15 x 10" {
+		y_pred [label="y_pred
+~
+Normal" style=filled]
+		t_shared [label="t_shared
+~
+Data" shape=box style="rounded, filled"]
+		label="15 x 10" labeljust=r labelloc=b style=rounded
+	}
+	sigma [label="sigma
+~
+HalfNormal"]
+	beta [label="beta
+~
+Normal"]
+	alpha [label="alpha
+~
+Normal"]
+	sigma -> y_pred
+	beta -> y_pred
+	alpha -> y_pred
+	t_shared -> y_pred
+}

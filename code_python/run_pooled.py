@@ -1,7 +1,6 @@
 ## packages ##
 import numpy as np
 import pandas as pd
-import time
 import matplotlib.pyplot as plt 
 import pymc3 as pm
 import seaborn as sns
@@ -10,42 +9,147 @@ import arviz as az
 import pickle
 import fun_models as fm
 import fun_helper as fh
+import xarray as xr
+
+# set some global parameters
+model_type = "pooled"
+n_pp = 100
+n_draws = 2000 
+n_tune = 2000
+n_chains = 2
+target_accept = .8 ### CHANGE 
+max_treedepth = 10 ### CHANGE 
+prior_draws = 500
 
 ### load data ###
-with open('../data/train.pickle', 'rb') as f:
-    train = pickle.load(f)
+train = pd.read_csv("../data/train.csv")
 
-with open('../data/test.pickle', 'rb') as f:
-    test = pickle.load(f)
+### preprocessing ###
+# t & idx unique
+t_unique = np.unique(train.t.values)
+idx_unique = np.unique(train.idx.values)
 
-# take out the vectors
-t_train = train.t.values
-idx_train = train.idx.values
-y_train = train.y.values
-n_train = len(np.unique(idx_train))
+# get n of unique for shapes
+n_time = len(t_unique)
+n_idx = len(idx_unique)
 
-## compile all the models ##
-m_pooled_strict = fm.pooled(t_train, idx_train, y_train, 0.05)
-m_pooled_reasonable = fm.pooled(t_train, idx_train, y_train, 0.5)
-m_pooled_vague = fm.pooled(t_train, idx_train, y_train, 5)
+# create coords and dims 
+coords = {
+    'idx': idx_unique,
+    't': t_unique
+}
 
-## sample for all the models
-idata_pooled_strict = fh.sample_mod(m_pooled_strict)
-idata_pooled_reasonable = fh.sample_mod(m_pooled_reasonable) 
-idata_pooled_vague = fh.sample_mod(m_pooled_vague)
+# take out dims 
+dims = coords.keys()
 
-## plot traces 
-az.plot_trace(idata_pooled_strict)
-az.plot_trace(idata_pooled_reasonable)
-az.plot_trace(idata_pooled_vague)
+# data in correct format. 
+t_train = train.t.values.reshape((n_idx, n_time))
+y_train = train.y.values.reshape((n_idx, n_time))
 
-## updating checks for all models 
-fh.updating_check(idata_pooled_strict)
-fh.updating_check(idata_pooled_reasonable)
-fh.updating_check(idata_pooled_vague)
+# gather dataset 
+dataset = xr.Dataset(
+    {'t_data': (dims, t_train),
+    'y_data': (dims, y_train)},
+    coords = coords)
 
-## save all the models 
-idata_pooled_strict.to_netcdf("../models_python/idata_pooled_strict.nc")
-idata_pooled_reasonable.to_netcdf("../models_python/idata_pooled_reasonable.nc")
-idata_pooled_vague.to_netcdf("../models_python/idata_pooled_vague.nc")
+## run main analysis for all multilevel model ##
+for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
+    
+    # compile the model 
+    m = fm.pooled( 
+        t = t_train, 
+        y = y_train, 
+        coords = coords, 
+        dims = dims, 
+        sigma = sigma)
+    
+    # plot plate
+    fh.plot_plate(
+    compiled_model = m,
+    model_type = model_type)
+    
+    # sample prior predictive
+    # https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html
+    with m:
+        prior = pm.sample_prior_predictive(700) # small, but only for pp. 
+        m_idata = az.from_pymc3(prior=prior)
+    
+    # prior predictive
+    fh.prior_pred(
+        m_idata = m_idata, 
+        model_type = model_type,
+        prior_level = prior_level,
+        n_draws = n_pp)
+    
+    # sample posterior (add optimization). 
+    with m:
+        idata_posterior = pm.sample(
+            draws = n_draws, 
+            tune = n_tune, 
+            chains = n_chains,
+            return_inferencedata = True,
+            target_accept = target_accept,
+            max_treedepth = max_treedepth)
+    m_idata.extend(idata_posterior) # we can extend our existing idata.
+    
+    # check trace
+    fh.plot_trace(
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level)
+    
+    # plot summary
+    fh.export_summary(
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level)
+    
+    # sample posterior predictive
+    with m:
+        post_pred = pm.sample_posterior_predictive(
+            m_idata,
+            var_names = [
+                "y_pred",
+                "alpha",
+                "beta"])
+        idata_postpred = az.from_pymc3(posterior_predictive=post_pred)
+    m_idata.extend(idata_postpred)
 
+    # posterior predictive 
+    fh.posterior_pred(
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level,
+        n_draws = n_pp)
+    
+    # plot hdi for fixed effects
+    fh.plot_hdi(
+        t = t_train,
+        y = y_train,
+        n_idx = n_idx,
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level,
+        kind = "fixed"
+    )
+    
+    # plot hdi for all effects
+    fh.plot_hdi(
+        t = t_train,
+        y = y_train,
+        n_idx = n_idx,
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level,
+        kind = "full"
+    )
+    
+    # hdi for parameters
+    fh.hdi_param(
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level
+    )
+    
+    # save idata (for model comparison and predictions)
+    m_idata.to_netcdf(f"../models_python/idata_{model_type}_{prior_level}.nc")

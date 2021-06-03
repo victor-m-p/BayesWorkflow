@@ -11,9 +11,18 @@ import fun_models as fm
 import fun_helper as fh
 import xarray as xr
 
+# set some global parameters
+model_type = "multilevel"
+n_pp = 100
+n_draws = 2000 
+n_tune = 2000
+n_chains = 2
+target_accept = .8 ### CHANGE 
+max_treedepth = 10 ### CHANGE 
+prior_draws = 500
+
 ### load data ###
-with open('../data/train.pickle', 'rb') as f:
-    train = pickle.load(f)
+train = pd.read_csv("../data/train.csv")
 
 ### preprocessing ###
 # t & idx unique
@@ -59,7 +68,7 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
     # plot plate
     fh.plot_plate(
     compiled_model = m,
-    model_type = "multilevel")
+    model_type = model_type)
     
     # sample prior predictive
     # https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html
@@ -70,30 +79,31 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
     # prior predictive
     fh.prior_pred(
         m_idata = m_idata, 
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level,
-        n_draws = 100)
+        n_draws = n_pp)
     
     # sample posterior (add optimization). 
     with m:
         idata_posterior = pm.sample(
-            draws = 2000, 
-            tune = 2000, 
-            random_seed = 32, 
-            chains = 2,
-            return_inferencedata=True)
+            draws = n_draws, 
+            tune = n_tune, 
+            chains = n_chains,
+            return_inferencedata = True,
+            target_accept = target_accept,
+            max_treedepth = max_treedepth)
     m_idata.extend(idata_posterior) # we can extend our existing idata.
     
     # check trace
     fh.plot_trace(
         m_idata = m_idata,
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level)
     
     # plot summary
     fh.export_summary(
         m_idata = m_idata,
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level)
     
     # sample posterior predictive
@@ -110,9 +120,9 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
     # posterior predictive 
     fh.posterior_pred(
         m_idata = m_idata,
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level,
-        n_draws = 100)
+        n_draws = n_pp)
     
     # plot hdi for fixed effects
     fh.plot_hdi(
@@ -120,7 +130,7 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
         y = y_train,
         n_idx = n_idx,
         m_idata = m_idata,
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level,
         kind = "fixed"
     )
@@ -131,10 +141,17 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
         y = y_train,
         n_idx = n_idx,
         m_idata = m_idata,
-        model_type = "multilevel",
+        model_type = model_type,
         prior_level = prior_level,
         kind = "full"
     )
     
+    # hdi for parameters
+    fh.hdi_param(
+        m_idata = m_idata,
+        model_type = model_type,
+        prior_level = prior_level
+    )
+    
     # save idata (for model comparison and predictions)
-    m_idata.to_netcdf(f"../models_python/idata_multilevel_{prior_level}.nc")
+    m_idata.to_netcdf(f"../models_python/idata_{model_type}_{prior_level}.nc")

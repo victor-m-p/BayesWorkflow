@@ -145,7 +145,20 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
     fig.tight_layout()
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_{kind}.jpeg",
                 dpi = 300)
-    
+
+# HDI for parameters
+def hdi_param(m_idata, model_type, prior_level):
+    fig, ax = plt.subplots(figsize = (7, 3))
+    az.plot_forest(
+        m_idata,
+        kind='forestplot',
+        var_names=["alpha", "beta", "sigma"],
+        combined=True,
+        ax = ax)
+    fig.suptitle("Python/pyMC3: HDI intervals for parameters")
+    fig.tight_layout()
+    plt.savefig(f"../plots_python/{model_type}_{prior_level}_hdi_param.jpeg",
+                dpi = 300)
 '''
 # updating checks
 def updating_check(m_idata, n_prior = 100, n_posterior = 100): 
