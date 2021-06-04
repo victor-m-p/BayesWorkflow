@@ -1,9 +1,5 @@
 '''
-Reproduce analysis of pooled model.
-Only for sigma = 0.5 (generic priors).
-Can be changed to reproduce the plots
-with other prior levels. 
-Has been checked against analysis. 
+reproduced based on code copied from streamlit to test.
 '''
 
 ## python: packages & reproducibility ##
@@ -16,7 +12,6 @@ import xarray as xr
 RANDOM_SEED = 42
 
 ### python: preprocessing ###
-
 # read data
 train = pd.read_csv("../data/train.csv")
 
@@ -31,8 +26,7 @@ n_idx = len(idx_unique)
 # create coords and dims 
 coords = {
     'idx': idx_unique,
-    't': t_unique
-}
+    't': t_unique}
 
 # take out dims 
 dims = coords.keys()
@@ -40,6 +34,7 @@ dims = coords.keys()
 # data in correct format. 
 t_train = train.t.values.reshape((n_idx, n_time))
 y_train = train.y.values.reshape((n_idx, n_time))
+idx_train = train.idx.values.reshape((n_idx, n_time)) # not relevant for pooled
 
 # gather dataset 
 dataset = xr.Dataset(
@@ -47,40 +42,37 @@ dataset = xr.Dataset(
     'y_data': (dims, y_train)},
     coords = coords)
 
-### python: specify model & compile ###
-sigma = 0.5
-with pm.Model(coords=coords) as m_pooled:
-    
-    # shared variables
-    t_ = pm.Data('t_shared', 
-                 t_train, 
-                 dims = dims)
-    
-    # specify priors for parameters & model error
-    beta = pm.Normal("beta", 
-                     mu = 0, 
-                     sigma = sigma)
-    alpha = pm.Normal("alpha", 
-                      mu = 1.5, 
-                      sigma = sigma)
-    sigma = pm.HalfNormal("sigma", 
-                          sigma = sigma)
-    
-    # calculate mu
-    mu = alpha + beta * t_
-    
+with pm.Model(coords=coords) as m_multilevel: 
+
+    # Inputs
+    idx_ = pm.Data('idx_shared', idx_train, dims = dims)
+    t_ = pm.Data('t_shared', t_train, dims = dims)
+
+    # hyper-priors
+    alpha = pm.Normal("alpha", mu = 1.5, sigma = 0.5)
+    alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = 0.5)
+    beta = pm.Normal("beta", mu = 0, sigma = 0.5)
+    beta_sigma = pm.HalfNormal("beta_sigma", sigma = 0.5)
+
+    # varying intercepts & slopes
+    alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+    beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
+
+    # expected value per participant at each time-step
+    mu = alpha_varying[idx_] + beta_varying[idx_] * t_
+
+    # model error
+    sigma = pm.HalfNormal("sigma", sigma = 0.5)
+
     # likelihood
-    y_pred = pm.Normal("y_pred", 
-                       mu = mu, 
-                       sigma = sigma, 
-                       observed = y_train)
+    y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y_train, dims = dims)
     
 ### python: plate notation ###
-pm.model_to_graphviz(m_pooled)
+pm.model_to_graphviz(m_multilevel)
 
 ### python: prior predictive checks ###
 # sample prior predictive 
-with m_pooled:
+with m_multilevel:
     prior = pm.sample_prior_predictive(700) 
     m_idata = az.from_pymc3(prior=prior)
 
@@ -98,7 +90,7 @@ fig.tight_layout()
 plt.plot();
 
 ### python: sample posterior ###
-with m_pooled: 
+with m_multilevel: 
     idata_posterior = pm.sample(
         draws = 2000, 
         tune = 2000, 
@@ -116,7 +108,7 @@ az.plot_trace(m_idata)
 az.summary(m_idata)
 
 ### python: sample posterior predictive ###
-with m_pooled:
+with m_multilevel:
     post_pred = pm.sample_posterior_predictive(
         m_idata,
         var_names = [
@@ -128,7 +120,6 @@ with m_pooled:
 m_idata.extend(idata_postpred) # add to idata
 
 ### plot posterior predictive ###
-
 # set up matplotlib plot
 fig, ax = plt.subplots()
 
@@ -142,7 +133,6 @@ fig.tight_layout()
 plt.plot();
 
 ### plot hdi (fixed effects) ###
-
 # take posterior predictive out of idata for convenience
 ppc = m_idata.posterior_predictive
 
@@ -181,7 +171,7 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs={'alpha': 0.4, "label": f"{low*100}% HPD intervals"},
+    fill_kwargs= {'alpha': 0.4, "label": "80% HPD intervals"},
     hdi_prob = low)
 
 # plot higher interval
@@ -189,19 +179,18 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs = {'alpha': 0.3, "label": f"{high*100}% HDI intervals"},
+    fill_kwargs = {'alpha': 0.3, "label": "95% HDI intervals"},
     hdi_prob = high)
 
 # add legend, title and tight layout. 
 ax.legend()
-fig.suptitle(f"Python/pyMC3: Prediction Intervals (fixed)")
+fig.suptitle("Python/pyMC3: Prediction Intervals (fixed)")
 fig.tight_layout()
 
 # plot it 
 plt.plot();
 
 ### plot hdi (full uncertainty) ###
-
 # take posterior predictive out of idata for convenience
 ppc = m_idata.posterior_predictive
 
@@ -240,7 +229,7 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs={'alpha': 0.4, "label": f"{low*100}% HPD intervals"},
+    fill_kwargs= {'alpha': 0.4, "label": "80% HDI intervals"},
     hdi_prob = low)
 
 # plot higher interval
@@ -248,19 +237,18 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs = {'alpha': 0.3, "label": f"{high*100}% HDI intervals"},
+    fill_kwargs = {'alpha': 0.3, "label": "95% HDI intervals"},
     hdi_prob = high)
 
 # add legend, title and tight layout. 
 ax.legend()
-fig.suptitle(f"Python/pyMC3: Prediction Intervals (full)")
+fig.suptitle("Python/pyMC3: Prediction Intervals (full)")
 fig.tight_layout()
 
 # plot it 
 plt.plot();
 
 ### HDI for parameters ###
-
 # set up matplotlib plot
 fig, ax = plt.subplots(figsize = (10, 7))
 
@@ -280,4 +268,3 @@ az.plot_forest(
 fig.suptitle("Python/pyMC3: HDI intervals for parameters")
 fig.tight_layout()
 plt.plot();
-

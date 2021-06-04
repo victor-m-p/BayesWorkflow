@@ -5,9 +5,7 @@ VMP: generate data
 ## packages ##
 import numpy as np
 import pandas as pd
-import pickle 
 import seaborn as sns
-import fun_helper as fh
 import matplotlib.pyplot as plt
 
 ## simulate data ##
@@ -34,6 +32,7 @@ train, test = fh.train_test(d, "t", 0.6)
 sns.lmplot(x = "t", y = "y", hue = "idx", data = train)
 figure = plt.gcf()
 figure.set_size_inches(10, 7)
+figure.title("Python: Quick EDA")
 plt.savefig("../plots_python/EDA.jpeg", dpi=300, transparent=False)
 
 ## save data csv (for R compatibility)

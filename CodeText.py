@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import pymc3 as pm
 import arviz as az
 import xarray as xr
+import seaborn as sns
 RANDOM_SEED = 42
 '''
     return py_code
@@ -43,6 +44,7 @@ dims = coords.keys()
 # data in correct format. 
 t_train = train.t.values.reshape((n_idx, n_time))
 y_train = train.y.values.reshape((n_idx, n_time))
+idx_train = train.idx.values.reshape((n_idx, n_time)) # not relevant for pooled
 
 # gather dataset 
 dataset = xr.Dataset(
@@ -84,7 +86,67 @@ with pm.Model(coords=coords) as {model_name}:
 '''
     return py_code
 
+def py_multilevel(model_name, sigma_choice): 
+    py_code = f'''
+with pm.Model(coords=coords) as {model_name}: 
+    
+    # Inputs
+    idx_ = pm.Data('idx_shared', idx_train, dims = dims)
+    t_ = pm.Data('t_shared', t_train, dims = dims)
 
+    # hyper-priors
+    alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
+    alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = {sigma_choice})
+    beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
+    beta_sigma = pm.HalfNormal("beta_sigma", sigma = {sigma_choice})
+    
+    # varying intercepts & slopes
+    alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+    beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
+    
+    # expected value per participant at each time-step
+    mu = alpha_varying[idx_] + beta_varying[idx_] * t_
+
+    # model error
+    sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
+    
+    # likelihood
+    y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y_train, dims = dims)
+    '''
+    return py_code
+
+def py_student(model_name, sigma_choice):
+    py_code = f'''
+with pm.Model(coords=coords) as {model_name}: 
+    
+    # Inputs
+    idx_ = pm.Data('idx_shared', idx_train, dims = dims)
+    t_ = pm.Data('t_shared', t_train, dims = dims)
+
+    # hyper-priors
+    alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
+    alpha_sigma = pm.HalfNormal("alpha_sigma", sigma = {sigma_choice})
+    beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
+    beta_sigma = pm.HalfNormal("beta_sigma", sigma = {sigma_choice})
+    
+    # varying intercepts & slopes
+    alpha_varying = pm.Normal("alpha_varying", mu = alpha, sigma = alpha_sigma, dims = "idx")
+    beta_varying = pm.Normal("beta_varying", mu = beta, sigma = beta_sigma, dims = "idx")
+    
+    # expected value per participant at each time-step
+    mu = alpha_varying[idx_] + beta_varying[idx_] * t_
+
+    # nu
+    v = pm.Gamma("v", alpha = 2, beta = 0.1)
+    
+    # model error
+    sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
+    
+    # likelihood
+    y_pred = pm.StudentT("y_pred", nu = v, mu = mu, sigma = sigma, observed = y_train, dims = dims)
+    '''
+    return py_code
+    
 # plate
 def py_plate(model_name): # m_pooled, m_multilevel, m_student
     py_code = f'''
@@ -370,7 +432,7 @@ def R_pooled(model_name, model_formula, prior_name, sigma_choice):
 
 # compile model & sample prior
 {model_name} <- brm(
-    formula = f_pooled,
+    formula = {model_formula},
     family = gaussian,
     data = train,
     prior = {prior_name},
@@ -379,7 +441,60 @@ def R_pooled(model_name, model_formula, prior_name, sigma_choice):
 '''
     return R_code
 
-### flexible R code ###
+def R_multilevel(model_name, model_formula, prior_name, sigma_choice):
+    R_code = f'''
+### R: specify model & compile ###
+# formula 
+{model_formula} <- bf(y ~ 1 + t + (1+t|idx)) # random eff. structure 
+    
+# set priors --> can use get_prior() if in doubt. 
+{prior_name} <- c(
+    prior(normal(0, {sigma_choice}), class = b),
+    prior(normal(1.5, {sigma_choice}), class = Intercept),
+    prior(normal(0, {sigma_choice}), class = sd), # new
+    prior(normal(0, {sigma_choice}), class = sigma),
+    prior(lkj(1), class = cor) # new
+)
+
+# compile model & sample prior
+{model_name} <- brm(
+    formula = {model_formula},
+    family = gaussian,
+    data = train,
+    prior = {prior_name},
+    sample_prior = "only",
+    backend = "cmdstanr")
+    '''
+    return R_code
+
+def R_student(model_name, model_formula, prior_name, sigma_choice):
+    R_code = f'''
+### R: specify model & compile ###
+# formula 
+{model_formula} <- bf(y ~ 1 + t + (1+t|idx)) # random eff. structure 
+
+# set priors --> can use get_prior() if in doubt. 
+prior_student_specific <- c(
+    prior(normal(0, {sigma_choice}), class = b),
+    prior(normal(1.5, {sigma_choice}), class = Intercept),
+    prior(normal(0, {sigma_choice}), class = sd),
+    prior(normal(0, {sigma_choice}), class = sigma),
+    prior(lkj(1), class = cor),
+    prior(gamma(2, 0.1), class = nu) # new. 
+)
+
+# compile model & sample prior
+{model_name} <- brm(
+    formula = {model_formula},
+    family = student, # student-t likelihood function
+    data = train,
+    prior = {prior_name},
+    sample_prior = "only",
+    backend = "cmdstanr")
+    '''
+    return R_code
+    
+# prior predictive
 def R_pp(model_name):
     R_code = f'''
 ### R: Prior predictive checks ###
@@ -415,7 +530,8 @@ def R_sample(model_name, model_formula, model_family, prior_name):
 def R_trace(model_name):
     R_code = f'''
 ### R: plot trace ###
-plot({model_name})
+plot({model_name},
+    N = 10) # N param per plot. 
 '''
     return R_code
 
@@ -442,11 +558,55 @@ labs(title = "R/brms: posterior predictive check")
 
 # type = .prediction, .fixed 
 # data = train, test. 
-def R_hdi_data(model_name, pred_type, data_type, function, title): 
+def R_hdi_data_pool(model_name, pred_type, data_type, function, title): 
     R_code = f'''
 ### R: HDI prediction intervals ###
 {data_type} %>%
     data_grid(t = seq_range(t, n = 100)) %>%
+    {function}({model_name}) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = {pred_type}), 
+                    .width = c(.95, .8), # HDI intervals
+                    color = "#08519C",
+                    point_interval = median_hdi) + 
+    geom_jitter(data = {data_type}, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals ({title})")
+'''
+    return R_code
+
+def R_hdi_fixed_groups(model_name, pred_type, data_type, function, title): 
+    R_code = f'''
+### R: HDI prediction intervals ###
+{data_type} %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    {function}({model_name}) %>%
+    ggplot(aes(x = t, y = y, re_formula = NA)) + 
+    stat_lineribbon(aes(y = {pred_type}), 
+                    .width = c(.95, .8), # HDI intervals
+                    color = "#08519C",
+                    point_interval = median_hdi) + 
+    geom_jitter(data = {data_type}, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals ({title})")
+'''
+    return R_code
+
+def R_hdi_full_groups(model_name, pred_type, data_type, function, title): 
+    R_code = f'''
+### R: HDI prediction intervals ###
+{data_type} %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
     {function}({model_name}) %>%
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = {pred_type}), 

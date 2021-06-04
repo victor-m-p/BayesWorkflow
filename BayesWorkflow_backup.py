@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 import pymc3 as pm
 import seaborn as sns
 import arviz as az
-#import fun_models as fm
-## @st.cache - use this?
+import CodeText as ct
 
 # we want this for all pages
 st.set_page_config(
@@ -17,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     )
 
-st.image("/img/bayes_bois.png", width = 100)
+st.image("img/bayes_bois.png", width = 100)
 
 # translation dictionaries: 
 translation_prior = {
@@ -34,6 +33,17 @@ translation_model = {
     'Pooled': 'pooled',
     'Multilevel': 'multilevel',
     'Student-t': 'student'}
+
+translation_code = {
+    'population mean (fixed)': ('add_fitted_draws', '.value'),
+    'individuals (full uncertainty)': ('add_predicted_draws', '.prediction')
+}
+
+translation_sigma = {
+    'Weak (sd = 5)': '5',
+    'Generic (sd = 0.5)': '0.5',
+    'Specific (sd = 0.05)': '0.05'
+}
 
 # other layout options?
 # 1. taking less space
@@ -151,10 +161,10 @@ elif choice == "Simulation & EDA":
     col1, col2 = st.beta_columns(2)
     
     with col1: 
-        st.image("../plots_python/EDA.jpeg")
+        st.image("plots_python/EDA.jpeg")
         
     with col2: 
-        st.image("../plots_R/EDA.png")
+        st.image("plots_R/EDA.png")
         
     expander = st.beta_expander("Code-Monkey: exploratory plot")
     
@@ -168,7 +178,13 @@ elif choice == "Simulation & EDA":
     
 elif choice == "Complete Pooling (model 1)":
     
+    # for f-strings.
     model_context = "pooled"
+    model_name = "m_pooled" # should be in args
+    model_formula = "f_pooled" # should be in args
+    model_family = "gaussian" 
+    prior_name = "prior_pooled" # should be in args
+    data_type = "train"
     
     r'''
     # Candidate model 1 (Complete Pooling)
@@ -186,30 +202,9 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    ### reproducibility 
-    #python
-    py_reproducibility = r'''
-    ## python: packages & reproducibility ##
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt 
-    import pymc3 as pm
-    import arviz as az
-    import xarray as xr
-    RANDOM_SEED = 42
-    '''
-    
-    # R
-    R_reproducibility = r'''
-    ### R: packages & reproducibility ###
-    pacman::p_load(
-        tidyverse, 
-        brms,
-        modelr,
-        tidybayes,
-        bayesplot)
-    RANDOM_SEED = 42
-    '''
+    ### reproducibility code. 
+    py_reproducibility = ct.py_reproducibility()
+    R_reproducibility = ct.R_reproducibility()
     
     expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
     
@@ -221,45 +216,8 @@ elif choice == "Complete Pooling (model 1)":
             st.code(R_reproducibility) 
     
     ### preprocessing 
-    py_preprocessing = r'''
-    ### python: preprocessing ###
-    # read data
-    train = pd.read_csv("../data/train.csv")
-
-    # t & idx unique
-    t_unique = np.unique(train.t.values)
-    idx_unique = np.unique(train.idx.values)
-
-    # get n of unique for shapes
-    n_time = len(t_unique)
-    n_idx = len(idx_unique)
-
-    # create coords and dims 
-    coords = {
-        'idx': idx_unique,
-        't': t_unique
-    }
-
-    # take out dims 
-    dims = coords.keys()
-
-    # data in correct format. 
-    t_train = train.t.values.reshape((n_idx, n_time))
-    y_train = train.y.values.reshape((n_idx, n_time))
-
-    # gather dataset 
-    dataset = xr.Dataset(
-        {'t_data': (dims, t_train),
-        'y_data': (dims, y_train)},
-        coords = coords)
-    '''
-    
-    R_preprocessing = r'''
-    ### R: preprocessing ###
-    train <- read_csv("../data/train.csv") %>%
-        mutate(idx = as_factor(idx))
-        
-    '''
+    py_preprocessing = ct.py_preprocessing()
+    R_preprocessing = ct.R_preprocessing()
     
     expander = st.beta_expander("Code-Monkey: Preprocessing")
     
@@ -286,59 +244,17 @@ elif choice == "Complete Pooling (model 1)":
     # Model specification (code)
     '''
     
-    ### python model
-    py_model = r'''
-    ### python: specify model and compile ###
-    with pm.Model(coords=coords) as m_pooled:
-        
-        # shared variables
-        t_ = pm.Data('t_shared', 
-                    t_train, 
-                    dims = dims)
-        
-        # specify priors for parameters & model error
-        beta = pm.Normal("beta", 
-                        mu = 0, 
-                        sigma = sigma)
-        alpha = pm.Normal("alpha", 
-                        mu = 1.5, 
-                        sigma = sigma)
-        sigma = pm.HalfNormal("sigma", 
-                            sigma = sigma)
-        
-        # calculate mu
-        mu = alpha + beta * t_
-        
-        # likelihood
-        y_pred = pm.Normal("y_pred", 
-                        mu = mu, 
-                        sigma = sigma, 
-                        observed = y_train)
-        
-    '''
+    selection_prior = st.radio(
+        "Choose prior level (how uncertain)", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
     
-    ### r model   
-    r_model = r'''
-    ### R: specify model & compile ###
-    # formula 
-    f_pooled <- bf(y ~ 1 + t) # complete pooling 
+    prior_choice = translation_sigma.get(selection_prior)
+    
+    ### model code
+    py_model = ct.py_pooled(model_name, prior_choice)
+    r_model = ct.R_pooled(model_name, model_formula, prior_name, prior_choice)
 
-    # set priors --> can use get_prior() if in doubt. 
-    prior_pooled <- c(
-        prior(normal(0, 0.5), class = b),
-        prior(normal(1.5, 0.5), class = Intercept),
-        prior(normal(0, 0.5), class = sigma))
-
-    # compile model & sample prior
-    m_pooled <- brm(
-        formula = f_pooled,
-        family = gaussian,
-        data = train,
-        prior = prior_pooled,
-        sample_prior = "only",
-        backend = "cmdstanr")
-
-    '''
     expander = st.beta_expander("Code-Monkey: Model specification")
     with expander: 
         col1_model, col2_model = st.beta_columns(2)
@@ -366,17 +282,14 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    py_plate = r'''
-    ### python: plate notation ###
-    pm.model_to_graphviz(m_pooled)
-    '''
+    py_plate = ct.py_plate(model_name)
     
     expander = st.beta_expander("Code-Monkey: Plate Notation")
     
     with expander: 
         st.code(py_plate)
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -393,34 +306,8 @@ elif choice == "Complete Pooling (model 1)":
     '''
     
     ### python code
-    py_pp = r'''
-    ### python: prior predictive checks ###
-    # sample prior predictive 
-    with m_pooled:
-        prior = pm.sample_prior_predictive(700) 
-        m_idata = az.from_pymc3(prior=prior)
-        
-    # set up plot 
-    fig, ax = plt.subplots()
-
-    # if you just want the figure then this is enough
-    az.plot_ppc(m_idata, # the idata
-                group = "prior", # plot the prior
-                num_pp_samples = 100, # how many draws
-                ax = ax) # add to matplotlib ax. 
-
-    fig.suptitle("Python/pyMC3: prior predictive check")
-    fig.tight_layout()
-    plt.plot();
-    '''
-    
-    ### R code
-    R_pp = r'''
-    ### R: Prior predictive checks ###
-    pp_check(m_pooled, 
-            nsamples = 100) +
-        labs(title = "R/brms: prior predictive check") 
-    '''
+    py_pp = ct.py_pp(model_name)
+    R_pp = ct.R_pp(model_name)
     
     expander = st.beta_expander("Code-Monkey: Prior predictive checks")
     with expander: 
@@ -429,7 +316,6 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_pp)
         with col2:
             st.code(R_pp) 
-    
     
     selection_pp_pool = st.radio(
         "Choose prior level for prior predictive", 
@@ -441,10 +327,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_pp_pool = translation_prior.get(selection_pp_pool)
 
     with col1_pp_pool: 
-        st.image(f"../plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
         
     with col2_pp_pool: 
-        st.image(f"../plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
     
     
     '''
@@ -457,42 +343,9 @@ elif choice == "Complete Pooling (model 1)":
     We should now sample the posterior. 
     '''
     
-    ### python code 
-    py_sample = r'''
-    ### python: sample posterior ###
-    with m_pooled: 
-        idata_posterior = pm.sample(
-            draws = 2000, 
-            tune = 2000, 
-            chains = 2,
-            return_inferencedata = True,
-            target_accept = .99,
-            max_treedepth = 20,
-            random_seed = RANDOM_SEED)
-    m_idata.extend(idata_posterior) # add to idata
-    '''
-    
-    
-    ### R code
-    R_sample = r'''
-    ### R: sample posterior ###
-    m_pooled <- brm(
-        formula = f_pooled,
-        family = gaussian,
-        data = train,
-        prior = prior_pooled,
-        sample_prior = TRUE, # only difference. 
-        backend = "cmdstanr",
-        chains = 2,
-        cores = 4,
-        iter = 4000, 
-        warmup = 2000,
-        threads = threading(2), # not sure this can be done in pyMC3
-        control = list(adapt_delta = .99,
-                        max_treedepth = 20),
-        seed = RANDOM_SEED)
-
-    '''
+    ### sample posterior code 
+    py_sample = ct.py_sample(model_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
     expander = st.beta_expander("Code-Monkey: Sample posterior")
     with expander: 
@@ -507,17 +360,9 @@ elif choice == "Complete Pooling (model 1)":
     # Check traces (sampling)
     '''
     
-    ### python code
-    py_trace = r'''
-    ### python: plot trace ###
-    az.plot_trace(m_idata)
-    '''
-    
-    ### R code
-    R_trace = r'''
-    ### R: plot trace ###
-    plot(m_pooled)
-    '''
+    ### trace code 
+    py_trace = ct.py_trace()
+    R_trace = ct.R_trace(model_name)
     
     expander = st.beta_expander("Code-Monkey: Trace-plot")
     with expander: 
@@ -537,9 +382,9 @@ elif choice == "Complete Pooling (model 1)":
     prior_trace_pool = translation_prior.get(selection_trace_pool)
     
     with col1_trace_pool: 
-        st.image(f"../plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
     with col2_trace_pool: 
-        st.image(f"../plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
     
     '''
@@ -548,15 +393,8 @@ elif choice == "Complete Pooling (model 1)":
     '''
     
     ### python code
-    py_summary = r'''
-    ### python: plot summary ###
-    az.summary(m_idata)
-    '''
-    ### R code
-    R_summary = r'''
-    ### R: get summary (not displayed) ###
-    summary(m_pooled)
-    '''
+    py_summary = ct.py_summary()
+    R_summary = ct.R_summary(model_name)
     
     expander = st.beta_expander("Code-Monkey: Summary")
     with expander: 
@@ -573,7 +411,7 @@ elif choice == "Complete Pooling (model 1)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     '''
     
@@ -605,41 +443,8 @@ elif choice == "Complete Pooling (model 1)":
     '''
     
     ### python code
-    py_pp2 = r'''
-    ### python: sample posterior predictive ###
-    with m_pooled:
-        post_pred = pm.sample_posterior_predictive(
-            m_idata,
-            var_names = [
-                "y_pred",
-                "alpha",
-                "beta"])
-        idata_postpred = az.from_pymc3(
-            posterior_predictive=post_pred)
-    m_idata.extend(idata_postpred) # add to idata
-    
-    ### plot posterior predictive ###
-    # set up matplotlib plot
-    fig, ax = plt.subplots()
-
-    # if you just want the figure then this is enough
-    az.plot_ppc(m_idata, 
-                num_pp_samples = 100,
-                ax = ax)
-
-    fig.suptitle("Python/pyMC3: posterior predictive check")
-    fig.tight_layout()
-    plt.plot();
-
-    
-    '''
-    ### R code
-    R_pp2 = r'''
-    ### R: Posterior predictive checks ###
-    pp_check(m_pooled, 
-            nsamples = 100) + 
-    labs(title = "R/brms: posterior predictive check") 
-    '''
+    py_pp2 = ct.py_post_pred(model_name)
+    R_pp2 = ct.R_post_pred(model_name)
     
     expander = st.beta_expander("Code-Monkey: Posterior predictive")
     with expander: 
@@ -659,10 +464,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_pp2_pool = translation_prior.get(selection_pp2_pool)
     
     with col1_pp2_pool:
-        st.image(f"../plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
         
     with col2_pp2_pool:
-        st.image(f"../plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
 
     '''
     # HDI (vs. data)
@@ -672,8 +477,6 @@ elif choice == "Complete Pooling (model 1)":
     e.g. fixed effects, all uncertainty (three levels actually). 
     
     '''
-    
-    ### 
     
     col1_hdi, col2_hdi = st.beta_columns(2)
     
@@ -697,11 +500,28 @@ elif choice == "Complete Pooling (model 1)":
     
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
+    ### HDI vs. data code
+    R_function, R_type = translation_code.get(selection_hdi2)
+    R_hdi = ct.R_hdi_data(model_name, R_type, data_type, R_function, hdi_type)
+    
+    if hdi_type == "fixed": 
+        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+    elif hdi_type == "full": 
+        py_hdi = ct.py_hdi_data_full(hdi_type)
+    
+    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi)
+        with col2:
+            st.code(R_hdi) 
+            
     '''
     # HDI (parameters)
     
@@ -720,11 +540,23 @@ elif choice == "Complete Pooling (model 1)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png")
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
+    ### code for HDI vs. parameters
+    py_hdi_param = ct.py_hdi_param()
+    R_hdi_param = ct.R_hdi_param(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi_param)
+        with col2:
+            st.code(R_hdi_param) 
+    
 elif choice == "Multilevel (model 2)":
     
     model_context = "multilevel"
@@ -774,10 +606,10 @@ elif choice == "Multilevel (model 2)":
     prior_pp = translation_prior.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_context}_{prior_pp}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
     
     
     '''
@@ -797,7 +629,7 @@ elif choice == "Multilevel (model 2)":
     
     '''
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -815,9 +647,9 @@ elif choice == "Multilevel (model 2)":
     prior_trace = translation_prior.get(selection_trace)
     
     with col1_trace: 
-        st.image(f"../plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
     with col2_trace: 
-        st.image(f"../plots_R/{model_context}_{prior_trace}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
     
     '''
     
@@ -858,10 +690,10 @@ elif choice == "Multilevel (model 2)":
     prior_pp2 = translation_prior.get(selection_pp2)
     
     with col1_pp2:
-        st.image(f"../plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
         
     with col2_pp2:
-        st.image(f"../plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
         
     '''
     # Summary
@@ -880,7 +712,7 @@ elif choice == "Multilevel (model 2)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
 
     '''
     # HDI (vs. data)
@@ -913,10 +745,10 @@ elif choice == "Multilevel (model 2)":
     
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
     '''
     # HDI (parameters)
@@ -936,10 +768,10 @@ elif choice == "Multilevel (model 2)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png") 
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png") 
     
 elif choice == "Student-t (model 3)":
     
@@ -982,10 +814,10 @@ elif choice == "Student-t (model 3)":
     prior_pp = translation_prior.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_context}_{prior_pp}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
     
     
     '''
@@ -1005,7 +837,7 @@ elif choice == "Student-t (model 3)":
     
     '''
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -1023,9 +855,9 @@ elif choice == "Student-t (model 3)":
     prior_trace = translation_prior.get(selection_trace)
     
     with col1_trace: 
-        st.image(f"../plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
     with col2_trace: 
-        st.image(f"../plots_R/{model_context}_{prior_trace}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
     
     
     '''
@@ -1067,10 +899,10 @@ elif choice == "Student-t (model 3)":
     prior_pp2 = translation_prior.get(selection_pp2)
     
     with col1_pp2:
-        st.image(f"../plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
         
     with col2_pp2:
-        st.image(f"../plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
         
     
     
@@ -1091,7 +923,7 @@ elif choice == "Student-t (model 3)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
 
     '''
     # HDI (vs. data)
@@ -1123,10 +955,10 @@ elif choice == "Student-t (model 3)":
     hdi_type = translation_uncertainty.get(selection_hdi2)
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
     '''
     # HDI (parameters)
@@ -1146,10 +978,10 @@ elif choice == "Student-t (model 3)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png")
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
 elif choice == "Model Comparison":
     
@@ -1217,10 +1049,10 @@ elif choice == "Model Comparison":
     model_pp = translation_model.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_pp}_{prior_context}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_pp}_{prior_context}_posterior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_pp}_{prior_context}_posterior_pred.png")
+        st.image(f"plots_R/{model_pp}_{prior_context}_posterior_pred.png")
     
     '''
     # Compare HDI
@@ -1254,10 +1086,10 @@ elif choice == "Model Comparison":
     col1_hdi2, col2_hdi2 = st.beta_columns(2)
     
     with col1_hdi2: 
-        st.image(f"../plots_python/{model_hdi}_{prior_context}_HDI_{uncertainty}.jpeg")
+        st.image(f"plots_python/{model_hdi}_{prior_context}_HDI_{uncertainty}.jpeg")
         
     with col2_hdi2: 
-        st.image(f"../plots_R/{model_hdi}_{prior_context}_HDI_{uncertainty}.png")
+        st.image(f"plots_R/{model_hdi}_{prior_context}_HDI_{uncertainty}.png")
     
     '''
     # Information criterion (loo)
@@ -1268,7 +1100,7 @@ elif choice == "Model Comparison":
     
     '''
     
-    st.image(f"../plots_python/loo_comparison.png")
+    st.image(f"plots_python/loo_comparison.png")
     
     '''
     Overthinking, that loo is leave-one-out approximation. 
@@ -1313,10 +1145,10 @@ elif choice == "Prediction":
     col1, col2 = st.beta_columns(2)
     
     with col1: 
-        st.image("../plots_python/multilevel_generic_HDI_predictions.jpeg") 
+        st.image("plots_python/multilevel_generic_HDI_predictions.jpeg") 
     
     with col2: 
-        st.image("../plots_R/multilevel_generic_HDI_predictions.png")
+        st.image("plots_R/multilevel_generic_HDI_predictions.png")
     
 elif choice == "References & Inspiration":
     pass

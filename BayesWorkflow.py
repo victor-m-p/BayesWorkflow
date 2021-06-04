@@ -202,7 +202,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    ### reproducibility code. 
+    ### code ###
     py_reproducibility = ct.py_reproducibility()
     R_reproducibility = ct.R_reproducibility()
     
@@ -215,7 +215,7 @@ elif choice == "Complete Pooling (model 1)":
         with col2_reproducibility: 
             st.code(R_reproducibility) 
     
-    ### preprocessing 
+    ### code ###
     py_preprocessing = ct.py_preprocessing()
     R_preprocessing = ct.R_preprocessing()
     
@@ -244,6 +244,7 @@ elif choice == "Complete Pooling (model 1)":
     # Model specification (code)
     '''
     
+    ### code prep ###
     selection_prior = st.radio(
         "Choose prior level (how uncertain)", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -251,7 +252,7 @@ elif choice == "Complete Pooling (model 1)":
     
     prior_choice = translation_sigma.get(selection_prior)
     
-    ### model code
+    ### code ###
     py_model = ct.py_pooled(model_name, prior_choice)
     r_model = ct.R_pooled(model_name, model_formula, prior_name, prior_choice)
 
@@ -282,14 +283,16 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
+    ### plot ###
+    st.image(f"plots_python/{model_context}_plate.png")
+    
+    ### code ###
     py_plate = ct.py_plate(model_name)
     
     expander = st.beta_expander("Code-Monkey: Plate Notation")
     
     with expander: 
         st.code(py_plate)
-    
-    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -305,18 +308,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    ### python code
-    py_pp = ct.py_pp(model_name)
-    R_pp = ct.R_pp(model_name)
-    
-    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
-    with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1: 
-            st.code(py_pp)
-        with col2:
-            st.code(R_pp) 
-    
+    ### plot ###
     selection_pp_pool = st.radio(
         "Choose prior level for prior predictive", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -332,7 +324,18 @@ elif choice == "Complete Pooling (model 1)":
     with col2_pp_pool: 
         st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
     
+    ### code ###
+    py_pp = ct.py_pp(model_name)
+    R_pp = ct.R_pp(model_name)
     
+    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp)
+        with col2:
+            st.code(R_pp) 
+            
     '''
     # Sample posterior
     
@@ -343,7 +346,7 @@ elif choice == "Complete Pooling (model 1)":
     We should now sample the posterior. 
     '''
     
-    ### sample posterior code 
+    ### code ###
     py_sample = ct.py_sample(model_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
@@ -360,18 +363,7 @@ elif choice == "Complete Pooling (model 1)":
     # Check traces (sampling)
     '''
     
-    ### trace code 
-    py_trace = ct.py_trace()
-    R_trace = ct.R_trace(model_name)
-    
-    expander = st.beta_expander("Code-Monkey: Trace-plot")
-    with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1: 
-            st.code(py_trace)
-        with col2:
-            st.code(R_trace) 
-    
+    ### plot ###
     selection_trace_pool = st.radio(
         "Choose prior level for trace plot", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -386,13 +378,34 @@ elif choice == "Complete Pooling (model 1)":
     with col2_trace_pool: 
         st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
+    ### code ###
+    py_trace = ct.py_trace()
+    R_trace = ct.R_trace(model_name)
     
+    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_trace)
+        with col2:
+            st.code(R_trace) 
+            
     '''
     # Summary
     
     '''
     
-    ### python code
+    ### plot ###
+    selection_summary = st.radio(
+        "Choose prior level for summary", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_summary = translation_prior.get(selection_summary)
+    
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
+    
+    ### code ###
     py_summary = ct.py_summary()
     R_summary = ct.R_summary(model_name)
     
@@ -403,15 +416,6 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_summary)
         with col2:
             st.code(R_summary) 
-    
-    selection_summary = st.radio(
-        "Choose prior level for summary", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    prior_summary = translation_prior.get(selection_summary)
-    
-    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     '''
     
@@ -442,18 +446,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    ### python code
-    py_pp2 = ct.py_post_pred(model_name)
-    R_pp2 = ct.R_post_pred(model_name)
-    
-    expander = st.beta_expander("Code-Monkey: Posterior predictive")
-    with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1: 
-            st.code(py_pp2)
-        with col2:
-            st.code(R_pp2) 
-    
+    ### plot ### 
     selection_pp2_pool = st.radio(
         "Choose prior level for posterior predictive", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -469,6 +462,18 @@ elif choice == "Complete Pooling (model 1)":
     with col2_pp2_pool:
         st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
 
+    ### code ###
+    py_pp2 = ct.py_post_pred(model_name)
+    R_pp2 = ct.R_post_pred(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp2)
+        with col2:
+            st.code(R_pp2) 
+    
     '''
     # HDI (vs. data)
     
@@ -478,6 +483,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
+    ### plot ###
     col1_hdi, col2_hdi = st.beta_columns(2)
     
     with col1_hdi:
@@ -498,16 +504,15 @@ elif choice == "Complete Pooling (model 1)":
     prior_level_hdi = translation_prior.get(selection_hdi1)
     hdi_type = translation_uncertainty.get(selection_hdi2)
     
-    
     with col1_hdiplot:
         st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
         st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
-    ### HDI vs. data code
+    ### code ###
     R_function, R_type = translation_code.get(selection_hdi2)
-    R_hdi = ct.R_hdi_data(model_name, R_type, data_type, R_function, hdi_type)
+    R_hdi = ct.R_hdi_data_pool(model_name, R_type, data_type, R_function, hdi_type)
     
     if hdi_type == "fixed": 
         py_hdi = ct.py_hdi_data_fixed(hdi_type)
@@ -531,6 +536,7 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
+    ### plot ###
     selection_param = st.radio(
             "Choose prior level for HDI parameter plots", 
             ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -545,7 +551,7 @@ elif choice == "Complete Pooling (model 1)":
     with col2_hdi_param: 
         st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
-    ### code for HDI vs. parameters
+    ### code ###
     py_hdi_param = ct.py_hdi_param()
     R_hdi_param = ct.R_hdi_param(model_name)
     
@@ -559,58 +565,93 @@ elif choice == "Complete Pooling (model 1)":
     
 elif choice == "Multilevel (model 2)":
     
+    # for f-strings.
     model_context = "multilevel"
+    model_name = "m_multilevel" # should be in args
+    model_formula = "f_multilevel" # should be in args
+    model_family = "gaussian" 
+    prior_name = "prior_multilevel" # should be in args
+    data_type = "train"
     
     r'''
-    Multilevel model with: 
+    # Candidate model 1 (Complete Pooling)
+    Our first candidate model will be a complete pooling model.
     
-    1. Random intercepts ($\alpha$) &
+    This means that we treat each observations at each time-point
     
-    2. Random slopes ($\beta$)
+    as if they belong to the same group/ID. 
     
-    NB: not taking into account (in the pyMC3 model) the correlation 
+    Before we get to play with the model we will need two things. 
     
-    between intercepts and slopes (which is the "lkj(1)" parameter in brms).
+    (1) importing packages
     
-    For more, see: https://docs.pymc.io/notebooks/multilevel_modeling.html
+    (2) load and preprocsess data
+    
     '''
-    # put in the actual stuff here.
+    
+    ### code ###
+    py_reproducibility = ct.py_reproducibility()
+    R_reproducibility = ct.R_reproducibility()
+    
+    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    
+    with expander: 
+        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
+        with col1_reproducibility:
+            st.code(py_reproducibility)
+        with col2_reproducibility: 
+            st.code(R_reproducibility) 
+    
+    ### code ###
+    py_preprocessing = ct.py_preprocessing()
+    R_preprocessing = ct.R_preprocessing()
+    
+    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1:
+            st.code(py_preprocessing)
+        with col2: 
+            st.code(R_preprocessing) 
+    
+    '''
+    # Model specification (math)
+    '''
+    
     st.latex(r''' 
-    y_i \sim Normal(\mu, \sigma) \\
-    \mu = \alpha + \beta \cdot x_i \\
-    \alpha \sim Normal(0, 1) \\
-    \beta \sim Normal(0, 1) \\
-    \sigma \sim HalfNormal(0, 1)
-    ''')
+        y_i \sim Normal(\mu_i, \sigma) \\
+        \mu = \alpha + \beta \cdot x_i \\
+        \alpha \sim Normal(0, 1) \\
+        \beta \sim Normal(0, 1) \\
+        \sigma \sim HalfNormal(0, 1)
+        ''')
     
     '''
-    # Prior predictive checks
-    
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
-    Our main model is run with what they refer to as a "generic weakly informative prior".
-    
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
-    
+    # Model specification (code)
     '''
     
-    selection_pp = st.radio(
-        "Choose prior level for prior predictive", 
+    ### code prep ###
+    selection_prior = st.radio(
+        "Choose prior level (how uncertain)", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
         index = 1)
     
-    col1_pp, col2_pp = st.beta_columns(2)
+    prior_choice = translation_sigma.get(selection_prior)
     
-    prior_pp = translation_prior.get(selection_pp)
+    ### code ###
+    py_model = ct.py_multilevel(model_name, prior_choice)
+    r_model = ct.R_multilevel(model_name, model_formula, prior_name, prior_choice)
 
-    with col1_pp: 
-        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
+    expander = st.beta_expander("Code-Monkey: Model specification")
+    with expander: 
+        col1_model, col2_model = st.beta_columns(2)
         
-    with col2_pp: 
-        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
-    
+        with col1_model:
+            st.code(py_model)
+        
+        with col2_model: 
+            st.code(r_model)
     
     '''
     # Plate Notation 
@@ -629,27 +670,137 @@ elif choice == "Multilevel (model 2)":
     
     '''
     
+    ### plot ###
     st.image(f"plots_python/{model_context}_plate.png")
+    
+    ### code ###
+    py_plate = ct.py_plate(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    
+    with expander: 
+        st.code(py_plate)
+    
+    '''
+    # Prior predictive checks
+    
+    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
+    
+    Our main model is run with what they refer to as a "generic weakly informative prior".
+    
+    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
+    
+    NB: Notice the x-axis. 
+    
+    '''
+    ### plot ###
+    selection_pp_pool = st.radio(
+        "Choose prior level for prior predictive", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_pp_pool, col2_pp_pool = st.beta_columns(2)
+    
+    prior_pp_pool = translation_prior.get(selection_pp_pool)
+
+    with col1_pp_pool: 
+        st.image(f"plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+        
+    with col2_pp_pool: 
+        st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
+        
+    ### code ###
+    py_pp = ct.py_pp(model_name)
+    R_pp = ct.R_pp(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp)
+        with col2:
+            st.code(R_pp) 
+    
+    '''
+    # Sample posterior
+    
+    We have now verified that the we have specified our model correctly (plate)
+    
+    and let's say that we are happy with our prior predictive checks.
+    
+    We should now sample the posterior. 
+    '''
+    
+    ### code ###
+    py_sample = ct.py_sample(model_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
+    
+    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_sample)
+        with col2:
+            st.code(R_sample) 
     
     
     '''
     # Check traces (sampling)
-    
     '''
     
-    selection_trace = st.radio(
+    ### plot ###
+    selection_trace_pool = st.radio(
         "Choose prior level for trace plot", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
         index = 1)
     
-    col1_trace, col2_trace = st.beta_columns(2)
+    col1_trace_pool, col2_trace_pool = st.beta_columns(2)
     
-    prior_trace = translation_prior.get(selection_trace)
+    prior_trace_pool = translation_prior.get(selection_trace_pool)
     
-    with col1_trace: 
-        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
-    with col2_trace: 
-        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
+    with col1_trace_pool: 
+        st.image(f"plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
+    with col2_trace_pool: 
+        st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
+    
+    ### code ###
+    py_trace = ct.py_trace()
+    R_trace = ct.R_trace(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_trace)
+        with col2:
+            st.code(R_trace) 
+    
+    '''
+    # Summary
+    
+    '''
+    
+    ### plot ###
+    selection_summary = st.radio(
+        "Choose prior level for summary", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_summary = translation_prior.get(selection_summary)
+    
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
+    
+    ### code ###
+    py_summary = ct.py_summary()
+    R_summary = ct.R_summary(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Summary")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_summary)
+        with col2:
+            st.code(R_summary) 
     
     '''
     
@@ -680,39 +831,33 @@ elif choice == "Multilevel (model 2)":
     
     '''
     
-    selection_pp2 = st.radio(
+    ### plot ###
+    selection_pp2_pool = st.radio(
         "Choose prior level for posterior predictive", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
         index = 1)
     
-    col1_pp2, col2_pp2 = st.beta_columns(2)
+    col1_pp2_pool, col2_pp2_pool = st.beta_columns(2)
     
-    prior_pp2 = translation_prior.get(selection_pp2)
+    prior_pp2_pool = translation_prior.get(selection_pp2_pool)
     
-    with col1_pp2:
-        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
+    with col1_pp2_pool:
+        st.image(f"plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
         
-    with col2_pp2:
-        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
+    with col2_pp2_pool:
+        st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
         
-    '''
-    # Summary
+    ### code ###
+    py_pp2 = ct.py_post_pred(model_name)
+    R_pp2 = ct.R_post_pred(model_name)
     
-    We are now happy with our prior- and posterior predictive checks
-    
-    & with our sampling and chains. 
-    
-    We can now get an overview with the summary method. 
-    '''
-    
-    selection_summary = st.radio(
-        "Choose prior level for summary", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    prior_summary = translation_prior.get(selection_summary)
-    
-    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
+    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp2)
+        with col2:
+            st.code(R_pp2) 
 
     '''
     # HDI (vs. data)
@@ -723,217 +868,7 @@ elif choice == "Multilevel (model 2)":
     
     '''
     
-    col1_hdi, col2_hdi = st.beta_columns(2)
-    
-    with col1_hdi:
-        selection_hdi1 = st.radio(
-            "Choose prior level for HDI plots", 
-            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-            index = 1)
-    
-    with col2_hdi: 
-        selection_hdi2 = st.radio(
-            "See predictions for population mean (fixed effects) or for individuals (full uncertainty)",
-            ("population mean (fixed)", "individuals (full uncertainty)"),
-            index = 0
-            )
-    
-    col1_hdiplot, col2_hdiplot = st.beta_columns(2)
-
-    prior_level_hdi = translation_prior.get(selection_hdi1)
-    hdi_type = translation_uncertainty.get(selection_hdi2)
-    
-    
-    with col1_hdiplot:
-        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
-        
-    with col2_hdiplot:
-        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
-    
-    '''
-    # HDI (parameters)
-    
-    The last thing we might want to check is 
-    
-    how the model has estimated the parameters we care about. 
-    
-    '''
-    
-    selection_param = st.radio(
-            "Choose prior level for HDI parameter plots", 
-            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-            index = 1)
-    
-    col1_hdi_param, col2_hdi_param = st.beta_columns(2)
-    prior_param = translation_prior.get(selection_param)
-    
-    with col1_hdi_param: 
-        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
-    
-    with col2_hdi_param: 
-        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png") 
-    
-elif choice == "Student-t (model 3)":
-    
-    model_context = "student"
-    
-    r'''
-    Still multilevel (random slopes and intercepts).
-    
-    Notice that only top row has changed. 
-    '''
-    # put in the actual stuff here.
-    st.latex(r''' 
-    y_i \sim Normal(\mu, \sigma) \\
-    \mu = \alpha + \beta \cdot x_i \\
-    \alpha \sim Normal(0, 1) \\
-    \beta \sim Normal(0, 1) \\
-    \sigma \sim HalfNormal(0, 1)
-    ''')
-    
-    '''
-    # Prior predictive checks
-    
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
-    Our main model is run with what they refer to as a "generic weakly informative prior".
-    
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
-    
-    '''
-    
-    selection_pp = st.radio(
-        "Choose prior level for prior predictive", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    col1_pp, col2_pp = st.beta_columns(2)
-    
-    prior_pp = translation_prior.get(selection_pp)
-
-    with col1_pp: 
-        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
-        
-    with col2_pp: 
-        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
-    
-    
-    '''
-    # Plate Notation 
-    
-    There are many reasons why a prior predictive check can be bad
-    
-    (including of course, bad priors). Something that is really nice in
-    
-    pyMC3 though is that you can check whether you actually specified the
-    
-    model as you intended to. Your model is shown in plate notation,
-    
-    which can seem confusing, and which I think is less intuitive than the
-    
-    really nice Kruschke diagrams/plots (link). However, it is still useful. 
-    
-    '''
-    
-    st.image(f"plots_python/{model_context}_plate.png")
-    
-    
-    '''
-    # Check traces (sampling)
-    
-    '''
-    
-    selection_trace = st.radio(
-        "Choose prior level for trace plot", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    col1_trace, col2_trace = st.beta_columns(2)
-    
-    prior_trace = translation_prior.get(selection_trace)
-    
-    with col1_trace: 
-        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
-    with col2_trace: 
-        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
-    
-    
-    '''
-    
-    For all prior levels we see healthy traces to the right (catterpillars),
-    
-    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
-    
-    However, notice that the values for our parameters differ based on our priors.
-    
-    The models fitted with either "Very Weak" or "Generic" priors are close, 
-    
-    but the "Specific" priors bias the model heavily towards our priors. 
-    
-    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
-    
-    for more details on Arviz' plot_trace() and customization.  
-    '''
-    
-    
-    '''
-    # Posterior Predictive checks 
-    
-    We have now accepted our prior predictive check and verified
-    
-    that computation (sampling) was okay. 
-    
-    We will now look at posterior predictive checks. 
-    
-    '''
-    
-    selection_pp2 = st.radio(
-        "Choose prior level for posterior predictive", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    col1_pp2, col2_pp2 = st.beta_columns(2)
-    
-    prior_pp2 = translation_prior.get(selection_pp2)
-    
-    with col1_pp2:
-        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
-        
-    with col2_pp2:
-        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
-        
-    
-    
-    '''
-    # Summary
-    
-    We are now happy with our prior- and posterior predictive checks
-    
-    & with our sampling and chains. 
-    
-    We can now get an overview with the summary method. 
-    '''
-    
-    selection_summary = st.radio(
-        "Choose prior level for summary", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    prior_summary = translation_prior.get(selection_summary)
-    
-    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
-
-    '''
-    # HDI (vs. data)
-    
-    Something about how there are different things we can look at,
-    
-    e.g. fixed effects, all uncertainty (three levels actually). 
-    
-    '''
-    
+    ### plot ### 
     col1_hdi, col2_hdi = st.beta_columns(2)
     
     with col1_hdi:
@@ -954,12 +889,31 @@ elif choice == "Student-t (model 3)":
     prior_level_hdi = translation_prior.get(selection_hdi1)
     hdi_type = translation_uncertainty.get(selection_hdi2)
     
+    
     with col1_hdiplot:
         st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
         st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
+    ### code ###
+    R_function, R_type = translation_code.get(selection_hdi2)
+    
+    if hdi_type == "fixed": 
+        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+        R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
+    elif hdi_type == "full": 
+        py_hdi = ct.py_hdi_data_full(hdi_type)
+        R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
+    
+    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi)
+        with col2:
+            st.code(R_hdi) 
+            
     '''
     # HDI (parameters)
     
@@ -969,6 +923,7 @@ elif choice == "Student-t (model 3)":
     
     '''
     
+    ### plot ###
     selection_param = st.radio(
             "Choose prior level for HDI parameter plots", 
             ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -982,6 +937,405 @@ elif choice == "Student-t (model 3)":
     
     with col2_hdi_param: 
         st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
+
+    ### code ###
+    py_hdi_param = ct.py_hdi_param()
+    R_hdi_param = ct.R_hdi_param(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi_param)
+        with col2:
+            st.code(R_hdi_param) 
+    
+elif choice == "Student-t (model 3)":
+    
+    # for f-strings.
+    model_context = "student"
+    model_name = "m_student" # should be in args
+    model_formula = "f_student" # should be in args
+    model_family = "gaussian" 
+    prior_name = "prior_student" # should be in args
+    data_type = "train"
+    
+    r'''
+    # Candidate model 1 (Complete Pooling)
+    Our first candidate model will be a complete pooling model.
+    
+    This means that we treat each observations at each time-point
+    
+    as if they belong to the same group/ID. 
+    
+    Before we get to play with the model we will need two things. 
+    
+    (1) importing packages
+    
+    (2) load and preprocsess data
+    
+    '''
+    
+    ### code ###
+    py_reproducibility = ct.py_reproducibility()
+    R_reproducibility = ct.R_reproducibility()
+    
+    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    
+    with expander: 
+        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
+        with col1_reproducibility:
+            st.code(py_reproducibility)
+        with col2_reproducibility: 
+            st.code(R_reproducibility) 
+    
+    ### code ###
+    py_preprocessing = ct.py_preprocessing()
+    R_preprocessing = ct.R_preprocessing()
+    
+    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1:
+            st.code(py_preprocessing)
+        with col2: 
+            st.code(R_preprocessing) 
+    
+    '''
+    # Model specification (math)
+    '''
+    
+    st.latex(r''' 
+        y_i \sim Normal(\mu_i, \sigma) \\
+        \mu = \alpha + \beta \cdot x_i \\
+        \alpha \sim Normal(0, 1) \\
+        \beta \sim Normal(0, 1) \\
+        \sigma \sim HalfNormal(0, 1)
+        ''')
+    
+    '''
+    # Model specification (code)
+    '''
+    
+    ### code prep ###
+    selection_prior = st.radio(
+        "Choose prior level (how uncertain)", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_choice = translation_sigma.get(selection_prior)
+    
+    ### code ###
+    py_model = ct.py_student(model_name, prior_choice)
+    r_model = ct.R_student(model_name, model_formula, prior_name, prior_choice)
+
+    expander = st.beta_expander("Code-Monkey: Model specification")
+    with expander: 
+        col1_model, col2_model = st.beta_columns(2)
+        
+        with col1_model:
+            st.code(py_model)
+        
+        with col2_model: 
+            st.code(r_model)
+    
+    '''
+    # Plate Notation 
+    
+    There are many reasons why a prior predictive check can be bad
+    
+    (including of course, bad priors). Something that is really nice in
+    
+    pyMC3 though is that you can check whether you actually specified the
+    
+    model as you intended to. Your model is shown in plate notation,
+    
+    which can seem confusing, and which I think is less intuitive than the
+    
+    really nice Kruschke diagrams/plots (link). However, it is still useful. 
+    
+    '''
+    
+    ### plot ###
+    st.image(f"plots_python/{model_context}_plate.png")
+    
+    ### code ###
+    py_plate = ct.py_plate(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    
+    with expander: 
+        st.code(py_plate)
+    
+    '''
+    # Prior predictive checks
+    
+    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
+    
+    Our main model is run with what they refer to as a "generic weakly informative prior".
+    
+    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
+    
+    NB: Notice the x-axis. 
+    
+    '''
+    ### plot ###
+    selection_pp_pool = st.radio(
+        "Choose prior level for prior predictive", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_pp_pool, col2_pp_pool = st.beta_columns(2)
+    
+    prior_pp_pool = translation_prior.get(selection_pp_pool)
+
+    with col1_pp_pool: 
+        st.image(f"plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+        
+    with col2_pp_pool: 
+        st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
+        
+    ### code ###
+    py_pp = ct.py_pp(model_name)
+    R_pp = ct.R_pp(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp)
+        with col2:
+            st.code(R_pp) 
+    
+    '''
+    # Sample posterior
+    
+    We have now verified that the we have specified our model correctly (plate)
+    
+    and let's say that we are happy with our prior predictive checks.
+    
+    We should now sample the posterior. 
+    '''
+    
+    ### code ###
+    py_sample = ct.py_sample(model_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
+    
+    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_sample)
+        with col2:
+            st.code(R_sample) 
+    
+    
+    '''
+    # Check traces (sampling)
+    '''
+    
+    ### plot ###
+    selection_trace_pool = st.radio(
+        "Choose prior level for trace plot", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_trace_pool, col2_trace_pool = st.beta_columns(2)
+    
+    prior_trace_pool = translation_prior.get(selection_trace_pool)
+    
+    with col1_trace_pool: 
+        st.image(f"plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
+    with col2_trace_pool: 
+        st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
+    
+    ### code ###
+    py_trace = ct.py_trace()
+    R_trace = ct.R_trace(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_trace)
+        with col2:
+            st.code(R_trace) 
+    
+    '''
+    # Summary
+    
+    '''
+    
+    ### plot ###
+    selection_summary = st.radio(
+        "Choose prior level for summary", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_summary = translation_prior.get(selection_summary)
+    
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
+    
+    ### code ###
+    py_summary = ct.py_summary()
+    R_summary = ct.R_summary(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Summary")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_summary)
+        with col2:
+            st.code(R_summary) 
+    
+    '''
+    
+    For all prior levels we see healthy traces to the right (catterpillars),
+    
+    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
+    
+    However, notice that the values for our parameters differ based on our priors.
+    
+    The models fitted with either "Very Weak" or "Generic" priors are close, 
+    
+    but the "Specific" priors bias the model heavily towards our priors. 
+    
+    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
+    
+    for more details on Arviz' plot_trace() and customization.  
+    '''
+    
+    
+    '''
+    # Posterior Predictive checks 
+    
+    We have now accepted our prior predictive check and verified
+    
+    that computation (sampling) was okay. 
+    
+    We will now look at posterior predictive checks. 
+    
+    '''
+    
+    ### plot ###
+    selection_pp2_pool = st.radio(
+        "Choose prior level for posterior predictive", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_pp2_pool, col2_pp2_pool = st.beta_columns(2)
+    
+    prior_pp2_pool = translation_prior.get(selection_pp2_pool)
+    
+    with col1_pp2_pool:
+        st.image(f"plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
+        
+    with col2_pp2_pool:
+        st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
+        
+    ### code ###
+    py_pp2 = ct.py_post_pred(model_name)
+    R_pp2 = ct.R_post_pred(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp2)
+        with col2:
+            st.code(R_pp2) 
+
+    '''
+    # HDI (vs. data)
+    
+    Something about how there are different things we can look at,
+    
+    e.g. fixed effects, all uncertainty (three levels actually). 
+    
+    '''
+    
+    ### plot ### 
+    col1_hdi, col2_hdi = st.beta_columns(2)
+    
+    with col1_hdi:
+        selection_hdi1 = st.radio(
+            "Choose prior level for HDI plots", 
+            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+            index = 1)
+    
+    with col2_hdi: 
+        selection_hdi2 = st.radio(
+            "See predictions for population mean (fixed effects) or for individuals (full uncertainty)",
+            ("population mean (fixed)", "individuals (full uncertainty)"),
+            index = 0
+            )
+    
+    col1_hdiplot, col2_hdiplot = st.beta_columns(2)
+    
+    prior_level_hdi = translation_prior.get(selection_hdi1)
+    hdi_type = translation_uncertainty.get(selection_hdi2)
+    
+    
+    with col1_hdiplot:
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        
+    with col2_hdiplot:
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+    
+    ### code ###
+    R_function, R_type = translation_code.get(selection_hdi2)
+    
+    if hdi_type == "fixed": 
+        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+        R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
+    elif hdi_type == "full": 
+        py_hdi = ct.py_hdi_data_full(hdi_type)
+        R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
+    
+    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi)
+        with col2:
+            st.code(R_hdi) 
+            
+    '''
+    # HDI (parameters)
+    
+    The last thing we might want to check is 
+    
+    how the model has estimated the parameters we care about. 
+    
+    '''
+    
+    ### plot ###
+    selection_param = st.radio(
+            "Choose prior level for HDI parameter plots", 
+            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+            index = 1)
+    
+    col1_hdi_param, col2_hdi_param = st.beta_columns(2)
+    prior_param = translation_prior.get(selection_param)
+    
+    with col1_hdi_param: 
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+    
+    with col2_hdi_param: 
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
+
+    ### code ###
+    py_hdi_param = ct.py_hdi_param()
+    R_hdi_param = ct.R_hdi_param(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi_param)
+        with col2:
+            st.code(R_hdi_param) 
 
 elif choice == "Model Comparison":
     
