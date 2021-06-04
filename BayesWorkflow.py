@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     )
 
-st.image("../img/bayes_bois.png", width = 100)
+st.image("/img/bayes_bois.png", width = 100)
 
 # translation dictionaries: 
 translation_prior = {
