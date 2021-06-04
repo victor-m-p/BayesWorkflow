@@ -171,19 +171,111 @@ elif choice == "Complete Pooling (model 1)":
     model_context = "pooled"
     
     r'''
-    ## Candidate model $1$ (Complete Pooling)
+    # Candidate model 1 (Complete Pooling)
     Our first candidate model will be a complete pooling model.
-    This is in contrast to (1) a no pooling model (i.e. all ID's 
-    analyzed individually) and (2) a multilevel model
-    (i.e. hierarchical random effects structure). 
-    '''
+    
+    This means that we treat each observations at each time-point
+    
+    as if they belong to the same group/ID. 
+    
+    Before we get to play with the model we will need two things. 
+    
+    (1) importing packages
+    
+    (2) load and preprocsess data
     
     '''
-    # Model specification
+    
+    ### reproducibility 
+    #python
+    py_reproducibility = r'''
+    ## python: packages & reproducibility ##
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt 
+    import pymc3 as pm
+    import arviz as az
+    import xarray as xr
+    RANDOM_SEED = 42
+    '''
+    
+    # R
+    R_reproducibility = r'''
+    ### R: packages & reproducibility ###
+    pacman::p_load(
+        tidyverse, 
+        brms,
+        modelr,
+        tidybayes,
+        bayesplot)
+    RANDOM_SEED = 42
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    
+    with expander: 
+        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
+        with col1_reproducibility:
+            st.code(py_reproducibility)
+        with col2_reproducibility: 
+            st.code(R_reproducibility) 
+    
+    ### preprocessing 
+    py_preprocessing = r'''
+    ### python: preprocessing ###
+    # read data
+    train = pd.read_csv("../data/train.csv")
+
+    # t & idx unique
+    t_unique = np.unique(train.t.values)
+    idx_unique = np.unique(train.idx.values)
+
+    # get n of unique for shapes
+    n_time = len(t_unique)
+    n_idx = len(idx_unique)
+
+    # create coords and dims 
+    coords = {
+        'idx': idx_unique,
+        't': t_unique
+    }
+
+    # take out dims 
+    dims = coords.keys()
+
+    # data in correct format. 
+    t_train = train.t.values.reshape((n_idx, n_time))
+    y_train = train.y.values.reshape((n_idx, n_time))
+
+    # gather dataset 
+    dataset = xr.Dataset(
+        {'t_data': (dims, t_train),
+        'y_data': (dims, y_train)},
+        coords = coords)
+    '''
+    
+    R_preprocessing = r'''
+    ### R: preprocessing ###
+    train <- read_csv("../data/train.csv") %>%
+        mutate(idx = as_factor(idx))
+        
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1:
+            st.code(py_preprocessing)
+        with col2: 
+            st.code(R_preprocessing) 
+    
+    '''
+    # Model specification (math)
     '''
     
     st.latex(r''' 
-        y_i \sim Normal(\mu, \sigma) \\
+        y_i \sim Normal(\mu_i, \sigma) \\
         \mu = \alpha + \beta \cdot x_i \\
         \alpha \sim Normal(0, 1) \\
         \beta \sim Normal(0, 1) \\
@@ -191,87 +283,71 @@ elif choice == "Complete Pooling (model 1)":
         ''')
     
     '''
-    # Specify model
+    # Model specification (code)
     '''
     
-    ## python model
-    py_model = '''
-    with pm.Model() as m1:
+    ### python model
+    py_model = r'''
+    ### python: specify model and compile ###
+    with pm.Model(coords=coords) as m_pooled:
         
         # shared variables
-        t_shared = pm.Data('t_shared', t)
+        t_ = pm.Data('t_shared', 
+                    t_train, 
+                    dims = dims)
         
         # specify priors for parameters & model error
-        beta = pm.Normal("beta", mu = 0, sigma = 1)
-        alpha = pm.Normal("alpha", mu = 0, sigma = 1)
-        sigma = pm.HalfNormal("sigma", sigma = 1)
+        beta = pm.Normal("beta", 
+                        mu = 0, 
+                        sigma = sigma)
+        alpha = pm.Normal("alpha", 
+                        mu = 1.5, 
+                        sigma = sigma)
+        sigma = pm.HalfNormal("sigma", 
+                            sigma = sigma)
         
         # calculate mu
-        mu = alpha + beta * t_shared
+        mu = alpha + beta * t_
         
         # likelihood
-        y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y)
+        y_pred = pm.Normal("y_pred", 
+                        mu = mu, 
+                        sigma = sigma, 
+                        observed = y_train)
+        
     '''
     
-    ## r model    # r model 
-    r_model = '''
-    # model specification
-    f1 <- bf(y ~ t)
-    
-    # set priors
-    prior_f1 <- c(
-        prior(normal(0, 1), class = b),
-        prior(normal(0, 1), class = Intercept),
-        prior(normal(0, 1), class = sigma)
-    )
-    
-    # fit model
-    m1_prior <- brm(
-        formula = f1,
+    ### r model   
+    r_model = r'''
+    ### R: specify model & compile ###
+    # formula 
+    f_pooled <- bf(y ~ 1 + t) # complete pooling 
+
+    # set priors --> can use get_prior() if in doubt. 
+    prior_pooled <- c(
+        prior(normal(0, 0.5), class = b),
+        prior(normal(1.5, 0.5), class = Intercept),
+        prior(normal(0, 0.5), class = sigma))
+
+    # compile model & sample prior
+    m_pooled <- brm(
+        formula = f_pooled,
         family = gaussian,
         data = train,
-        prior = prior_f1,
-        backend = "cmdstanr", # faster than rstan
-        file = "
-    )
-    '''
-    
-    col1_code_model, col2_code_model = st.beta_columns(2)
-    
-    with col1_code_model:
-        st.code(py_model)
-    
-    with col2_code_model: 
-        st.code(r_model)
-    
-    '''
-    # Prior predictive checks
-    
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
-    Our main model is run with what they refer to as a "generic weakly informative prior".
-    
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
-    
-    '''
-    
-    selection_pp_pool = st.radio(
-        "Choose prior level for prior predictive", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    col1_pp_pool, col2_pp_pool = st.beta_columns(2)
-    
-    prior_pp_pool = translation_prior.get(selection_pp_pool)
+        prior = prior_pooled,
+        sample_prior = "only",
+        backend = "cmdstanr")
 
-    with col1_pp_pool: 
-        st.image(f"../plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+    '''
+    expander = st.beta_expander("Code-Monkey: Model specification")
+    with expander: 
+        col1_model, col2_model = st.beta_columns(2)
         
-    with col2_pp_pool: 
-        st.image(f"../plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
-    
+        with col1_model:
+            st.code(py_model)
+        
+        with col2_model: 
+            st.code(r_model)
     
     '''
     # Plate Notation 
@@ -290,11 +366,166 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
+    py_plate = r'''
+    ### python: plate notation ###
+    pm.model_to_graphviz(m_pooled)
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    
+    with expander: 
+        st.code(py_plate)
+    
     st.image(f"../plots_python/{model_context}_plate.png")
+    
+    
+    '''
+    # Prior predictive checks
+    
+    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
+    
+    Our main model is run with what they refer to as a "generic weakly informative prior".
+    
+    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
+    
+    NB: Notice the x-axis. 
+    
+    '''
+    
+    ### python code
+    py_pp = r'''
+    ### python: prior predictive checks ###
+    # sample prior predictive 
+    with m_pooled:
+        prior = pm.sample_prior_predictive(700) 
+        m_idata = az.from_pymc3(prior=prior)
+        
+    # set up plot 
+    fig, ax = plt.subplots()
+
+    # if you just want the figure then this is enough
+    az.plot_ppc(m_idata, # the idata
+                group = "prior", # plot the prior
+                num_pp_samples = 100, # how many draws
+                ax = ax) # add to matplotlib ax. 
+
+    fig.suptitle("Python/pyMC3: prior predictive check")
+    fig.tight_layout()
+    plt.plot();
+    '''
+    
+    ### R code
+    R_pp = r'''
+    ### R: Prior predictive checks ###
+    pp_check(m_pooled, 
+            nsamples = 100) +
+        labs(title = "R/brms: prior predictive check") 
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp)
+        with col2:
+            st.code(R_pp) 
+    
+    
+    selection_pp_pool = st.radio(
+        "Choose prior level for prior predictive", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    col1_pp_pool, col2_pp_pool = st.beta_columns(2)
+    
+    prior_pp_pool = translation_prior.get(selection_pp_pool)
+
+    with col1_pp_pool: 
+        st.image(f"../plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+        
+    with col2_pp_pool: 
+        st.image(f"../plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
+    
+    
+    '''
+    # Sample posterior
+    
+    We have now verified that the we have specified our model correctly (plate)
+    
+    and let's say that we are happy with our prior predictive checks.
+    
+    We should now sample the posterior. 
+    '''
+    
+    ### python code 
+    py_sample = r'''
+    ### python: sample posterior ###
+    with m_pooled: 
+        idata_posterior = pm.sample(
+            draws = 2000, 
+            tune = 2000, 
+            chains = 2,
+            return_inferencedata = True,
+            target_accept = .99,
+            max_treedepth = 20,
+            random_seed = RANDOM_SEED)
+    m_idata.extend(idata_posterior) # add to idata
+    '''
+    
+    
+    ### R code
+    R_sample = r'''
+    ### R: sample posterior ###
+    m_pooled <- brm(
+        formula = f_pooled,
+        family = gaussian,
+        data = train,
+        prior = prior_pooled,
+        sample_prior = TRUE, # only difference. 
+        backend = "cmdstanr",
+        chains = 2,
+        cores = 4,
+        iter = 4000, 
+        warmup = 2000,
+        threads = threading(2), # not sure this can be done in pyMC3
+        control = list(adapt_delta = .99,
+                        max_treedepth = 20),
+        seed = RANDOM_SEED)
+
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_sample)
+        with col2:
+            st.code(R_sample) 
+    
     
     '''
     # Check traces (sampling)
     '''
+    
+    ### python code
+    py_trace = r'''
+    ### python: plot trace ###
+    az.plot_trace(m_idata)
+    '''
+    
+    ### R code
+    R_trace = r'''
+    ### R: plot trace ###
+    plot(m_pooled)
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_trace)
+        with col2:
+            st.code(R_trace) 
     
     selection_trace_pool = st.radio(
         "Choose prior level for trace plot", 
@@ -310,6 +541,39 @@ elif choice == "Complete Pooling (model 1)":
     with col2_trace_pool: 
         st.image(f"../plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
+    
+    '''
+    # Summary
+    
+    '''
+    
+    ### python code
+    py_summary = r'''
+    ### python: plot summary ###
+    az.summary(m_idata)
+    '''
+    ### R code
+    R_summary = r'''
+    ### R: get summary (not displayed) ###
+    summary(m_pooled)
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Summary")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_summary)
+        with col2:
+            st.code(R_summary) 
+    
+    selection_summary = st.radio(
+        "Choose prior level for summary", 
+        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+        index = 1)
+    
+    prior_summary = translation_prior.get(selection_summary)
+    
+    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
     
     '''
     
@@ -340,6 +604,51 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
+    ### python code
+    py_pp2 = r'''
+    ### python: sample posterior predictive ###
+    with m_pooled:
+        post_pred = pm.sample_posterior_predictive(
+            m_idata,
+            var_names = [
+                "y_pred",
+                "alpha",
+                "beta"])
+        idata_postpred = az.from_pymc3(
+            posterior_predictive=post_pred)
+    m_idata.extend(idata_postpred) # add to idata
+    
+    ### plot posterior predictive ###
+    # set up matplotlib plot
+    fig, ax = plt.subplots()
+
+    # if you just want the figure then this is enough
+    az.plot_ppc(m_idata, 
+                num_pp_samples = 100,
+                ax = ax)
+
+    fig.suptitle("Python/pyMC3: posterior predictive check")
+    fig.tight_layout()
+    plt.plot();
+
+    
+    '''
+    ### R code
+    R_pp2 = r'''
+    ### R: Posterior predictive checks ###
+    pp_check(m_pooled, 
+            nsamples = 100) + 
+    labs(title = "R/brms: posterior predictive check") 
+    '''
+    
+    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pp2)
+        with col2:
+            st.code(R_pp2) 
+    
     selection_pp2_pool = st.radio(
         "Choose prior level for posterior predictive", 
         ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
@@ -354,27 +663,6 @@ elif choice == "Complete Pooling (model 1)":
         
     with col2_pp2_pool:
         st.image(f"../plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
-        
-    
-    
-    '''
-    # Summary
-    
-    We are now happy with our prior- and posterior predictive checks
-    
-    & with our sampling and chains. 
-    
-    We can now get an overview with the summary method. 
-    '''
-    
-    selection_summary = st.radio(
-        "Choose prior level for summary", 
-        ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
-        index = 1)
-    
-    prior_summary = translation_prior.get(selection_summary)
-    
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
 
     '''
     # HDI (vs. data)
@@ -384,6 +672,8 @@ elif choice == "Complete Pooling (model 1)":
     e.g. fixed effects, all uncertainty (three levels actually). 
     
     '''
+    
+    ### 
     
     col1_hdi, col2_hdi = st.beta_columns(2)
     

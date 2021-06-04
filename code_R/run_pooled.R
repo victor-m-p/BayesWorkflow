@@ -7,9 +7,6 @@
 #' 
 ## -----------------------------------------------------------------------------
 
-# working directory 
-#setwd("~/BayesWorkflow/code_r")
-
 # packages
 pacman::p_load(tidyverse, 
                brms,
@@ -239,7 +236,7 @@ save_plot(path = "../plots_R/pooled_weak_posterior_pred.png")
 
 # specific
 fixed_interval_pool(fit = m_pooled_specific_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -247,7 +244,7 @@ save_plot(path = "../plots_R/pooled_specific_HDI_fixed.png")
 
 # generic
 fixed_interval_pool(fit = m_pooled_generic_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -255,7 +252,7 @@ save_plot(path = "../plots_R/pooled_generic_HDI_fixed.png")
 
 # weak
 fixed_interval_pool(fit = m_pooled_weak_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -269,7 +266,7 @@ save_plot(path = "../plots_R/pooled_weak_HDI_fixed.png")
 
 # specific
 fixed_kruschke_pool(fit = m_pooled_specific_fit,
-                      title = "Fixed effect draws (Kruschke style)",
+                      title = "R/brms: Fixed effect draws (Kruschke style)",
                       data = train,
                       n_time = 100)
 
@@ -277,7 +274,7 @@ save_plot(path = "../plots_R/pooled_specific_HDI_kruschke.png")
 
 # generic
 fixed_kruschke_pool(fit = m_pooled_generic_fit,
-                      title = "Fixed effect draws (Kruschke style)",
+                      title = "R/brms: Fixed effect draws (Kruschke style)",
                       data = train,
                       n_time = 100)
 
@@ -285,7 +282,7 @@ save_plot(path = "../plots_R/pooled_generic_HDI_kruschke.png")
 
 # weak
 fixed_kruschke_pool(fit = m_pooled_weak_fit,
-                      title = "Fixed effect draws (Kruschke style)",
+                      title = "R/brms: Fixed effect draws (Kruschke style)",
                       data = train,
                       n_time = 100)
 
@@ -299,7 +296,7 @@ save_plot(path = "../plots_R/pooled_weak_HDI_kruschke.png")
 
 # specific
 prediction_interval_pool(fit = m_pooled_specific_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "R/brms: Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 
@@ -307,7 +304,7 @@ save_plot(path = "../plots_R/pooled_specific_HDI_full.png")
 
 # generic
 prediction_interval_pool(fit = m_pooled_generic_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "R/brms: Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 
@@ -315,7 +312,7 @@ save_plot(path = "../plots_R/pooled_generic_HDI_full.png")
 
 # weak
 prediction_interval_pool(fit = m_pooled_weak_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "R/brms: Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 

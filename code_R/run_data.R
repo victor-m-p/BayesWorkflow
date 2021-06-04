@@ -7,9 +7,6 @@
 #' 
 ## -----------------------------------------------------------------------------
 
-# working directory 
-#setwd("~/BayesWorkflow/code_r")
-
 # packages
 pacman::p_load(tidyverse)
 source("fun_helper.R")

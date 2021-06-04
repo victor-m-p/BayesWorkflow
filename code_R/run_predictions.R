@@ -6,8 +6,6 @@
 #' setup
 #' 
 ## -----------------------------------------------------------------------------
-# working directory 
-#setwd("~/BayesWorkflow/code_r")
 
 # packages
 pacman::p_load(tidyverse, 
@@ -46,7 +44,7 @@ test <- read_csv("../data/test.csv") %>%
 
 plot_predicted_groups(
   fit = m_pooled_posterior,
-  title = "R/brms: Predictions intervals (.95, .8 HDI) unseen data",
+  title = "R/brms: Predictions intervals (predictions)",
   data = test
 )
 

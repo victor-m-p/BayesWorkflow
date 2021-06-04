@@ -6,9 +6,6 @@
 #' 
 ## -----------------------------------------------------------------------------
 
-# working directory 
-#setwd("~/BayesWorkflow/code_r")
-
 # packages
 pacman::p_load(tidyverse, 
                brms,
@@ -245,7 +242,7 @@ save_plot(path = "../plots_R/student_weak_posterior_pred.png")
 
 # specific
 fixed_interval_groups(fit = m_student_specific_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -253,7 +250,7 @@ save_plot(path = "../plots_R/student_specific_HDI_fixed.png")
 
 # generic
 fixed_interval_groups(fit = m_student_generic_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -261,7 +258,7 @@ save_plot(path = "../plots_R/student_generic_HDI_fixed.png")
 
 # weak
 fixed_interval_groups(fit = m_student_weak_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -275,7 +272,7 @@ save_plot(path = "../plots_R/student_weak_HDI_fixed.png")
 
 # specific
 prediction_interval_groups(fit = m_student_specific_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 
@@ -283,7 +280,7 @@ save_plot(path = "../plots_R/student_specific_HDI_full.png")
 
 # generic
 prediction_interval_groups(fit = m_student_generic_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 
@@ -291,7 +288,7 @@ save_plot(path = "../plots_R/student_generic_HDI_full.png")
 
 # weak
 prediction_interval_groups(fit = m_student_weak_fit, 
-                         title = "Prediction interval (.95, .8)",
+                         title = "Prediction intervals (full)",
                          data = train,
                          n_time = 100)
 

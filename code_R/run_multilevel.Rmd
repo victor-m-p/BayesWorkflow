@@ -7,9 +7,6 @@ set-up
 
 ```{r}
 
-# working directory 
-setwd("~/BayesWorkflow/code_r")
-
 # packages
 pacman::p_load(tidyverse, 
                brms,
@@ -243,7 +240,7 @@ fixed effects HDI vs. data
 
 # specific
 fixed_interval_groups(fit = m_multilevel_specific_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -251,7 +248,7 @@ save_plot(path = "../plots_R/multilevel_specific_HDI_fixed.png")
 
 # generic
 fixed_interval_groups(fit = m_multilevel_generic_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -259,7 +256,7 @@ save_plot(path = "../plots_R/multilevel_generic_HDI_fixed.png")
 
 # weak
 fixed_interval_groups(fit = m_multilevel_weak_fit,
-                    title = "Fixed effect interval (.95, .8)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -273,7 +270,7 @@ prediction intervals
 
 # specific
 prediction_interval_groups(fit = m_multilevel_specific_fit, 
-                           title = "Prediction interval (.95, .8)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 
@@ -281,7 +278,7 @@ save_plot(path = "../plots_R/multilevel_specific_HDI_full.png")
 
 # generic
 prediction_interval_groups(fit = m_multilevel_generic_fit, 
-                           title = "Prediction interval (.95, .8)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 
@@ -289,7 +286,7 @@ save_plot(path = "../plots_R/multilevel_generic_HDI_full.png")
 
 # weak
 prediction_interval_groups(fit = m_multilevel_weak_fit, 
-                           title = "Prediction interval (.95, .8)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 

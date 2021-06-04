@@ -3,10 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 import pymc3 as pm
-import seaborn as sns
-import theano 
 import arviz as az
-import pickle
 import fun_models as fm
 import fun_helper as fh
 import xarray as xr
