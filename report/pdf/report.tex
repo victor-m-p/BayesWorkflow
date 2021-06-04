@@ -165,6 +165,53 @@ the parallels between pymc3 and brms pretty direct.
 
 remember to show the "easy" glm
 
+
+\section{more thoughts}
+
+1. you can copy the code to clipboard (workflow).
+implemented with st.code() in streamlit.
+unfortunately only python syntax highlighting,
+but it still looks decent I think..
+could have considered to break the code up
+into more chunks so as to explain them step-by-step.
+Depends on scope though - I would probably only have
+had time to cover one model (i.e. either pooled or multilevel).
+
+difficult decision:
+what to force users to see, and what to
+leave optional. Depends on the point of course.
+My point is (1) to introduce how to technically
+implement the same analysis in python that we
+know how to implement in R (thus I should force
+them to see the code). Only second is my point
+to discuss with them why different models, priors
+and technicalities are important (thus this is
+in pop-out sections). Explanations for code is
+also largely in optional sections. This makes it
+easy for people to revisit and copy the code
+without having to see the explanations again
+if they do not feel like they need to.
+
+difficult decision 2:
+explaining how to use the product,
+or hoping that it is intuitive enough that
+people will just naturally figure it out?
+
+2. orange punkter i python?
+
+3. issue: multilevel specific HDI?
+mean based on parameters??
+mean appears to be the same for all model
+types in python..?
+
+4. hard-set x \& y on the plots.
+
+5. uncertainty does not spread out for pooled.
+
+6. set good base-line settings for what is
+displayed.
+
+
 \printbibliography
 \end{document}
 

@@ -76,10 +76,7 @@ def posterior_pred(m_idata, model_type, prior_level, n_draws):
 
 # plot trace
 def plot_trace(m_idata, model_type, prior_level):
-    #fig, ax = plt.subplots()
-    az.plot_trace(m_idata)
-    #fig.suptitle("Python/pyMC3: trace plot")
-    #fig.tight_layout() 
+    az.plot_trace(m_idata, figsize = (15, 15)) # square for R compatibility
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_plot_trace.jpeg")
     
 # export summary
@@ -118,10 +115,15 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
     fig, ax = plt.subplots(figsize = (10, 7))  
 
     # plot data
-    ax.plot(t.flatten(), y.flatten(), 'o')
+    ax.scatter(
+        t, 
+        y,
+        color = "darkorange",
+        alpha = 0.5)
     
     # plot mean
-    ax.plot(t_unique, y_mean)
+    ax.plot(t_unique, y_mean,
+            color = "darkorange")
     
     # plot lower interval
     az.plot_hdi(
@@ -148,16 +150,25 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
 
 # HDI for parameters
 def hdi_param(m_idata, model_type, prior_level):
-    fig, ax = plt.subplots(figsize = (7, 3))
+    
+    fig, ax = plt.subplots(figsize = (10, 7))
+    
     az.plot_forest(
         m_idata,
-        kind='forestplot',
-        var_names=["alpha", "beta", "sigma"],
-        combined=True,
-        ax = ax)
+        var_names=["alpha", "beta", "sigma"], 
+        combined=True, # combine chains 
+        kind='ridgeplot', # instead of default which does not show distribution
+        ridgeplot_truncate=False, # do show the tails 
+        hdi_prob = .8, # hdi prob .8 here. 
+        ridgeplot_alpha = 0.5, # looks prettier
+        ridgeplot_quantiles = [0.5], # show mean
+        ax = ax # add to our axis
+        )
+
     fig.suptitle("Python/pyMC3: HDI intervals for parameters")
     fig.tight_layout()
-    plt.savefig(f"../plots_python/{model_type}_{prior_level}_hdi_param.jpeg",
+    
+    plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_param.jpeg",
                 dpi = 300)
 '''
 # updating checks

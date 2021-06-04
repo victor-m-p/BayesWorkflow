@@ -13,7 +13,8 @@ setwd("~/BayesWorkflow/code_r")
 pacman::p_load(tidyverse, 
                brms,
                modelr,
-               tidybayes)
+               tidybayes,
+               bayesplot)
 
 # load functions from fun_models.R
 source("fun_models.R")
@@ -54,4 +55,5 @@ save_plot(
 )
 
 ```
+
 

@@ -17,8 +17,8 @@ n_pp = 100
 n_draws = 2000 
 n_tune = 2000
 n_chains = 2
-target_accept = .8 ### CHANGE 
-max_treedepth = 10 ### CHANGE 
+target_accept = .99 ### CHANGE 
+max_treedepth = 20 ### CHANGE 
 prior_draws = 500
 RANDOM_SEED = 42
 

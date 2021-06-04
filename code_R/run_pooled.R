@@ -1,0 +1,360 @@
+#' ---
+#' title: "Untitled"
+#' output: html_document
+#' ---
+#' 
+#' set-up
+#' 
+## -----------------------------------------------------------------------------
+
+# working directory 
+#setwd("~/BayesWorkflow/code_r")
+
+# packages
+pacman::p_load(tidyverse, 
+               brms,
+               modelr,
+               tidybayes,
+               bayesplot)
+
+# load functions from fun_models.R
+source("fun_models.R")
+source("fun_helper.R")
+
+
+#' 
+#' global arguments
+#' 
+## -----------------------------------------------------------------------------
+
+# Only this is flexible at the moment. Not as nice as the python setup. 
+n_pp = 100
+
+
+#' 
+#' 
+#' load data and ensure correct format.
+#' 
+## -----------------------------------------------------------------------------
+
+# load data
+train <- read_csv("../data/train.csv") %>%
+  mutate(idx = as_factor(idx))
+
+
+#' 
+#' specify formula. 
+#' 
+## -----------------------------------------------------------------------------
+
+#formula 
+f_pooled <- bf(y ~ 1 + t) # complete pooling 
+
+
+#' 
+#' Get priors and set priors. 
+#' 
+## -----------------------------------------------------------------------------
+
+# fit the first model
+get_prior(formula = f_pooled,
+          data = train,
+          family = gaussian,
+          
+)
+
+# set priors: three levels.
+prior_pooled_specific <- c(
+  prior(normal(0, 0.05), class = b),
+  prior(normal(1.5, 0.05), class = Intercept),
+  prior(normal(0, 0.05), class = sigma)
+)
+
+prior_pooled_generic <- c(
+  prior(normal(0, 0.5), class = b),
+  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = sigma)
+)
+
+prior_pooled_weak <- c(
+  prior(normal(0, 5), class = b),
+  prior(normal(1.5, 5), class = Intercept),
+  prior(normal(0, 5), class = sigma)
+)
+
+
+#' 
+#' Now we compile models and check prior predictive.
+#' 
+## -----------------------------------------------------------------------------
+
+# compile the models
+m_pooled_specific_prior <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_specific,
+  sample_prior = "only",
+  file = "../models_R/m_pooled_specific_prior"
+)
+
+m_pooled_generic_prior <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_generic,
+  sample_prior = "only",
+  file = "../models_R/m_pooled_generic_prior"
+)
+
+m_pooled_weak_prior <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_weak,
+  sample_prior = "only",
+  file = "../models_R/m_pooled_weak_prior"
+)
+
+
+#' 
+#' check the prior predictive checks
+#' 
+## -----------------------------------------------------------------------------
+
+# specific model 
+pooled_specific_prior_pred <- pp_check(m_pooled_specific_prior, 
+                                     nsamples = 100) +
+  labs(title = "R/brms: prior predictive check") 
+
+save_plot(path = "../plots_R/pooled_specific_prior_pred.png")
+
+# generic model
+pooled_generic_prior_pred <- pp_check(m_pooled_generic_prior, 
+                                         nsamples = 100) + 
+  labs(title = "R/brms: prior predictive check")
+
+save_plot(path = "../plots_R/pooled_generic_prior_pred.png")
+
+# weak model
+pooled_weak_prior_pred <- pp_check(m_pooled_weak_prior, 
+                                    nsamples = 100) + 
+  labs(title = "R/brms: prior predictive check")
+
+save_plot(path = "../plots_R/pooled_weak_prior_pred.png")
+
+
+
+#' 
+#' fit the models 
+#' 
+## -----------------------------------------------------------------------------
+
+# fit the models
+m_pooled_specific_fit <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_specific,
+  sample_prior = TRUE,
+  file = "../models_R/m_pooled_specific_fit"
+)
+
+m_pooled_generic_fit <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_generic,
+  sample_prior = TRUE,
+  file = "../models_R/m_pooled_generic_fit"
+)
+
+m_pooled_weak_fit <- fit_mod(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled_weak,
+  sample_prior = TRUE,
+  file = "../models_R/m_pooled_weak_fit"
+)
+
+
+#' 
+#' plot trace
+#' 
+## -----------------------------------------------------------------------------
+
+# specific model
+save_chains(
+  fit = m_pooled_specific_fit,
+  path = "../plots_R/pooled_specific_plot_trace.png"
+)
+
+# generic model
+save_chains(
+  fit = m_pooled_generic_fit,
+  path = "../plots_R/pooled_generic_plot_trace.png"
+)
+
+# weak model
+save_chains(
+  fit = m_pooled_weak_fit,
+  path = "../plots_R/pooled_weak_plot_trace.png"
+)
+
+
+#' 
+#' posterior predictive checks 
+#' 
+## -----------------------------------------------------------------------------
+
+# specific model 
+pooled_specific_posterior_pred <- pp_check(m_pooled_specific_fit, 
+                                         nsamples = 100) + 
+  labs(title = "R/brms: posterior predictive check") 
+
+save_plot(path = "../plots_R/pooled_specific_posterior_pred.png")
+
+# generic model
+pooled_generic_posterior_pred <- pp_check(m_pooled_generic_fit, 
+                                         nsamples = 100) +
+  labs(title = "R/brms: posterior predictive check")
+
+save_plot(path = "../plots_R/pooled_generic_posterior_pred.png")
+
+# weak model
+pooled_weak_posterior_pred <- pp_check(m_pooled_weak_fit, 
+                                    nsamples = 100) + 
+  labs(title = "R/brms: posterior predictive check")
+
+save_plot(path = "../plots_R/pooled_weak_posterior_pred.png")
+
+
+#' 
+#' ### HDI vs data ### 
+#' 
+#' fixed effects HDI vs. data
+#' 
+## -----------------------------------------------------------------------------
+
+# specific
+fixed_interval_pool(fit = m_pooled_specific_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/pooled_specific_HDI_fixed.png")
+
+# generic
+fixed_interval_pool(fit = m_pooled_generic_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/pooled_generic_HDI_fixed.png")
+
+# weak
+fixed_interval_pool(fit = m_pooled_weak_fit,
+                    title = "Fixed effect interval (.95, .8)",
+                    data = train,
+                    n_time = 100)
+
+save_plot(path = "../plots_R/pooled_weak_HDI_fixed.png")
+
+
+#' 
+#' fixed kruschke style 
+#' 
+## -----------------------------------------------------------------------------
+
+# specific
+fixed_kruschke_pool(fit = m_pooled_specific_fit,
+                      title = "Fixed effect draws (Kruschke style)",
+                      data = train,
+                      n_time = 100)
+
+save_plot(path = "../plots_R/pooled_specific_HDI_kruschke.png")
+
+# generic
+fixed_kruschke_pool(fit = m_pooled_generic_fit,
+                      title = "Fixed effect draws (Kruschke style)",
+                      data = train,
+                      n_time = 100)
+
+save_plot(path = "../plots_R/pooled_generic_HDI_kruschke.png")
+
+# weak
+fixed_kruschke_pool(fit = m_pooled_weak_fit,
+                      title = "Fixed effect draws (Kruschke style)",
+                      data = train,
+                      n_time = 100)
+
+save_plot(path = "../plots_R/pooled_weak_HDI_kruschke.png")
+
+
+#' 
+#' prediction intervals
+#' 
+## -----------------------------------------------------------------------------
+
+# specific
+prediction_interval_pool(fit = m_pooled_specific_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/pooled_specific_HDI_full.png")
+
+# generic
+prediction_interval_pool(fit = m_pooled_generic_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/pooled_generic_HDI_full.png")
+
+# weak
+prediction_interval_pool(fit = m_pooled_weak_fit, 
+                         title = "Prediction interval (.95, .8)",
+                         data = train,
+                         n_time = 100)
+
+save_plot(path = "../plots_R/pooled_weak_HDI_full.png")
+
+
+#' 
+#' ### MCMC (hdi for parameters) ###
+#' 
+## -----------------------------------------------------------------------------
+
+# for consistency with python. 
+width = 7
+height = 4
+
+# specific
+mcmc_hdi(fit = m_pooled_specific_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/pooled_specific_HDI_param.png",
+          width = width,
+          height = height)
+
+# generic
+mcmc_hdi(fit = m_pooled_generic_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/pooled_generic_HDI_param.png",
+          width = width,
+          height = height)
+
+# weak
+mcmc_hdi(fit = m_pooled_weak_fit, 
+         title = "R/brms: HDI intervals for parameters")
+
+save_plot(path = "../plots_R/pooled_weak_HDI_param.png",
+          width = width,
+          height = height)
+
+
+#' 
+#' 

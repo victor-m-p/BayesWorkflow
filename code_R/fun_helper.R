@@ -126,11 +126,14 @@ fixed_interval_groups <- function(fit, title, data = train, n_time = 100){
 ### MCMC (hdi for parameters) ###
 mcmc_hdi <- function(fit, title){
   
-  mcmc_plot(fit,
-            pars = c("b_Intercept",
-                     "b_t",
-                     "sigma"),
-            fixed = T) +
+  mcmc_areas(
+    fit,
+    pars = c("b_Intercept",
+             "b_t",
+             "sigma"),
+    prob = 0.8, # 80% intervals
+    prob_outer = 0.99, # 99%
+    point_est = "mean") + 
     ggtitle(title)
   
 }

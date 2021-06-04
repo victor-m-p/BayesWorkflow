@@ -1,0 +1,43 @@
+#' ---
+#' title: "run_data"
+#' output: html_document
+#' ---
+#' 
+#' set-up
+#' 
+## -----------------------------------------------------------------------------
+
+# working directory 
+#setwd("~/BayesWorkflow/code_r")
+
+# packages
+pacman::p_load(tidyverse)
+source("fun_helper.R")
+
+
+#' 
+#' read data
+#' 
+## -----------------------------------------------------------------------------
+
+# read train data
+train <- read_csv("../data/train.csv") %>%
+  mutate(idx = as_factor(idx))
+
+
+#' 
+## -----------------------------------------------------------------------------
+
+# quick EDA
+ggplot(data = train, aes(x = t, y = y, color = idx)) +
+  geom_point() + 
+  geom_smooth(method = "lm", aes(fill = idx), alpha = 0.2) + 
+  ggtitle("R: Quick EDA")
+
+# save 
+save_plot(
+  path = "../plots_R/EDA.png"
+)
+
+
+#' 

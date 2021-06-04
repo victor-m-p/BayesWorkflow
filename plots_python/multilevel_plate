@@ -14,6 +14,9 @@ Data" shape=box style="rounded, filled"]
 	alpha_sigma [label="alpha_sigma
 ~
 HalfNormal"]
+	sigma [label="sigma
+~
+HalfNormal"]
 	beta_sigma [label="beta_sigma
 ~
 HalfNormal"]
@@ -23,9 +26,6 @@ Normal"]
 	alpha [label="alpha
 ~
 Normal"]
-	sigma [label="sigma
-~
-HalfNormal"]
 	subgraph cluster15 {
 		beta_varying [label="beta_varying
 ~
@@ -37,11 +37,11 @@ Normal"]
 	}
 	alpha_sigma -> alpha_varying
 	alpha -> alpha_varying
-	beta_sigma -> beta_varying
 	beta -> beta_varying
+	beta_sigma -> beta_varying
 	idx_shared -> y_pred
-	beta_varying -> y_pred
 	alpha_varying -> y_pred
-	t_shared -> y_pred
 	sigma -> y_pred
+	t_shared -> y_pred
+	beta_varying -> y_pred
 }

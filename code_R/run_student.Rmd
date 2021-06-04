@@ -13,7 +13,8 @@ setwd("~/BayesWorkflow/code_r")
 pacman::p_load(tidyverse, 
                brms,
                modelr,
-               tidybayes)
+               tidybayes,
+               bayesplot)
 
 # load functions from fun_models.R
 source("fun_models.R")
@@ -248,7 +249,7 @@ fixed_interval_groups(fit = m_student_specific_fit,
                     data = train,
                     n_time = 100)
 
-save_plot(path = "../plots_R/student_specific_FI.png")
+save_plot(path = "../plots_R/student_specific_HDI_fixed.png")
 
 # generic
 fixed_interval_groups(fit = m_student_generic_fit,
@@ -256,7 +257,7 @@ fixed_interval_groups(fit = m_student_generic_fit,
                     data = train,
                     n_time = 100)
 
-save_plot(path = "../plots_R/student_generic_FI.png")
+save_plot(path = "../plots_R/student_generic_HDI_fixed.png")
 
 # weak
 fixed_interval_groups(fit = m_student_weak_fit,
@@ -264,7 +265,7 @@ fixed_interval_groups(fit = m_student_weak_fit,
                     data = train,
                     n_time = 100)
 
-save_plot(path = "../plots_R/student_weak_FI.png")
+save_plot(path = "../plots_R/student_weak_HDI_fixed.png")
 
 ```
 
@@ -278,7 +279,7 @@ prediction_interval_groups(fit = m_student_specific_fit,
                          data = train,
                          n_time = 100)
 
-save_plot(path = "../plots_R/student_specific_PI.png")
+save_plot(path = "../plots_R/student_specific_HDI_full.png")
 
 # generic
 prediction_interval_groups(fit = m_student_generic_fit, 
@@ -286,7 +287,7 @@ prediction_interval_groups(fit = m_student_generic_fit,
                          data = train,
                          n_time = 100)
 
-save_plot(path = "../plots_R/student_generic_PI.png")
+save_plot(path = "../plots_R/student_generic_HDI_full.png")
 
 # weak
 prediction_interval_groups(fit = m_student_weak_fit, 
@@ -294,7 +295,7 @@ prediction_interval_groups(fit = m_student_weak_fit,
                          data = train,
                          n_time = 100)
 
-save_plot(path = "../plots_R/student_weak_PI.png")
+save_plot(path = "../plots_R/student_weak_HDI_full.png")
 
 ```
 
@@ -311,7 +312,7 @@ height = 4
 mcmc_hdi(fit = m_student_specific_fit, 
          title = "R/brms: HDI intervals for parameters")
 
-save_plot(path = "../plots_R/student_specific_hdi_param.png",
+save_plot(path = "../plots_R/student_specific_HDI_param.png",
           width = width,
           height = height)
 
@@ -319,7 +320,7 @@ save_plot(path = "../plots_R/student_specific_hdi_param.png",
 mcmc_hdi(fit = m_student_generic_fit, 
          title = "R/brms: HDI intervals for parameters")
 
-save_plot(path = "../plots_R/student_generic_hdi_param.png",
+save_plot(path = "../plots_R/student_generic_HDI_param.png",
           width = width,
           height = height)
 
@@ -327,7 +328,7 @@ save_plot(path = "../plots_R/student_generic_hdi_param.png",
 mcmc_hdi(fit = m_student_weak_fit, 
          title = "R/brms: HDI intervals for parameters")
 
-save_plot(path = "../plots_R/student_generic_hdi_param.png",
+save_plot(path = "../plots_R/student_weak_HDI_param.png",
           width = width,
           height = height)
 
