@@ -1,5 +1,9 @@
 '''
-reproduced based on code copied from streamlit to test.
+Reproduce analysis of pooled model.
+Only for sigma = 0.5 (generic priors).
+Can be changed to reproduce the plots
+with other prior levels. 
+Has been checked against analysis. 
 '''
 
 ## python: packages & reproducibility ##
@@ -12,6 +16,7 @@ import xarray as xr
 RANDOM_SEED = 42
 
 ### python: preprocessing ###
+
 # read data
 train = pd.read_csv("../data/train.csv")
 
@@ -26,7 +31,8 @@ n_idx = len(idx_unique)
 # create coords and dims 
 coords = {
     'idx': idx_unique,
-    't': t_unique}
+    't': t_unique
+}
 
 # take out dims 
 dims = coords.keys()
@@ -41,32 +47,33 @@ dataset = xr.Dataset(
     'y_data': (dims, y_train)},
     coords = coords)
 
-### python: specify model and compile ###
+### python: specify model & compile ###
+sigma = 0.5
 with pm.Model(coords=coords) as m_pooled:
-
+    
     # shared variables
     t_ = pm.Data('t_shared', 
-                t_train, 
-                dims = dims)
-
+                 t_train, 
+                 dims = dims)
+    
     # specify priors for parameters & model error
     beta = pm.Normal("beta", 
-                    mu = 0, 
-                    sigma = 0.5)
+                     mu = 0, 
+                     sigma = sigma)
     alpha = pm.Normal("alpha", 
-                    mu = 1.5, 
-                    sigma = 0.5)
+                      mu = 1.5, 
+                      sigma = sigma)
     sigma = pm.HalfNormal("sigma", 
-                        sigma = 0.5)
-
+                          sigma = sigma)
+    
     # calculate mu
     mu = alpha + beta * t_
-
+    
     # likelihood
     y_pred = pm.Normal("y_pred", 
-                    mu = mu, 
-                    sigma = sigma, 
-                    observed = y_train)
+                       mu = mu, 
+                       sigma = sigma, 
+                       observed = y_train)
     
 ### python: plate notation ###
 pm.model_to_graphviz(m_pooled)
@@ -121,6 +128,7 @@ with m_pooled:
 m_idata.extend(idata_postpred) # add to idata
 
 ### plot posterior predictive ###
+
 # set up matplotlib plot
 fig, ax = plt.subplots()
 
@@ -131,92 +139,10 @@ az.plot_ppc(m_idata,
 
 fig.suptitle("Python/pyMC3: posterior predictive check")
 fig.tight_layout()
-plt.plot();
-
-### python: sample posterior predictive ###
-with m_pooled:
-    post_pred = pm.sample_posterior_predictive(
-        m_idata,
-        var_names = [
-            "y_pred",
-            "alpha",
-            "beta"])
-    idata_postpred = az.from_pymc3(
-        posterior_predictive=post_pred)
-m_idata.extend(idata_postpred) # add to idata
-
-### plot posterior predictive ###
-# set up matplotlib plot
-fig, ax = plt.subplots()
-
-# if you just want the figure then this is enough
-az.plot_ppc(m_idata, 
-            num_pp_samples = 100,
-            ax = ax)
-
-fig.suptitle("Python/pyMC3: posterior predictive check")
-fig.tight_layout()
-plt.plot();
-
-### plot hdi (full uncertainty) ###
-# take posterior predictive out of idata for convenience
-ppc = m_idata.posterior_predictive
-
-# take out predictions (mean over chains). 
-y_pred = ppc["y_pred"].mean(axis = 0).values
-
-# calculate mean y predicted (mean over draws and idx)
-y_mean = y_pred.mean(axis = (0, 1))
-
-# THE DIFFERENCE: base it on the actual predictions of the full model 
-outcome = y_pred.reshape((4000*n_idx, n_time)) # 4000 = 2000 (draws) * 2 (chains)
-
-# set-up matplotlib plot
-fig, ax = plt.subplots(figsize = (10, 7))  
-
-# plot data
-ax.scatter(
-    t_train, 
-    y_train,
-    color = "darkorange", #aesthetics
-    alpha = 0.5 # aesthetics
-    )
-
-# plot mean
-ax.plot(
-    t_unique, 
-    y_mean,
-    color = "darkorange" # aesthetics
-    )
-
-# set HDI intervals 
-high, low = (.95, .8) 
-
-# plot lower interval
-az.plot_hdi(
-    t_unique,
-    outcome,
-    ax = ax,
-    fill_kwargs= {'alpha': 0.4, "label": "80% HDI intervals"},
-    hdi_prob = low)
-
-# plot higher interval
-az.plot_hdi(
-    t_unique,
-    outcome,
-    ax = ax,
-    fill_kwargs = {'alpha': 0.3, "label": "95% HDI intervals"},
-    hdi_prob = high)
-
-# add legend, title and tight layout. 
-ax.legend()
-fig.suptitle("Python/pyMC3: Prediction Intervals (full)")
-fig.tight_layout()
-
-# plot it 
 plt.plot();
 
 ### plot hdi (fixed effects) ###
+
 # take posterior predictive out of idata for convenience
 ppc = m_idata.posterior_predictive
 
@@ -255,7 +181,7 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs= {'alpha': 0.4, "label": "80% HPD intervals"},
+    fill_kwargs={'alpha': 0.4, "label": f"{low*100}% HPD intervals"},
     hdi_prob = low)
 
 # plot higher interval
@@ -263,18 +189,78 @@ az.plot_hdi(
     t_unique,
     outcome,
     ax = ax,
-    fill_kwargs = {'alpha': 0.3, "label": "95% HDI intervals"},
+    fill_kwargs = {'alpha': 0.3, "label": f"{high*100}% HDI intervals"},
     hdi_prob = high)
 
 # add legend, title and tight layout. 
 ax.legend()
-fig.suptitle("Python/pyMC3: Prediction Intervals (fixed)")
+fig.suptitle(f"Python/pyMC3: Prediction Intervals (fixed)")
+fig.tight_layout()
+
+# plot it 
+plt.plot();
+
+### plot hdi (full uncertainty) ###
+
+# take posterior predictive out of idata for convenience
+ppc = m_idata.posterior_predictive
+
+# take out predictions (mean over chains). 
+y_pred = ppc["y_pred"].mean(axis = 0).values
+
+# calculate mean y predicted (mean over draws and idx)
+y_mean = y_pred.mean(axis = (0, 1))
+
+# THE DIFFERENCE: base it on the actual predictions of the full model 
+outcome = y_pred.reshape((4000*n_idx, n_time)) # 4000 = 2000 (draws) * 2 (chains)
+
+# set-up matplotlib plot
+fig, ax = plt.subplots(figsize = (10, 7))  
+
+# plot data
+ax.scatter(
+    t_train, 
+    y_train,
+    color = "darkorange", #aesthetics
+    alpha = 0.5 # aesthetics
+    )
+
+# plot mean
+ax.plot(
+    t_unique, 
+    y_mean,
+    color = "darkorange" # aesthetics
+    )
+
+# set HDI intervals 
+high, low = (.95, .8) 
+
+# plot lower interval
+az.plot_hdi(
+    t_unique,
+    outcome,
+    ax = ax,
+    fill_kwargs={'alpha': 0.4, "label": f"{low*100}% HPD intervals"},
+    hdi_prob = low)
+
+# plot higher interval
+az.plot_hdi(
+    t_unique,
+    outcome,
+    ax = ax,
+    fill_kwargs = {'alpha': 0.3, "label": f"{high*100}% HDI intervals"},
+    hdi_prob = high)
+
+# add legend, title and tight layout. 
+ax.legend()
+fig.suptitle(f"Python/pyMC3: Prediction Intervals (full)")
 fig.tight_layout()
 
 # plot it 
 plt.plot();
 
 ### HDI for parameters ###
+
 # set up matplotlib plot
 fig, ax = plt.subplots(figsize = (10, 7))
 
@@ -294,3 +280,4 @@ az.plot_forest(
 fig.suptitle("Python/pyMC3: HDI intervals for parameters")
 fig.tight_layout()
 plt.plot();
+

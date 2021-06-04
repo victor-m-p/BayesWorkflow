@@ -1,0 +1,187 @@
+---
+title: "reproduce_pooled"
+output: html_document
+---
+
+Packages and reproducibility.
+
+```{r}
+
+### R: packages & reproducibility ###
+pacman::p_load(tidyverse, 
+               brms,
+               modelr,
+               tidybayes,
+               bayesplot)
+
+RANDOM_SEED = 42
+
+```
+
+Preprocessing.
+
+```{r}
+
+### R: preprocessing ###
+train <- read_csv("../data/train.csv") %>%
+  mutate(idx = as_factor(idx))
+
+```
+
+Specify model & compile. 
+
+```{r}
+
+### R: specify model & compile ###
+
+# formula 
+f_pooled <- bf(y ~ 1 + t) # complete pooling 
+
+# set priors --> can use get_prior() if in doubt. 
+prior_pooled <- c(
+  prior(normal(0, 0.5), class = b),
+  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = sigma)
+)
+
+# compile model & sample prior
+m_pooled <- brm(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled,
+  sample_prior = "only",
+  backend = "cmdstanr"
+)
+
+```
+
+Prior predictive checks.
+
+```{r}
+
+### R: Prior predictive checks ###
+pp_check(m_pooled, 
+         nsamples = 100) +
+  labs(title = "R/brms: prior predictive check") 
+
+```
+
+Sample posterior
+
+```{r}
+
+### R: sample posterior ###
+m_pooled <- brm(
+  formula = f_pooled,
+  family = gaussian,
+  data = train,
+  prior = prior_pooled,
+  sample_prior = TRUE, # only difference. 
+  backend = "cmdstanr",
+  chains = 2,
+  cores = 4,
+  iter = 4000, 
+  warmup = 2000,
+  threads = threading(2), # not sure this can be done in pyMC3
+  control = list(adapt_delta = .99,
+                 max_treedepth = 20),
+  seed = RANDOM_SEED
+)
+
+```
+
+Plot trace
+
+```{r}
+
+### R: plot trace ###
+plot(m_pooled)
+
+```
+
+Plot summary
+
+```{r}
+
+### R: get summary (not displayed) ###
+summary(m_pooled)
+
+```
+
+Posterior predictive checks
+
+```{r}
+
+### R: Posterior predictive checks ###
+pp_check(m_pooled, 
+         nsamples = 100) + 
+  labs(title = "R/brms: posterior predictive check") 
+
+```
+
+Plot HDI (fixed effects)
+
+```{r}
+
+### R: Plot HDI (fixed effects) ###
+train %>%
+  data_grid(t = seq_range(t, n = 100)) %>%
+  add_fitted_draws(m_pooled) %>%
+  ggplot(aes(x = t, y = y)) + 
+  stat_lineribbon(aes(y = .value), 
+                  .width = c(.95, .8), # HDI intervals
+                  color = "#08519C",
+                  point_interval = median_hdi) + 
+  geom_jitter(data = train, 
+              color = "navyblue", 
+              shape = 1,
+              alpha = 0.5, 
+              size = 2, 
+              width = 0.1) + 
+  scale_fill_brewer() + 
+  ggtitle("R/brms: Prediction intervals (fixed)")
+
+```
+
+Plot HDI (full uncertainty)
+
+```{r}
+
+### R: Plot HDI (full uncertainty) ###
+train %>%
+  data_grid(t = seq_range(t, n = 100)) %>%
+  add_predicted_draws(m_pooled) %>%
+  ggplot(aes(x = t, y = y)) +
+  stat_lineribbon(aes(y = .prediction), 
+                  .width = c(.95, .8),
+                  color = "#08519C",
+                  point_interval = median_hdi) +
+  geom_jitter(data = train, 
+              color = "navyblue", 
+              shape = 1, 
+              alpha = 0.5, 
+              size = 2, 
+              width = 0.1) + 
+  scale_fill_brewer() +
+  ggtitle("R/brms: Prediction intervals (full)")
+
+```
+
+Plot HDI for parameters 
+
+```{r}
+
+### R: HDI for parameters ###
+mcmc_areas(
+  m_pooled,
+  pars = c("b_Intercept",
+           "b_t",
+           "sigma"),
+  prob = 0.8, # 80% intervals
+  prob_outer = 0.99, # 99%
+  point_est = "mean") + 
+  ggtitle("R/brms: HDI intervals for parameters")
+
+```
+
