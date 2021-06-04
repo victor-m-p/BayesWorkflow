@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     )
 
-st.image("/img/bayes_bois.png", width = 100)
+st.image("img/bayes_bois.png", width = 100)
 
 # translation dictionaries: 
 translation_prior = {
@@ -151,10 +151,10 @@ elif choice == "Simulation & EDA":
     col1, col2 = st.beta_columns(2)
     
     with col1: 
-        st.image("../plots_python/EDA.jpeg")
+        st.image("plots_python/EDA.jpeg")
         
     with col2: 
-        st.image("../plots_R/EDA.png")
+        st.image("plots_R/EDA.png")
         
     expander = st.beta_expander("Code-Monkey: exploratory plot")
     
@@ -376,7 +376,7 @@ elif choice == "Complete Pooling (model 1)":
     with expander: 
         st.code(py_plate)
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -441,10 +441,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_pp_pool = translation_prior.get(selection_pp_pool)
 
     with col1_pp_pool: 
-        st.image(f"../plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp_pool}_prior_pred.jpeg")
         
     with col2_pp_pool: 
-        st.image(f"../plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
     
     
     '''
@@ -537,9 +537,9 @@ elif choice == "Complete Pooling (model 1)":
     prior_trace_pool = translation_prior.get(selection_trace_pool)
     
     with col1_trace_pool: 
-        st.image(f"../plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace_pool}_plot_trace.jpeg")
     with col2_trace_pool: 
-        st.image(f"../plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
     
     '''
@@ -573,7 +573,7 @@ elif choice == "Complete Pooling (model 1)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     '''
     
@@ -659,10 +659,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_pp2_pool = translation_prior.get(selection_pp2_pool)
     
     with col1_pp2_pool:
-        st.image(f"../plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2_pool}_posterior_pred.jpeg")
         
     with col2_pp2_pool:
-        st.image(f"../plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
 
     '''
     # HDI (vs. data)
@@ -697,10 +697,10 @@ elif choice == "Complete Pooling (model 1)":
     
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
     '''
     # HDI (parameters)
@@ -720,10 +720,10 @@ elif choice == "Complete Pooling (model 1)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png")
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
 elif choice == "Multilevel (model 2)":
     
@@ -774,10 +774,10 @@ elif choice == "Multilevel (model 2)":
     prior_pp = translation_prior.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_context}_{prior_pp}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
     
     
     '''
@@ -797,7 +797,7 @@ elif choice == "Multilevel (model 2)":
     
     '''
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -815,9 +815,9 @@ elif choice == "Multilevel (model 2)":
     prior_trace = translation_prior.get(selection_trace)
     
     with col1_trace: 
-        st.image(f"../plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
     with col2_trace: 
-        st.image(f"../plots_R/{model_context}_{prior_trace}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
     
     '''
     
@@ -858,10 +858,10 @@ elif choice == "Multilevel (model 2)":
     prior_pp2 = translation_prior.get(selection_pp2)
     
     with col1_pp2:
-        st.image(f"../plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
         
     with col2_pp2:
-        st.image(f"../plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
         
     '''
     # Summary
@@ -880,7 +880,7 @@ elif choice == "Multilevel (model 2)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
 
     '''
     # HDI (vs. data)
@@ -913,10 +913,10 @@ elif choice == "Multilevel (model 2)":
     
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
     '''
     # HDI (parameters)
@@ -936,10 +936,10 @@ elif choice == "Multilevel (model 2)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png") 
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png") 
     
 elif choice == "Student-t (model 3)":
     
@@ -982,10 +982,10 @@ elif choice == "Student-t (model 3)":
     prior_pp = translation_prior.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp}_prior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_context}_{prior_pp}_prior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp}_prior_pred.png")
     
     
     '''
@@ -1005,7 +1005,7 @@ elif choice == "Student-t (model 3)":
     
     '''
     
-    st.image(f"../plots_python/{model_context}_plate.png")
+    st.image(f"plots_python/{model_context}_plate.png")
     
     
     '''
@@ -1023,9 +1023,9 @@ elif choice == "Student-t (model 3)":
     prior_trace = translation_prior.get(selection_trace)
     
     with col1_trace: 
-        st.image(f"../plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_trace}_plot_trace.jpeg")
     with col2_trace: 
-        st.image(f"../plots_R/{model_context}_{prior_trace}_plot_trace.png")
+        st.image(f"plots_R/{model_context}_{prior_trace}_plot_trace.png")
     
     
     '''
@@ -1067,10 +1067,10 @@ elif choice == "Student-t (model 3)":
     prior_pp2 = translation_prior.get(selection_pp2)
     
     with col1_pp2:
-        st.image(f"../plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_pp2}_posterior_pred.jpeg")
         
     with col2_pp2:
-        st.image(f"../plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
+        st.image(f"plots_R/{model_context}_{prior_pp2}_posterior_pred.png")
         
     
     
@@ -1091,7 +1091,7 @@ elif choice == "Student-t (model 3)":
     
     prior_summary = translation_prior.get(selection_summary)
     
-    st.image(f"../plots_python/{model_context}_{prior_summary}_summary.png")
+    st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
 
     '''
     # HDI (vs. data)
@@ -1123,10 +1123,10 @@ elif choice == "Student-t (model 3)":
     hdi_type = translation_uncertainty.get(selection_hdi2)
     
     with col1_hdiplot:
-        st.image(f"../plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.jpeg")
         
     with col2_hdiplot:
-        st.image(f"../plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
+        st.image(f"plots_R/{model_context}_{prior_level_hdi}_HDI_{hdi_type}.png")
     
     '''
     # HDI (parameters)
@@ -1146,10 +1146,10 @@ elif choice == "Student-t (model 3)":
     prior_param = translation_prior.get(selection_param)
     
     with col1_hdi_param: 
-        st.image(f"../plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
+        st.image(f"plots_python/{model_context}_{prior_param}_HDI_param.jpeg")
     
     with col2_hdi_param: 
-        st.image(f"../plots_R/{model_context}_{prior_param}_HDI_param.png")
+        st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
 elif choice == "Model Comparison":
     
@@ -1217,10 +1217,10 @@ elif choice == "Model Comparison":
     model_pp = translation_model.get(selection_pp)
 
     with col1_pp: 
-        st.image(f"../plots_python/{model_pp}_{prior_context}_posterior_pred.jpeg")
+        st.image(f"plots_python/{model_pp}_{prior_context}_posterior_pred.jpeg")
         
     with col2_pp: 
-        st.image(f"../plots_R/{model_pp}_{prior_context}_posterior_pred.png")
+        st.image(f"plots_R/{model_pp}_{prior_context}_posterior_pred.png")
     
     '''
     # Compare HDI
@@ -1254,10 +1254,10 @@ elif choice == "Model Comparison":
     col1_hdi2, col2_hdi2 = st.beta_columns(2)
     
     with col1_hdi2: 
-        st.image(f"../plots_python/{model_hdi}_{prior_context}_HDI_{uncertainty}.jpeg")
+        st.image(f"plots_python/{model_hdi}_{prior_context}_HDI_{uncertainty}.jpeg")
         
     with col2_hdi2: 
-        st.image(f"../plots_R/{model_hdi}_{prior_context}_HDI_{uncertainty}.png")
+        st.image(f"plots_R/{model_hdi}_{prior_context}_HDI_{uncertainty}.png")
     
     '''
     # Information criterion (loo)
@@ -1268,7 +1268,7 @@ elif choice == "Model Comparison":
     
     '''
     
-    st.image(f"../plots_python/loo_comparison.png")
+    st.image(f"plots_python/loo_comparison.png")
     
     '''
     Overthinking, that loo is leave-one-out approximation. 
@@ -1313,10 +1313,10 @@ elif choice == "Prediction":
     col1, col2 = st.beta_columns(2)
     
     with col1: 
-        st.image("../plots_python/multilevel_generic_HDI_predictions.jpeg") 
+        st.image("plots_python/multilevel_generic_HDI_predictions.jpeg") 
     
     with col2: 
-        st.image("../plots_R/multilevel_generic_HDI_predictions.png")
+        st.image("plots_R/multilevel_generic_HDI_predictions.png")
     
 elif choice == "References & Inspiration":
     pass
