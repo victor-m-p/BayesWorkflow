@@ -34,6 +34,17 @@ translation_model = {
     'Multilevel': 'multilevel',
     'Student-t': 'student'}
 
+translation_mod_name = {
+    'Pooled': 'm_pooled',
+    'Multilevel': 'm_multilevel',
+    'Student-t': 'm_student'}
+
+translation_idata = {
+    'Pooled': 'pooled_idata',
+    'Multilevel': 'multilevel_idata',
+    'Student-t': 'student_idata'
+}
+
 translation_code = {
     'population mean (fixed)': ('add_fitted_draws', '.value'),
     'individuals (full uncertainty)': ('add_predicted_draws', '.prediction')
@@ -52,83 +63,78 @@ choice = st.sidebar.radio('Sections:', ["Introduction", "Simulation & EDA", "Com
 
 
 if choice == "Introduction":
+    
     '''
     # Purpose 
     
-    something about what people should expect to get out of the
+    This notebook attempts to show how to carry out two (almost) identical bayesian analyses, using python (pyMC3) and R (brms). 
     
-    notebook, and who the intended audience is. 
+    The main purpose of this app is to show users with experience in one language how to carry out a bayesian analysis in the other. 
     
-    Something I wish I had had when I started to transition from bayesian modeling 
-    in R to Python. 
+    I have specifically had people who are looking to transition from R/brms to python/pyMC3 in mind, but people coming from python should also find the app interesting.
+    
+    I have tried to explain the code and concepts in selected parts, but this is not supposed to be an exhaustive guide to bayesian statistics nor pyMC3 or brms. 
+    
+    If you want to dive deeper into either bayesian statistics or more advanced analyses I have provided a list of good resources in the appendix (References & Inspiration).
     
     '''
     
     '''
-    # Progression
+    # How to use 
     
+    For all parts of the analysis (for both languages) you can access reproducible code, and easily copy it to clipboard.
     
-    ## Optimization of workflow
+    I hope that this will encourage you to run the code alongside the app, since this is the only way to really understand what is going on.
     
-    As you will see, almost all the code used is the same
-    for all three candidate models. 
-    
-    Typing all the code for each model is 
-    redundant and a waste of typing. 
-    
-    In order to make the workflow effective we can create a 
-    number of convenience functions. 
-    
-    We might also want to split up the analysis into several
-    documents, such that we fit models in one document and
-    explore them in others. 
-    
-    A non-exhaustive list of convenience functions that I 
-    like to use are discussed in this section.
-    
-    Here we will also discuss how the workflow differs 
-    between pyMC3 and brms. 
+    While building a bridge between python/pyMC3 and R/brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better bayesin workflow.
     
     '''
     
     '''
     # Functionality 
     
-    You will see boxes with the titles:
+    You will see boxes with the titles *Code-Monkey*, *Language-Learner* and *Concept-Guru*. These let you dive deeper into the material:
     
-    * "Code-Shark"
-    * "Math-Whizz"
-    * "Concept-Guru"
+    * "Code-Monkey": Display code to reproduce analysis
+    * "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * "Concept-Guru": Conceptual deep-dives
     
-    These are for those interested in diving deeper into the material. 
-    '''
+    Some of them will be expanded by default because I think you *should* see them.
     
-    '''
-    # Notes
-    
-    ## shown code 
-    
-    You can copy the code chunks in the upper right corner
-    
-    if you want to follow along with the coding. 
-    
-    Note that the code I show in these sections is only for what I will
-    
-    call the "generic" prior level. You will have to change the priors
-    
-    (see github) to reproduce the "weak" and the "specific" prior levels. 
-    
-    ## R/brms vs python/pyMC3
-    
-    You will probably notice that some parts of the analysis require more
-    
-    lines of code in python and that some parts of the analysis require more
-    
-    lines of code in R. There are pros and cons to both languages 
-    
-    (say what they are). 
+    Some of them you can expand if you want to dive deeper into either the code or the concepts behind the code.
     
     '''
+    
+    '''
+    # Bayesian Workflow
+    '''
+    col1, col2 = st.beta_columns(2)
+    
+    with col1: 
+            '''
+        The notebook follows a workflow close to what is presented in Gelman (2020). 
+        
+        Some parts are not included (yet), but we will cover the following: 
+        
+        1. Fake data simulation 
+        
+        2. Picking an initial model 
+        
+        3. Prior predictive checks
+        
+        4. Fitting a model 
+        
+        5. Validate computation
+        
+        6. Posterior predictive checks
+        
+        7. Prediction
+        
+        '''
+    with col2: 
+        st.image("img/Gelman.png")
+
+
     
     
 elif choice == "Simulation & EDA":
@@ -136,44 +142,68 @@ elif choice == "Simulation & EDA":
     '''
     # Data (Simulation)
 
-    For this notebook we will simulate our own data.
+    For this analysis we will simulate our own data. This is nice, because we will know the "true" parameter values. 
     
-    The data will consist of ...
+    We can spin our own story about what the data corresponds to. 
     
-    If you are curious, check the "Code-Monkey" box. 
+    * *x-value* corresponds to consecutive years (t) 
+    
+    * *y-value* corresponds to grading on the danish citizenship test. 
+    
+    * *ID-value* corresponds to individual aliens. 
+    
+    Based on 15 consecutive years of data (t) and corresponding gradings (y) and a sample of 15 aliens (ID) 
+    
+    we want to infer how fast how aliens learn about danish culture (beta), and how much they know when they arrive (alpha). 
+    
+    We might also be interested in the variability between aliens or our left-over uncertainty, but let's table that for now. 
+    
+    Remember to check out the "Code-Monkey" boxes to follow along with the code. 
     
     '''
     
-    # if people want to see the simulation code
-    expander = st.beta_expander("Code-Monkey: simulation")
+    ### code ###
+    expander = st.beta_expander("Code-Monkey: Reproducibility")
+    py_reproducibility = ct.py_reproducibility()
+    
+    with expander: 
+        st.code(py_reproducibility)
+        
+    
+    ### code ##
+    expander = st.beta_expander("Code-Monkey: Simulation")
+    py_sim = ct.py_sim()
+    
+    with expander: 
+        st.code(py_sim)
+            
+    '''
+    # Quick EDA
+    
+    Below is a scatter plot of the *training* data, where a regression line is showed for each alien (ID). 
+    
+    '''
+    
+    ### plot ###
+    col1_EDA, col2_EDA = st.beta_columns(2)
+    
+    with col1_EDA: 
+        st.image("plots_python/EDA.jpeg")
+    with col2_EDA: 
+        st.image("plots_R/EDA.png")
+    
+    ### code ###
+    expander = st.beta_expander("Code-Monkey: EDA")
+    
+    py_EDA = ct.py_EDA()
+    R_EDA = ct.R_EDA()
     
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1:
-            st.write("Python code")
+            st.code(py_EDA)
         with col2: 
-            st.write("R code") 
-            
-    '''
-    # Quick EDA
-    Let's plot the data to get a feel. 
-    '''
-    col1, col2 = st.beta_columns(2)
-    
-    with col1: 
-        st.image("plots_python/EDA.jpeg")
-        
-    with col2: 
-        st.image("plots_R/EDA.png")
-        
-    expander = st.beta_expander("Code-Monkey: exploratory plot")
-    
-    with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1: 
-            st.write("Python code")
-        with col2:
-            st.write("R code")
+            st.code(R_EDA)
 
     
 elif choice == "Complete Pooling (model 1)":
@@ -185,20 +215,16 @@ elif choice == "Complete Pooling (model 1)":
     model_family = "gaussian" 
     prior_name = "prior_pooled" # should be in args
     data_type = "train"
+    idata_name = "pooled_idata"
     
-    r'''
+    '''
     # Candidate model 1 (Complete Pooling)
-    Our first candidate model will be a complete pooling model.
     
-    This means that we treat each observations at each time-point
+    Our first candidate model will be a complete pooling model. 
     
-    as if they belong to the same group/ID. 
+    This model treats each observation at each time-point as if it belongs to the same alien (ID). 
     
-    Before we get to play with the model we will need two things. 
-    
-    (1) importing packages
-    
-    (2) load and preprocsess data
+    You might already feel that this is not a satisfactory model, but bear with me. 
     
     '''
     
@@ -230,6 +256,9 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     # Model specification (math)
+    
+    We can formulate the complete pooling model as follows. 
+    
     '''
     
     st.latex(r''' 
@@ -242,6 +271,11 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     # Model specification (code)
+    
+    Now we need to translate this into pyMC3 and brms code. 
+    
+    Throughout the app you can choose which prior-level to display code & plots for. 
+    
     '''
     
     ### code prep ###
@@ -266,20 +300,49 @@ elif choice == "Complete Pooling (model 1)":
         with col2_model: 
             st.code(r_model)
     
+    ### language-learner ###
+    expander = st.beta_expander("Language-Learner: Model specification")
+    
+    with expander: 
+
+            '''
+            # Shared Variables: 
+            
+            In the pyMC3 code (left) we have created something called a shared variable. 
+            
+            This has to be done if we want to generate predictions based on new data (data that the model was not trained on).
+            
+            pyMC3 relies on theano as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change in a different format. 
+            
+
+            # Likelihood and mu: 
+            
+            write something here...
+
+            
+            # sigma: 
+            
+            We have specified a normal distribution for the sigma distribution in the brms priors (right), but we have specified a half-normal distribution for the sigma distribution i pyMC3 (left). 
+            
+            This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow negative values). 
+            
+            The reason why we can do this in brms is because it realizes that draws from the sigma distribution have to be positive. 
+            
+            So, when it encounters a negative value it throws away that sample. This will then effectively give us a half-normal distribution. 
+            
+            pyMC3 does not baby-sit in this way, and will throw an error if we try to specify a normal distribution for the sigma parameter. 
+            
+            You can try this for yourself. 
+            '''
+    
     '''
     # Plate Notation 
     
-    There are many reasons why a prior predictive check can be bad
+    Something that is really nice in pyMC3 is that we can check whether we specified the model as we intended to. 
     
-    (including of course, bad priors). Something that is really nice in
+    Your model is shown in plate notation, and which I think is less intuitive than the awesome Kruschke diagrams/plots (link). 
     
-    pyMC3 though is that you can check whether you actually specified the
-    
-    model as you intended to. Your model is shown in plate notation,
-    
-    which can seem confusing, and which I think is less intuitive than the
-    
-    really nice Kruschke diagrams/plots (link). However, it is still useful. 
+    Once we learn to read them however, it is a useful check. 
     
     '''
     
@@ -325,7 +388,7 @@ elif choice == "Complete Pooling (model 1)":
         st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
     
     ### code ###
-    py_pp = ct.py_pp(model_name)
+    py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
     expander = st.beta_expander("Code-Monkey: Prior predictive checks")
@@ -347,7 +410,7 @@ elif choice == "Complete Pooling (model 1)":
     '''
     
     ### code ###
-    py_sample = ct.py_sample(model_name)
+    py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
     expander = st.beta_expander("Code-Monkey: Sample posterior")
@@ -379,7 +442,7 @@ elif choice == "Complete Pooling (model 1)":
         st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
     ### code ###
-    py_trace = ct.py_trace()
+    py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
     expander = st.beta_expander("Code-Monkey: Trace-plot")
@@ -406,7 +469,7 @@ elif choice == "Complete Pooling (model 1)":
     st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     ### code ###
-    py_summary = ct.py_summary()
+    py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
     expander = st.beta_expander("Code-Monkey: Summary")
@@ -463,7 +526,7 @@ elif choice == "Complete Pooling (model 1)":
         st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
 
     ### code ###
-    py_pp2 = ct.py_post_pred(model_name)
+    py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
     expander = st.beta_expander("Code-Monkey: Posterior predictive")
@@ -515,7 +578,7 @@ elif choice == "Complete Pooling (model 1)":
     R_hdi = ct.R_hdi_data_pool(model_name, R_type, data_type, R_function, hdi_type)
     
     if hdi_type == "fixed": 
-        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+        py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
     elif hdi_type == "full": 
         py_hdi = ct.py_hdi_data_full(hdi_type)
     
@@ -552,7 +615,7 @@ elif choice == "Complete Pooling (model 1)":
         st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
     ### code ###
-    py_hdi_param = ct.py_hdi_param()
+    py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
     expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
@@ -572,6 +635,7 @@ elif choice == "Multilevel (model 2)":
     model_family = "gaussian" 
     prior_name = "prior_multilevel" # should be in args
     data_type = "train"
+    idata_name = "multilevel_idata"
     
     r'''
     # Candidate model 1 (Complete Pooling)
@@ -710,7 +774,7 @@ elif choice == "Multilevel (model 2)":
         st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
         
     ### code ###
-    py_pp = ct.py_pp(model_name)
+    py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
     expander = st.beta_expander("Code-Monkey: Prior predictive checks")
@@ -732,7 +796,7 @@ elif choice == "Multilevel (model 2)":
     '''
     
     ### code ###
-    py_sample = ct.py_sample(model_name)
+    py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
     expander = st.beta_expander("Code-Monkey: Sample posterior")
@@ -764,7 +828,7 @@ elif choice == "Multilevel (model 2)":
         st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
     ### code ###
-    py_trace = ct.py_trace()
+    py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
     expander = st.beta_expander("Code-Monkey: Trace-plot")
@@ -791,7 +855,7 @@ elif choice == "Multilevel (model 2)":
     st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     ### code ###
-    py_summary = ct.py_summary()
+    py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
     expander = st.beta_expander("Code-Monkey: Summary")
@@ -848,7 +912,7 @@ elif choice == "Multilevel (model 2)":
         st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
         
     ### code ###
-    py_pp2 = ct.py_post_pred(model_name)
+    py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
     expander = st.beta_expander("Code-Monkey: Posterior predictive")
@@ -900,10 +964,10 @@ elif choice == "Multilevel (model 2)":
     R_function, R_type = translation_code.get(selection_hdi2)
     
     if hdi_type == "fixed": 
-        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+        py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
         R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
     expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
@@ -939,7 +1003,7 @@ elif choice == "Multilevel (model 2)":
         st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
     ### code ###
-    py_hdi_param = ct.py_hdi_param()
+    py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
     expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
@@ -959,6 +1023,7 @@ elif choice == "Student-t (model 3)":
     model_family = "gaussian" 
     prior_name = "prior_student" # should be in args
     data_type = "train"
+    idata_name = "student_idata"
     
     r'''
     # Candidate model 1 (Complete Pooling)
@@ -1097,7 +1162,7 @@ elif choice == "Student-t (model 3)":
         st.image(f"plots_R/{model_context}_{prior_pp_pool}_prior_pred.png")
         
     ### code ###
-    py_pp = ct.py_pp(model_name)
+    py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
     expander = st.beta_expander("Code-Monkey: Prior predictive checks")
@@ -1119,7 +1184,7 @@ elif choice == "Student-t (model 3)":
     '''
     
     ### code ###
-    py_sample = ct.py_sample(model_name)
+    py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
     expander = st.beta_expander("Code-Monkey: Sample posterior")
@@ -1151,7 +1216,7 @@ elif choice == "Student-t (model 3)":
         st.image(f"plots_R/{model_context}_{prior_trace_pool}_plot_trace.png")
     
     ### code ###
-    py_trace = ct.py_trace()
+    py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
     expander = st.beta_expander("Code-Monkey: Trace-plot")
@@ -1178,7 +1243,7 @@ elif choice == "Student-t (model 3)":
     st.image(f"plots_python/{model_context}_{prior_summary}_summary.png")
     
     ### code ###
-    py_summary = ct.py_summary()
+    py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
     expander = st.beta_expander("Code-Monkey: Summary")
@@ -1233,9 +1298,9 @@ elif choice == "Student-t (model 3)":
         
     with col2_pp2_pool:
         st.image(f"plots_R/{model_context}_{prior_pp2_pool}_posterior_pred.png")
-        
+    
     ### code ###
-    py_pp2 = ct.py_post_pred(model_name)
+    py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
     expander = st.beta_expander("Code-Monkey: Posterior predictive")
@@ -1287,10 +1352,10 @@ elif choice == "Student-t (model 3)":
     R_function, R_type = translation_code.get(selection_hdi2)
     
     if hdi_type == "fixed": 
-        py_hdi = ct.py_hdi_data_fixed(hdi_type)
+        py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
         R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
     expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
@@ -1326,7 +1391,7 @@ elif choice == "Student-t (model 3)":
         st.image(f"plots_R/{model_context}_{prior_param}_HDI_param.png")
 
     ### code ###
-    py_hdi_param = ct.py_hdi_param()
+    py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
     expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
@@ -1340,6 +1405,7 @@ elif choice == "Student-t (model 3)":
 elif choice == "Model Comparison":
     
     prior_context = "generic"
+    data_type = "train"
     
     '''
     # Model comparison
@@ -1393,6 +1459,7 @@ elif choice == "Model Comparison":
     
     '''
     
+    ### plot ### 
     selection_pp = st.radio(
         "Choose model type to display posterior predictive checks for ", 
         ("Pooled", "Multilevel", "Student-t"),
@@ -1408,6 +1475,21 @@ elif choice == "Model Comparison":
     with col2_pp: 
         st.image(f"plots_R/{model_pp}_{prior_context}_posterior_pred.png")
     
+    
+    ### code ###
+    model_name = translation_mod_name.get(selection_pp)
+    idata_name = translation_idata.get(selection_pp)
+    py_trace = ct.py_trace(idata_name)
+    R_trace = ct.R_trace(model_name)
+    
+    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_trace)
+        with col2:
+            st.code(R_trace) 
+    
     '''
     # Compare HDI
     
@@ -1419,6 +1501,7 @@ elif choice == "Model Comparison":
     
     '''
     
+    ### plot ###
     col1_hdi1, col2_hdi1 = st.beta_columns(2)
     
     with col1_hdi1:
@@ -1445,12 +1528,30 @@ elif choice == "Model Comparison":
     with col2_hdi2: 
         st.image(f"plots_R/{model_hdi}_{prior_context}_HDI_{uncertainty}.png")
     
+    ### code ###
+    model_name = translation_mod_name.get(selection_hdi1)
+    R_function, R_type = translation_code.get(selection_hdi2)
+    idata_name = translation_idata.get(selection_hdi1)
+    
+    if uncertainty == "fixed": 
+        py_hdi = ct.py_hdi_data_fixed(uncertainty, idata_name)
+        R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, uncertainty)
+    elif uncertainty == "full": 
+        py_hdi = ct.py_hdi_data_full(uncertainty, idata_name)
+        R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
+    
+    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_hdi)
+        with col2:
+            st.code(R_hdi) 
+    
     '''
     # Information criterion (loo)
     
-    We have now done some eye-balling and will now check what
-    
-    loo has to say. 
+    We have now done some eye-balling and will now check what loo has to say. 
     
     '''
     
@@ -1468,6 +1569,10 @@ elif choice == "Model Comparison":
     '''
 
 elif choice == "Prediction": 
+    
+    model_name = "m_multilevel"
+    idata_name = "multilevel_idata"
+    data_type = "test"
     
     '''
     # Prediction on unseen data
@@ -1488,6 +1593,18 @@ elif choice == "Prediction":
     
     '''
     
+    ### code ###
+    py_prep = ct.py_pred_prep(model_name, idata_name)
+    R_prep = ct.R_pred_prep()
+    
+    expander = st.beta_expander("Code-Monkey: preprocessing & sampling")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_prep)
+        with col2:
+            st.code(R_prep) 
+    
     '''
     
     # HDI prediction interval 
@@ -1496,6 +1613,7 @@ elif choice == "Prediction":
     
     '''
     
+    ### plot ###
     col1, col2 = st.beta_columns(2)
     
     with col1: 
@@ -1504,5 +1622,40 @@ elif choice == "Prediction":
     with col2: 
         st.image("plots_R/multilevel_generic_HDI_predictions.png")
     
+    ### code ###
+    # manually set for now. 
+    uncertainty = "full"
+    R_type = ".prediction" 
+    R_function = "add_predicted_draws" 
+    
+    py_pred = ct.py_hdi_data_full(uncertainty, idata_name)
+    R_pred = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
+    
+    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_pred)
+        with col2:
+            st.code(R_pred) 
+    
+    
+    '''
+    Should have some overthinking box with both (1) 
+    shared variables and (2) that prediction is basically
+    the same that we have been doing the whole time..
+    New data does not really alter the process. We still
+    just use our estimated parameters and our likelihood
+    function to generate predictions (just as with the 
+    posterior predictive). 
+    '''
+    
 elif choice == "References & Inspiration":
-    pass
+    
+    '''
+    # python/pyMC3: 
+    '''
+    
+    '''
+    # R/brms: 
+    '''

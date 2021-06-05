@@ -156,19 +156,19 @@ pm.model_to_graphviz({model_name})
     return py_code
 
 # prior predictive
-def py_pp(model_name): # m_pooled, m_multilevel, m_student
+def py_pp(model_name, idata_name): # m_pooled, m_multilevel, m_student
     py_code = f'''
 ### python: prior predictive checks ###
 # sample prior predictive 
 with {model_name}:
     prior = pm.sample_prior_predictive(700) 
-    m_idata = az.from_pymc3(prior=prior)
+    {idata_name} = az.from_pymc3(prior=prior)
     
 # set up plot 
 fig, ax = plt.subplots()
 
 # if you just want the figure then this is enough
-az.plot_ppc(m_idata, # the idata
+az.plot_ppc({idata_name}, # the idata
             group = "prior", # plot the prior
             num_pp_samples = 100, # how many draws
             ax = ax) # add to matplotlib ax. 
@@ -180,7 +180,7 @@ plt.plot();
     return py_code
 
 # sample posterior
-def py_sample(model_name):
+def py_sample(model_name, idata_name):
     py_code = f'''
 ### python: sample posterior ###
 with {model_name}: 
@@ -192,47 +192,47 @@ with {model_name}:
         target_accept = .99,
         max_treedepth = 20,
         random_seed = RANDOM_SEED)
-m_idata.extend(idata_posterior) # add to idata
+{idata_name}.extend(idata_posterior) # add to idata
 '''
     return py_code
     
 # trace
-def py_trace():
+def py_trace(idata_name):
     py_code = f'''
 ### python: plot trace ###
-az.plot_trace(m_idata)
+az.plot_trace({idata_name})
 '''
     return py_code
 
 # summary
-def py_summary(): 
+def py_summary(idata_name): 
     py_code = f'''
 ### python: plot summary ###
-az.summary(m_idata)
+az.summary({idata_name})
 '''
     return py_code
 
 # posterior predictive
-def py_post_pred(model_name):
+def py_post_pred(model_name, idata_name):
     py_code = f'''
 ### python: sample posterior predictive ###
 with {model_name}:
     post_pred = pm.sample_posterior_predictive(
-        m_idata,
+        {idata_name},
         var_names = [
             "y_pred",
             "alpha",
             "beta"])
     idata_postpred = az.from_pymc3(
         posterior_predictive=post_pred)
-m_idata.extend(idata_postpred) # add to idata
+{idata_name}.extend(idata_postpred) # add to idata
 
 ### plot posterior predictive ###
 # set up matplotlib plot
 fig, ax = plt.subplots()
 
 # if you just want the figure then this is enough
-az.plot_ppc(m_idata, 
+az.plot_ppc({idata_name}, 
             num_pp_samples = 100,
             ax = ax)
 
@@ -243,11 +243,11 @@ plt.plot();
     return py_code
 
 # hdi
-def py_hdi_data_fixed(hdi_type): 
+def py_hdi_data_fixed(hdi_type, idata_name): 
     py_code = f'''
 ### plot hdi (fixed effects) ###
 # take posterior predictive out of idata for convenience
-ppc = m_idata.posterior_predictive
+ppc = {idata_name}.posterior_predictive
 
 # take out predictions (mean over chains). 
 y_pred = ppc["y_pred"].mean(axis = 0).values
@@ -305,11 +305,11 @@ plt.plot();
 '''
     return py_code 
 
-def py_hdi_data_full(hdi_type): 
+def py_hdi_data_full(hdi_type, idata_name): 
     py_code = f'''
 ### plot hdi (full uncertainty) ###
 # take posterior predictive out of idata for convenience
-ppc = m_idata.posterior_predictive
+ppc = {idata_name}.posterior_predictive
 
 # take out predictions (mean over chains). 
 y_pred = ppc["y_pred"].mean(axis = 0).values
@@ -367,7 +367,7 @@ plt.plot();
 '''
     return py_code
 
-def py_hdi_param(): 
+def py_hdi_param(idata_name): 
     py_code = f'''
 ### HDI for parameters ###
 # set up matplotlib plot
@@ -375,7 +375,7 @@ fig, ax = plt.subplots(figsize = (10, 7))
 
 # if you just want the figure this is enough
 az.plot_forest(
-        m_idata,
+        {idata_name},
         var_names=["alpha", "beta", "sigma"], # the parameters we care about
         combined=True, # combine chains 
         kind='ridgeplot', # instead of default which does not show distribution
@@ -392,6 +392,81 @@ plt.plot();
 '''
     return py_code
 
+def py_pred_prep(model_name, idata_name): 
+    py_code = f'''
+### python: preprocessing & sampling ###
+# load test data
+test = pd.read_csv("../data/test.csv")
+
+# get unique values for shared. 
+t_unique_test = np.unique(test.t.values)
+idx_unique_test = np.unique(test.idx.values)
+
+# get n unique for shapes. 
+n_time_test = len(t_unique_test)
+n_idx_test = len(idx_unique_test)
+
+# new coords as well
+prediction_coords = {{
+    'idx': idx_unique_test,
+    't': t_unique_test
+}}
+
+# test data in correct format. 
+t_test = test.t.values.reshape((n_idx_test, n_time_test))
+y_test = test.y.values.reshape((n_idx_test, n_time_test))
+idx_test = test.idx.values.reshape((n_idx_test, n_time_test))
+
+with {model_name}:
+    pm.set_data({{"t_shared": t_test, "idx_shared": idx_test}})
+    stl_pred = pm.fast_sample_posterior_predictive(
+        {idata_name}.posterior, random_seed=32
+    )
+    az.from_pymc3_predictions(
+        stl_pred, idata_orig={idata_name}, inplace=True, coords=prediction_coords
+    )
+    '''
+    return py_code
+
+def py_sim(): 
+    py_code = f'''
+### python: simulate data ###
+np.random.seed(17) # reproducibility
+n_id = 15 # 15 people (idx)
+n_time = 15 # 15 time-steps (t)
+idx = np.repeat(range(n_id), n_time)
+a_real = np.random.normal(loc = 1, scale = 0.5, size = n_id) # intercept
+b_real = np.random.normal(loc = 0.3, scale = 0.2, size = n_id) # beta
+eps_real = np.random.normal(loc = 0, scale = 0.5, size = len(idx)) # error
+t = np.resize(np.arange(n_time), n_time*n_id)
+y = a_real[idx] + b_real[idx] * t + eps_real # outcome
+
+# data frame 
+d = pd.DataFrame({{
+    'idx': idx, 
+    't': t,
+    'y': y}})
+    
+# train/test split
+sort_val = np.sort(np.unique(d["t"].values))
+min_val = min(sort_val)
+length = int(round(len(sort_val)*0.6, 0)) # 60% in train. 
+train = d[d["t"] <= min_val+length] # train data
+test = d[d["t"] > min_val+length] # test data
+
+# save data
+train.to_csv("../data/train.csv", index = False)
+test.to_csv("../data/test.csv", index = False)
+    '''
+    return py_code
+
+def py_EDA(): 
+    py_code = f'''
+### python: quick EDA ###
+lm = sns.lmplot(x = "t", y = "y", hue = "idx", data = train)
+lm.fig.suptitle("Python: Quick EDA") # add title
+    '''
+    return py_code 
 
 ### R functions ###
 # r reproducibility
@@ -638,4 +713,21 @@ prob_outer = 0.99, # 99%
 point_est = "mean") + # or median?
 ggtitle("R/brms: HDI intervals for parameters")
 '''
+    return R_code
+
+def R_pred_prep(): 
+    R_code = f'''
+### R: read test data ###
+test <- read_csv("../data/test.csv") %>%
+    mutate(idx = as_factor(idx))
+    '''
+    return R_code
+
+def R_EDA(): 
+    R_code = f'''
+ggplot(data = train, aes(x = t, y = y, color = idx)) +
+    geom_point() + 
+    geom_smooth(method = "lm", aes(fill = idx), alpha = 0.2) + 
+    ggtitle("R: Quick EDA")
+    '''
     return R_code

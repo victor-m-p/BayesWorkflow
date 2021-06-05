@@ -7,11 +7,12 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import fun_helper as fh
 
 ## simulate data ##
 np.random.seed(17) # reproducibility
-n_id = 15 # 8 people
-n_time = 15 # 15 time-steps 
+n_id = 15 # 15 people (idx)
+n_time = 15 # 15 time-steps (t)
 idx = np.repeat(range(n_id), n_time)
 a_real = np.random.normal(loc = 1, scale = 0.5, size = n_id) # intercept
 b_real = np.random.normal(loc = 0.3, scale = 0.2, size = n_id) # beta
@@ -29,10 +30,10 @@ d = pd.DataFrame({
 train, test = fh.train_test(d, "t", 0.6)
 
 ## quick EDA (title?)
-sns.lmplot(x = "t", y = "y", hue = "idx", data = train)
+lm = sns.lmplot(x = "t", y = "y", hue = "idx", data = train)
+lm.fig.suptitle("Python: Quick EDA")
 figure = plt.gcf()
 figure.set_size_inches(10, 7)
-figure.title("Python: Quick EDA")
 plt.savefig("../plots_python/EDA.jpeg", dpi=300, transparent=False)
 
 ## save data csv (for R compatibility)

@@ -59,8 +59,7 @@ m_idata = az.from_netcdf("../models_python/idata_multilevel_generic.nc")
 
 ### Predictions ###
 # load test data
-with open('../data/test.pickle', 'rb') as f:
-    test = pickle.load(f)
+test = pd.read_csv("../data/test.csv")
 
 # get unique values for shared. 
 t_unique_test = np.unique(test.t.values)
