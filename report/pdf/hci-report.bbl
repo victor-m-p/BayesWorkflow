@@ -132,6 +132,188 @@
       \field{title}{Bayesian workflow}
       \field{year}{2020}
     \endentry
+    \entry{hassenzahl2010experience}{article}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=db17d37ecdd86876546d10459c33e1a4}{%
+           family={Hassenzahl},
+           familyi={H\bibinitperiod},
+           given={Marc},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Morgan \& Claypool Publishers}%
+      }
+      \strng{namehash}{db17d37ecdd86876546d10459c33e1a4}
+      \strng{fullhash}{db17d37ecdd86876546d10459c33e1a4}
+      \strng{bibnamehash}{db17d37ecdd86876546d10459c33e1a4}
+      \strng{authorbibnamehash}{db17d37ecdd86876546d10459c33e1a4}
+      \strng{authornamehash}{db17d37ecdd86876546d10459c33e1a4}
+      \strng{authorfullhash}{db17d37ecdd86876546d10459c33e1a4}
+      \field{sortinit}{H}
+      \field{sortinithash}{6db6145dae8dc9e1271a8d556090b50a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Synthesis lectures on human-centered informatics}
+      \field{number}{1}
+      \field{title}{Experience design: Technology for all the right reasons}
+      \field{volume}{3}
+      \field{year}{2010}
+      \field{pages}{1\bibrangedash 95}
+      \range{pages}{95}
+    \endentry
+    \entry{janlert2017meaning}{article}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=472f676195f1d0bcc78f07d6a450aec9}{%
+           family={Janlert},
+           familyi={J\bibinitperiod},
+           given={Lars-Erik},
+           giveni={L\bibinithyphendelim E\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2518bc78bb3553f1eb83cc3e1f497259}{%
+           family={Stolterman},
+           familyi={S\bibinitperiod},
+           given={Erik},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Taylor \& Francis}%
+      }
+      \strng{namehash}{591a43d169dcbd8343a92760de8cc334}
+      \strng{fullhash}{591a43d169dcbd8343a92760de8cc334}
+      \strng{bibnamehash}{591a43d169dcbd8343a92760de8cc334}
+      \strng{authorbibnamehash}{591a43d169dcbd8343a92760de8cc334}
+      \strng{authornamehash}{591a43d169dcbd8343a92760de8cc334}
+      \strng{authorfullhash}{591a43d169dcbd8343a92760de8cc334}
+      \field{sortinit}{J}
+      \field{sortinithash}{c45040a764d616897e7f5b30174d7b92}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Human--Computer Interaction}
+      \field{number}{3}
+      \field{title}{The meaning of interactivity—some proposals for definitions and measures}
+      \field{volume}{32}
+      \field{year}{2017}
+      \field{pages}{103\bibrangedash 138}
+      \range{pages}{36}
+    \endentry
+    \entry{mills1992macintosh}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=7793edaf78c52d18366f15516913bf60}{%
+           family={Mills},
+           familyi={M\bibinitperiod},
+           given={Don},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=159bad7fa0c0901f438539e938ec04e2}{%
+           family={Bonn},
+           familyi={B\bibinitperiod},
+           given={England\bibnamedelima Amsterdam},
+           giveni={E\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9d1c88576027357dde386c14e628e114}{%
+           family={San\bibnamedelima Juan},
+           familyi={S\bibinitperiod\bibinitdelim J\bibinitperiod},
+           given={Sydney\bibnamedelimb Singapore\bibnamedelimb Tokyo\bibnamedelima Madrid},
+           giveni={S\bibinitperiod\bibinitdelim S\bibinitperiod\bibinitdelim T\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{967efa8693b7ad0524c34473c3776a15}
+      \strng{fullhash}{3c3f39779047c5fb057af762b2cf6c28}
+      \strng{bibnamehash}{3c3f39779047c5fb057af762b2cf6c28}
+      \strng{authorbibnamehash}{3c3f39779047c5fb057af762b2cf6c28}
+      \strng{authornamehash}{967efa8693b7ad0524c34473c3776a15}
+      \strng{authorfullhash}{3c3f39779047c5fb057af762b2cf6c28}
+      \field{sortinit}{M}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Macintosh Human Interface Guidelines}
+      \field{year}{1992}
+    \endentry
+    \entry{norman1999}{article}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=776ca57a7d9c38e420d6e131f31cb12f}{%
+           family={Norman},
+           familyi={N\bibinitperiod},
+           given={Donald},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \strng{fullhash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \strng{bibnamehash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \strng{authorbibnamehash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \strng{authornamehash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \strng{authorfullhash}{776ca57a7d9c38e420d6e131f31cb12f}
+      \field{sortinit}{N}
+      \field{sortinithash}{98cf339a479c0454fe09153a08675a15}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Interactions}
+      \field{month}{05}
+      \field{title}{Affordance, conventions, and design}
+      \field{volume}{6}
+      \field{year}{1999}
+      \field{pages}{38\bibrangedash 42}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1145/301153.301168
+      \endverb
+    \endentry
+    \entry{rogers2011interaction}{book}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=b63a3a4f037d8449395335bf9703194a}{%
+           family={Rogers},
+           familyi={R\bibinitperiod},
+           given={Yvonne},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=3c13b944e2b68ee928fb824b303ed11f}{%
+           family={Sharp},
+           familyi={S\bibinitperiod},
+           given={Helen},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9a63e77ace08be741775097b6dff877d}{%
+           family={Preece},
+           familyi={P\bibinitperiod},
+           given={Jenny},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{635188f439ba25dff4d271a20120f45f}
+      \strng{fullhash}{b2a06fc8919bbda15f588b084228b06a}
+      \strng{bibnamehash}{b2a06fc8919bbda15f588b084228b06a}
+      \strng{authorbibnamehash}{b2a06fc8919bbda15f588b084228b06a}
+      \strng{authornamehash}{635188f439ba25dff4d271a20120f45f}
+      \strng{authorfullhash}{b2a06fc8919bbda15f588b084228b06a}
+      \field{sortinit}{R}
+      \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Interaction design: beyond human-computer interaction}
+      \field{year}{2011}
+    \endentry
     \entry{Salvatier2016}{article}{}
       \name{author}{3}{}{%
         {{un=0,uniquepart=base,hash=05c761e203cc6c586605836fa4676d10}{%
@@ -185,6 +367,88 @@
       \verb{url}
       \verb https://doi.org/10.7717/peerj-cs.55
       \endverb
+    \endentry
+    \entry{sutcliffe2016}{article}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=f470b9e6b42c259d9ab2926c870620a8}{%
+           family={Sutcliffe},
+           familyi={S\bibinitperiod},
+           given={Alistair},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=345186a00c8755f8ed39e20576ef77e1}{%
+           family={Hart},
+           familyi={H\bibinitperiod},
+           given={Jennefer},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{61f8271bb3176dd3a5e875444d2352e0}
+      \strng{fullhash}{61f8271bb3176dd3a5e875444d2352e0}
+      \strng{bibnamehash}{61f8271bb3176dd3a5e875444d2352e0}
+      \strng{authorbibnamehash}{61f8271bb3176dd3a5e875444d2352e0}
+      \strng{authornamehash}{61f8271bb3176dd3a5e875444d2352e0}
+      \strng{authorfullhash}{61f8271bb3176dd3a5e875444d2352e0}
+      \field{sortinit}{S}
+      \field{sortinithash}{c319cff79d99c853d775f88277d4e45f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{International Journal of Human-Computer Interaction}
+      \field{month}{09}
+      \field{title}{Analysing the Role of Interactivity in User Experience}
+      \field{volume}{33}
+      \field{year}{2016}
+      \verb{doi}
+      \verb 10.1080/10447318.2016.1239797
+      \endverb
+    \endentry
+    \entry{tractinsky2000beautiful}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=3966cf892bd59ce684704bb3be1b9c9c}{%
+           family={Tractinsky},
+           familyi={T\bibinitperiod},
+           given={Noam},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c710f23c25ebc6249105a4aea48a6066}{%
+           family={Katz},
+           familyi={K\bibinitperiod},
+           given={Adi\bibnamedelima S},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9ebbe52e9a9af822e775c3f6da506643}{%
+           family={Ikar},
+           familyi={I\bibinitperiod},
+           given={Dror},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{26e8d46626b301e99bf108aa2d07caae}
+      \strng{fullhash}{54a8e3de8293941da89268b848c6d360}
+      \strng{bibnamehash}{54a8e3de8293941da89268b848c6d360}
+      \strng{authorbibnamehash}{54a8e3de8293941da89268b848c6d360}
+      \strng{authornamehash}{26e8d46626b301e99bf108aa2d07caae}
+      \strng{authorfullhash}{54a8e3de8293941da89268b848c6d360}
+      \field{sortinit}{T}
+      \field{sortinithash}{51f9faf24c60c62ca764a77f78cf5666}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Interacting with computers}
+      \field{number}{2}
+      \field{title}{What is beautiful is usable}
+      \field{volume}{13}
+      \field{year}{2000}
+      \field{pages}{127\bibrangedash 145}
+      \range{pages}{19}
     \endentry
   \enddatalist
 \endrefsection
