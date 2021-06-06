@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  6 JUN 2021 22:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  6 JUN 2021 23:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -641,22 +641,22 @@ This may cause the page layout to be inconsistent, however.
 
 [2] [3] [4] [5] [6] [7] [8] [9] [10] [11]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 320.
+(Font)              <12> on input line 330.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 320.
+(Font)              <8> on input line 330.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 320.
- [12] [13]
+(Font)              <6> on input line 330.
+ [12] [13] [14]
 (/home/victormp/BayesWorkflow/report/pdf/hci-report.aux)
 Package rerunfilecheck Info: File `hci-report.out' has not changed.
 (rerunfilecheck)             Checksum: 35FED6E43014811110FFE4CEEFD52575;433.
 Package logreq Info: Writing requests to 'hci-report.run.xml'.
  ) 
 Here is how much of TeX's memory you used:
- 13993 strings out of 479383
- 247913 string characters out of 5875830
- 1056995 words of memory out of 5000000
- 30895 multiletter control sequences out of 15000+600000
+ 13996 strings out of 479383
+ 247942 string characters out of 5875830
+ 1057004 words of memory out of 5000000
+ 30897 multiletter control sequences out of 15000+600000
  423982 words of font info for 45 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  66i,11n,73p,779b,4803s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -664,11 +664,11 @@ Here is how much of TeX's memory you used:
 st/fonts/type1/public/tex-gyre/qtmb.pfb></usr/share/texmf-dist/fonts/type1/publ
 ic/tex-gyre/qtmr.pfb></usr/share/texmf-dist/fonts/type1/public/tex-gyre/qtmri.p
 fb>
-Output written on /home/victormp/BayesWorkflow/report/pdf/hci-report.pdf (13 pa
-ges, 111169 bytes).
+Output written on /home/victormp/BayesWorkflow/report/pdf/hci-report.pdf (14 pa
+ges, 111728 bytes).
 PDF statistics:
- 165 PDF objects out of 1000 (max. 8388607)
- 145 compressed objects within 2 object streams
- 34 named destinations out of 1000 (max. 500000)
+ 172 PDF objects out of 1000 (max. 8388607)
+ 151 compressed objects within 2 object streams
+ 35 named destinations out of 1000 (max. 500000)
  73 words of extra memory for PDF output out of 10000 (max. 10000000)
 

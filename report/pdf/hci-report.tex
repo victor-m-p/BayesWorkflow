@@ -67,8 +67,8 @@ usability.
 This is where Streamlit becomes relevant. Streamlit is a Python package which allow users
 to launch interactive web applications to showcase analyses. It thus fulfills the same function
 that Shiny fulfills in the coding language R. Streamlit is developing rapidly however,
-and already appears to support more diverse options than Shiny. This is the reason why Streamlit
-was used rather than Shiny to develop this app.
+and already appears to support more diverse options than Shiny. I chose to use
+streamlit for this reason.
 
 \section{Target Group}
 Obtaining knowledge and understanding of the target group for a product is among the
@@ -129,8 +129,8 @@ principles outlined in \textcite{mills1992macintosh}.
 
 Firstly, the app is designed with a philosophy of \emph{avoiding clutter} in mind.
 The importance of this is emphasized througout \textcite{mills1992macintosh}.
-I have hidden everything that I think is not necessary for navigating the app and
-using it in line with \emph{UC2} in expandable sections. I wanted to avoid cluttering the
+I have hidden everything that I think is not necessary for navigating the app
+in in expandable sections. I wanted to avoid cluttering the
 app with text specifically since this can feel intimidating and could scare users away.
 If users want to use the app in line with \emph{UC1} they will have to interact with the optional
 elements and decide to see the code-chunks and the optional explanatory sections.
@@ -154,8 +154,8 @@ about how R (brms) differ from Python (pyMC3) while “Concept-Guru” sections 
 more generally. The order of presentation is also consitent throughout.
 Each subsection starts with a header and is then followed by a brief text.
 Below this are plots or outputs from Python and R, and only after this will the user find
-the optional sections. These are also consistently in order, such that “Code-Monkey” comes first,
-“Language-Learner” second and “Concept-Guru” lastly. Additionally, each expandable section
+the optional sections. These are also presented in consistent order, such that “Code-Monkey” comes first,
+“Language-Learner” second and “Concept-Guru” comes last. Additionally, each expandable section
 has a unique icon associated with it. This has been implemented to make it easier for the
 user to navigate the page. \textcite[223-255]{mills1992macintosh} focus
 heavily on the importance of icons. One highlighted advantage of icons is that users typically
@@ -173,12 +173,15 @@ than with the standard white theme. I have also tried to make the formatting bot
 streamlit, and for the R and Python plots pretty. Considerations around making
 the app engaging
 and pretty, is another reason why I show plots by default and hide most text and code by default.
-I hope that this makes the app pleasurable to engage with,
+I hope that users will find that the app and the content on it is pretty,
 something that is understood to be an important driver
 in creating an enjoyable experience \autocite[65]{hassenzahl2010experience}.
 
 \section{Interaction}
-There are three basic types of interaction implemented in the app at this point.
+There are three basic types of interaction implemented in the app
+at this point. They provide a relatively high level of
+interactability, with adaptable outputs that are contingent on
+user selection \autocite{janlert2017meaning}.
 
 \vspace{5mm}
 
@@ -190,6 +193,10 @@ In some cases, the user can choose to plot the outputs of analysis between diffe
 e.g. with different random effects structure and likelihood functions.
 When the user makes a selection the plots and figures will change,
 and the code in the “Code-Monkey” sections will also change in the cases where the analyses differ.
+As such, the display is contingent on the actions of the user,
+and there is an element of adaptability imbedded in the
+app \autocite{janlert2017meaning}.
+
 
 \vspace{5mm}
 
@@ -206,9 +213,8 @@ product engages the user in interaction has been called \emph{interactiveness}
 \autocite{janlert2017meaning}. This is implemented as quizzes that the app
 presents to users and the feedback that the app provides based on user answers.
 These quizzes are not shown on the page by default but hide inside the expandable boxes.
-This is again to ensure that the app will not be too cluttered and can be glanced
-through quickly (for UC2). Based on the answers that users give, they will receive
-feedback on whether they have the right intuitions (dialogue)?
+Again, this was done to ensure that the app will not be too cluttered and can be glanced
+through quickly (for \emph{UC2}).
 
 \vspace{5mm}
 
@@ -216,7 +222,7 @@ Streamlit is often used for Data Science applications which run extremely
 fast machine learning analyses or frequentist statistics. The apps are typically
 interactive in the sense that when the user makes a choice some corresponding code is run,
 which generates an output. This means that the possibility space is almost
-infinite, and as such these apps are high on interactability
+infinite, and as such these apps are high on interactiveness
 \autocite{janlert2017meaning}. This is not the case in the prototype app that
 I am presenting. In my case, I am not running any analysis code live because full
 Bayesian sampling is prohibitively slow. Thus, I have made an extensive code base
@@ -237,8 +243,10 @@ and the best way for users to learn that is to code themselves.
 Although I have focused extensively on the user experience (UX) on the app,
 the most demanding work has been to develop good analyses and managing an extensive
 code base which must be reproducible. I will not go too deep into that here,
-as you can check the Github (link). There are bash-scripts for both R and Python
-which eun all the necessary Python and R scripts to execute the whole pipeline
+as you can check the
+\href{https://github.com/victor-m-p/BayesWorkflow}{Github}.
+There are bash-scripts for both R and Python
+which execute all the necessary scripts to run the whole pipeline
 and reproduce all analysis on the streamlit app. This means that if users have
 the necessary packages in their environment, they can run all R and Python analysis
 with two lines of code from their terminal. This is of course unnecessary for most users,
@@ -273,16 +281,17 @@ This is what is currently supported, and can be characterized as a
 Because the app attempts to teach the user code-practices it would make sense to
 have a system which corresponds to what is used on platforms such as DataCamp.
 On DataCamp users type in code, which is then evaluated, and the user received feedback
-based on the code. The tricky part is that the code has to be compiled,
-and the app has to provide feedback on some test of the code. This has to be
-done part because the same can be written in infinitely many ways,
-so it is not possible simply to take the input as a string and evaluate that.
+based on what the code evaluates to. This would correspond to a "conversing"
+interaction type \autocite[81]{rogers2011interaction},
+and would be more sophisticated than what is currently in
+place. The tricky part is that the code has to be
+compiled,
+and not just treated as a string of text. Treating the input as a string
+is infeasible, because code which does the same can be expressed in infinitely many ways,
 There also has to be a nice interface where the user can type in the code that
 they want to execute. I think that both would be tricky to implement, especially the
 first part. Another reason to not support this functionality is that I would ideally
-like users to code along from their own instance of R and/or Python. This would
-correspond to the the "conversing" interaction type
-\autocite[81]{rogers2011interaction}
+like users to code along from their own instance of R and/or Python.
 
 \vspace{5mm}
 
@@ -291,20 +300,21 @@ that everything is reproducible, and that everything is well documented. Hopeful
 the app will be useful to some of the students, and perhaps some outsiders will even
 find their way to the app. Additionally, sharing the app should give me the chance
 to receive feedback on whether the app is usable. Both whether the content is good
-and whether the format is intuitive. I intend to just gather verbal feedback,
+and whether the format is intuitive. I intend to gather verbal feedback,
 although I know that this is not the ideal testing conditions.
-In general it would be nice to evaluate User Experience (UX) in a more
-scientific way, using A-B testing and statistical methods. One good example
-of such is \textcite{sutcliffe2016}.
-It would be useful to gather physiological data (e.g. eye-tracking data)
-or simply footage of users interacting with the app (e.g. screencast and mouse-tracking).
-What I am really interested in is how people interact with the app
-(e.g. \emph{UC1}, \emph{UC2} or something else).
-It would be useful to observe whether people interact
-with the app, expand the boxes, try different priors, etc.
-In the case of this app I think that \textcite{norman1999} is correct
-in arguing that the way to find out how users are engaging with the app
-is simply to watch them.
+
+\vspace{5mm}
+
+There are at least two ways of gathering feedback that could be more useful
+than verbal feedback. Firstly, one could attempt a quantitative evaluation,
+e.g. based on A-B testing, eye-tracking data and statistical analysis.
+A good example of this approach can be found in \textcite{sutcliffe2016}.
+Perhaps more useful approach in our case would be to simply observe users who interact
+with the app. \textcite{norman1999} has argued that the best way of finding
+out how users engage with products is to observe them engage with products.
+I think this is true in this case, where one of my main interests is simply
+\emph{how} users engage with the app (e.g. \emph{UC1}, \emph{UC2} or something
+else).
 
 \section{Conclusion}
 This paper has introduced a streamlit app which teaches a Bayesian workflow in R (brms)
