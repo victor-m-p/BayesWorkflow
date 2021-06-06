@@ -95,9 +95,9 @@ if choice == "Introduction":
     
     You will see boxes with the titles *Code-Monkey*, *Language-Learner* and *Concept-Guru*. These let you dive deeper into the material:
     
-    * "Code-Monkey": Display code to reproduce analysis
-    * "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
-    * "Concept-Guru": Conceptual deep-dives
+    * :monkey: "Code-Monkey": Display code to reproduce analysis
+    * :keyboard: "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * :male_mage: "Concept-Guru": Conceptual deep-dives
     
     Some of them will be expanded by default because I think you *should* see them.
     
@@ -308,16 +308,22 @@ elif choice == "Complete Pooling (model 1)":
             '''
             # Shared Variables: 
             
-            In the pyMC3 code (left) we have created something called a shared variable. 
+            In the pyMC3 code (left) we have created something called a shared variable for our x variable, time (t). 
             
             This has to be done if we want to generate predictions based on new data (data that the model was not trained on).
+            
+            We only need to create a shared variable for t here, because it is the only predictor variable in the model. 
             
             pyMC3 relies on theano as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change in a different format. 
             
 
             # Likelihood and mu: 
             
-            write something here...
+            You will notice that in the brms code (right) we specify the same priors as in the pyMC3 code (left) and the same likelihood. 
+            
+            In the pyMC3 code however we have to specify how the distributions are connected manually, whereas brms does this for us based on the formula we provide.
+            
+            As such pyMC3 forces us to understand how the model actually works and is more flexible. This comes with the trade-off of being more difficult (at least initially). 
 
             
             # sigma: 
@@ -340,7 +346,7 @@ elif choice == "Complete Pooling (model 1)":
     
     Something that is really nice in pyMC3 is that we can check whether we specified the model as we intended to. 
     
-    Your model is shown in plate notation, and which I think is less intuitive than the awesome Kruschke diagrams/plots (link). 
+    Our model is shown in plate notation, and which I think is less intuitive than the awesome Kruschke diagrams/plots (link). 
     
     Once we learn to read them however, it is a useful check. 
     
@@ -363,11 +369,9 @@ elif choice == "Complete Pooling (model 1)":
     
     There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
     
-    Our main model is run with what they refer to as a "generic weakly informative prior".
+    By default I will show the code and plots for what they refer to as a "generic weakly informative prior".
     
     Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
     
     '''
     
@@ -402,11 +406,10 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Sample posterior
     
-    We have now verified that the we have specified our model correctly (plate)
-    
-    and let's say that we are happy with our prior predictive checks.
+    We have now verified that the we have specified our model correctly (plate) and let's say that we are happy with our prior predictive checks.
     
     We should now sample the posterior. 
+    
     '''
     
     ### code ###
@@ -424,6 +427,11 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     # Check traces (sampling)
+    
+    The first thing we might want to check now is wheather the sampling/computation was successfull. 
+    
+    I like to generate *trace plots* at this point. There are nice in depth diagnostic plots available in both R and brms if we see issues (link). 
+    
     '''
     
     ### plot ###
@@ -455,6 +463,10 @@ elif choice == "Complete Pooling (model 1)":
             
     '''
     # Summary
+    
+    We can now (optionally) check the summary of the model. We might not be interested in the estimated parameters (yet)
+    
+    but the summary also gives us information about the number of effective samples and R-hat values. 
     
     '''
     
@@ -501,11 +513,7 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Posterior Predictive checks 
     
-    We have now accepted our prior predictive check and verified
-    
-    that computation (sampling) was okay. 
-    
-    We will now look at posterior predictive checks. 
+    If all is well so far we should now generate *posterior predictive checks*.  
     
     '''
     
@@ -537,13 +545,59 @@ elif choice == "Complete Pooling (model 1)":
         with col2:
             st.code(R_pp2) 
     
+    
+    ### Quiz ###
+    expander = st.beta_expander("Concept-Guru: Posterior Predictive Checks")
+    #selection_quiz = st.multiselect(
+    #    "QUIZ: The posterior predictive check indicates our model:", 
+    #    ("reasonably captures patterns in the data (accept model)", "does not reliably capture patterns in the data (reject model)"),
+    #    index = 1)
+    with expander: 
+        
+        '''
+        QUIZ: Based on the posterior predictive check, which do you think is an appropriate response? (choose one)
+        '''
+        
+        option_a = st.checkbox('The model reliably captures the important patterns in the data (accept model)')
+        option_b =  st.checkbox('The model does not reliably capture the important patterns in the data (reject model)')
+        
+        if option_a: 
+        
+            '''
+            
+            I disagree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
+            
+            The posterior has long tails (is not normally distributed) which is not well captured by our model. 
+            
+            We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
+            
+            is improper, or that the model has not been specified with the appropriate random effects structure. 
+            
+            '''
+        
+        if option_b: 
+            '''
+            I agree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
+            
+            The posterior has long tails (is not normally distributed) which is not well captured by our model. 
+            
+            We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
+            
+            is improper, or that the model has not been specified with the appropriate random effects structure. 
+            '''
+    
     '''
     # HDI (vs. data)
     
-    Something about how there are different things we can look at,
+    We can also now run the model forward (i.e. generate predictions from the model). 
     
-    e.g. fixed effects, all uncertainty (three levels actually). 
+    We can compare these model predictions with the data that the model is trained on, to check whether the model has captured the patterns in the data.
     
+    We can do this either for (a) fixed effects only or (b) with the full model uncertainty. 
+    
+    If we generate predictions for fixed effects only, we will get predictions for the *mean* of the population. 
+    
+    If we generate predictions with the full model uncertainty  (incl. sigma) we will get predictions for individuals.
     '''
     
     ### plot ###
@@ -580,7 +634,7 @@ elif choice == "Complete Pooling (model 1)":
     if hdi_type == "fixed": 
         py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
     
     expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
     with expander: 
@@ -593,9 +647,8 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # HDI (parameters)
     
-    The last thing we might want to check is 
+    The last thing we might want to inspect at this point is the estimated distributions (and HDI intervals) for our inferred parameters. 
     
-    how the model has estimated the parameters we care about. 
     
     '''
     
