@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  7 JUN 2021 11:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  7 JUN 2021 13:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -652,10 +652,10 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <14.4> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 33.
- [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-(/home/victormp/BayesWorkflow/report/hci-report.toc)
+(/home/victormp/BayesWorkflow/report/hci-report.toc [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}])
 \tf@toc=\write5
 
 
@@ -664,42 +664,42 @@ Make it at least 14.49998pt.
 We now make it that large for the rest of the document.
 This may cause the page layout to be inconsistent, however.
 
-[2] [3] [4] [5] [6]
-<../img/Pretty-Consistent.png, id=98, 828.696pt x 479.391pt>
+[2] [3] [4] [5] [6] [7]
+<../img/Pretty-Consistent.png, id=104, 828.696pt x 479.391pt>
 File: ../img/Pretty-Consistent.png Graphic file (type png)
 <use ../img/Pretty-Consistent.png>
-Package pdftex.def Info: ../img/Pretty-Consistent.png  used on input line 177.
+Package pdftex.def Info: ../img/Pretty-Consistent.png  used on input line 190.
 (pdftex.def)             Requested size: 414.34698pt x 239.69492pt.
- [7] [8 <../img/Pretty-Consistent.PNG>] [9] [10] [11]
+ [8 <../img/Pretty-Consistent.PNG>] [9] [10] [11]
 [12]
 <../img/Quiz-image.png, id=144, 791.95876pt x 467.94826pt>
 File: ../img/Quiz-image.png Graphic file (type png)
 <use ../img/Quiz-image.png>
-Package pdftex.def Info: ../img/Quiz-image.png  used on input line 327.
+Package pdftex.def Info: ../img/Quiz-image.png  used on input line 350.
 (pdftex.def)             Requested size: 395.97841pt x 233.97356pt.
- [13 <../img/Quiz-image.PNG>] [14]
+ [13] [14 <../img/Quiz-image.PNG>]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 374.
+(Font)              <12> on input line 398.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 374.
+(Font)              <8> on input line 398.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 374.
- [15]
+(Font)              <6> on input line 398.
+ [15] [16]
 
 Package caption Warning: Unused \captionsetup[ContinuedFloat] on input line 11.
 
 See the caption package documentation for explanation.
 
-[16] (/home/victormp/BayesWorkflow/report/hci-report.aux)
+[17] (/home/victormp/BayesWorkflow/report/hci-report.aux)
 Package rerunfilecheck Info: File `hci-report.out' has not changed.
 (rerunfilecheck)             Checksum: 35FED6E43014811110FFE4CEEFD52575;433.
 Package logreq Info: Writing requests to 'hci-report.run.xml'.
  ) 
 Here is how much of TeX's memory you used:
- 15211 strings out of 479383
- 271759 string characters out of 5875830
- 1073488 words of memory out of 5000000
- 32094 multiletter control sequences out of 15000+600000
+ 15213 strings out of 479383
+ 271777 string characters out of 5875830
+ 1073493 words of memory out of 5000000
+ 32095 multiletter control sequences out of 15000+600000
  432416 words of font info for 48 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  66i,11n,73p,775b,4803s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -707,11 +707,11 @@ Here is how much of TeX's memory you used:
 st/fonts/type1/public/tex-gyre/qtmb.pfb></usr/share/texmf-dist/fonts/type1/publ
 ic/tex-gyre/qtmr.pfb></usr/share/texmf-dist/fonts/type1/public/tex-gyre/qtmri.p
 fb>
-Output written on /home/victormp/BayesWorkflow/report/hci-report.pdf (16 pages,
- 458205 bytes).
+Output written on /home/victormp/BayesWorkflow/report/hci-report.pdf (17 pages,
+ 459638 bytes).
 PDF statistics:
- 204 PDF objects out of 1000 (max. 8388607)
- 175 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 500000)
+ 209 PDF objects out of 1000 (max. 8388607)
+ 179 compressed objects within 2 object streams
+ 41 named destinations out of 1000 (max. 500000)
  83 words of extra memory for PDF output out of 10000 (max. 10000000)
 
