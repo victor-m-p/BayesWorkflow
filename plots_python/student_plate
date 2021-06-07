@@ -1,9 +1,9 @@
 digraph {
 	subgraph "cluster15 x 10" {
-		t_shared [label="t_shared
+		idx_shared [label="idx_shared
 ~
 Data" shape=box style="rounded, filled"]
-		idx_shared [label="idx_shared
+		t_shared [label="t_shared
 ~
 Data" shape=box style="rounded, filled"]
 		y_pred [label="y_pred
@@ -11,21 +11,21 @@ Data" shape=box style="rounded, filled"]
 StudentT" style=filled]
 		label="15 x 10" labeljust=r labelloc=b style=rounded
 	}
-	alpha_sigma [label="alpha_sigma
+	beta [label="beta
+~
+Normal"]
+	sigma [label="sigma
 ~
 HalfNormal"]
 	v [label="v
 ~
 Gamma"]
+	alpha_sigma [label="alpha_sigma
+~
+HalfNormal"]
 	beta_sigma [label="beta_sigma
 ~
 HalfNormal"]
-	sigma [label="sigma
-~
-HalfNormal"]
-	beta [label="beta
-~
-Normal"]
 	alpha [label="alpha
 ~
 Normal"]
@@ -38,14 +38,14 @@ Normal"]
 Normal"]
 		label=15 labeljust=r labelloc=b style=rounded
 	}
-	alpha -> alpha_varying
 	alpha_sigma -> alpha_varying
+	alpha -> alpha_varying
 	beta -> beta_varying
 	beta_sigma -> beta_varying
-	t_shared -> y_pred
 	idx_shared -> y_pred
 	alpha_varying -> y_pred
+	sigma -> y_pred
+	t_shared -> y_pred
 	v -> y_pred
 	beta_varying -> y_pred
-	sigma -> y_pred
 }

@@ -9,9 +9,10 @@ save_plot <- function(path, height = 7, width = 10){
 
 #### check chains and save output ###
 save_chains <- function(fit, path){
-  png(filename=path)
+  png(filename=path,
+      width = 1500, height = 1500)
   plot(fit,
-       N = 10) 
+       N = 10) # testing this. 
   dev.off()
 }
 

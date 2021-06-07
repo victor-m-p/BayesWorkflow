@@ -54,7 +54,7 @@ def posterior_pred(m_idata, model_type, prior_level, n_draws):
 
 # plot trace
 def plot_trace(m_idata, model_type, prior_level):
-    az.plot_trace(m_idata, figsize = (4.8, 4.8)) # for R compatibility
+    az.plot_trace(m_idata, figsize = (15, 15)) # for R compatibility
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_plot_trace.jpeg")
     
 # export summary
