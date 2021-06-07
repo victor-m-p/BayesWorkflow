@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  6 JUN 2021 23:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2021.5.26)  7 JUN 2021 11:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/home/victormp/BayesWorkflow/report/pdf/hci-report
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.tex
+**/home/victormp/BayesWorkflow/report/hci-report
+(/home/victormp/BayesWorkflow/report/hci-report.tex
 LaTeX2e <2020-10-01> patch level 2
 L3 programming layer <2020-12-03> xparse <2020-03-03>
 (/usr/share/texmf-dist/tex/latex/base/article.cls
@@ -184,6 +184,25 @@ Package hyperref Info: Option `colorlinks' set `true' on input line 6.
 \WF@everypar=\toks16
 Package: wrapfig 2003/01/31  v 3.6
 )
+(/usr/share/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2020/10/26 v3.5g Customizing captions (AR)
+
+(/usr/share/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2020/10/21 v2.2e caption3 kernel (AR)
+\captionmargin=\dimen145
+\captionmargin@=\dimen146
+\captionwidth=\dimen147
+\caption@tempdima=\dimen148
+\caption@indent=\dimen149
+\caption@parindent=\dimen150
+\caption@hangindent=\dimen151
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count196
+\c@continuedfloat=\count197
+Package caption Info: hyperref package is loaded.
+Package caption Info: wrapfig package is loaded.
+)
 (/usr/share/texmf-dist/tex/latex/tex-gyre/tgtermes.sty
 Package: tgtermes 2009/09/27 v1.2 TeX Gyre Termes as default roman family
 )
@@ -194,7 +213,7 @@ Package: setspace 2011/12/19 v6.7a set line spacing
 Package: gensymb 2003/07/02 v1.0 (WaS)
 )
 LaTeX Font Info:    Trying to load font information for OT1+qtm on input line 1
-2.
+5.
 
 (/usr/share/texmf-dist/tex/latex/tex-gyre/ot1qtm.fd
 File: ot1qtm.fd 2009/09/25 v1.2 font definition file for OT1/qtm
@@ -213,12 +232,12 @@ File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 105.
 )
-\Gin@req@height=\dimen145
-\Gin@req@width=\dimen146
+\Gin@req@height=\dimen152
+\Gin@req@width=\dimen153
 )
 (/usr/share/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count196
+\c@float@type=\count198
 \float@exts=\toks17
 \float@box=\box48
 \@float@everytoks=\toks18
@@ -234,11 +253,11 @@ Package: biblatex 2020/08/23 v3.15a programmable bibliographies (PK/MW)
 
 (/usr/share/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count197
+\etb@tempcnta=\count199
 )
 (/usr/share/texmf-dist/tex/latex/logreq/logreq.sty
 Package: logreq 2010/08/04 v1.0 xml request logger
-\lrq@indent=\count198
+\lrq@indent=\count266
 
 (/usr/share/texmf-dist/tex/latex/logreq/logreq.def
 File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
@@ -246,48 +265,48 @@ File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
 (/usr/share/texmf-dist/tex/latex/base/ifthen.sty
 Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 )
-\c@tabx@nest=\count199
-\c@listtotal=\count266
-\c@listcount=\count267
-\c@liststart=\count268
-\c@liststop=\count269
-\c@citecount=\count270
-\c@citetotal=\count271
-\c@multicitecount=\count272
-\c@multicitetotal=\count273
-\c@instcount=\count274
-\c@maxnames=\count275
-\c@minnames=\count276
-\c@maxitems=\count277
-\c@minitems=\count278
-\c@citecounter=\count279
-\c@maxcitecounter=\count280
-\c@savedcitecounter=\count281
-\c@uniquelist=\count282
-\c@uniquename=\count283
-\c@refsection=\count284
-\c@refsegment=\count285
-\c@maxextratitle=\count286
-\c@maxextratitleyear=\count287
-\c@maxextraname=\count288
-\c@maxextradate=\count289
-\c@maxextraalpha=\count290
-\c@abbrvpenalty=\count291
-\c@highnamepenalty=\count292
-\c@lownamepenalty=\count293
-\c@maxparens=\count294
-\c@parenlevel=\count295
-\blx@tempcnta=\count296
-\blx@tempcntb=\count297
-\blx@tempcntc=\count298
-\blx@maxsection=\count299
-\blx@maxsegment@0=\count300
-\blx@notetype=\count301
-\blx@parenlevel@text=\count302
-\blx@parenlevel@foot=\count303
-\blx@sectionciteorder@0=\count304
-\blx@entrysetcounter=\count305
-\blx@biblioinstance=\count306
+\c@tabx@nest=\count267
+\c@listtotal=\count268
+\c@listcount=\count269
+\c@liststart=\count270
+\c@liststop=\count271
+\c@citecount=\count272
+\c@citetotal=\count273
+\c@multicitecount=\count274
+\c@multicitetotal=\count275
+\c@instcount=\count276
+\c@maxnames=\count277
+\c@minnames=\count278
+\c@maxitems=\count279
+\c@minitems=\count280
+\c@citecounter=\count281
+\c@maxcitecounter=\count282
+\c@savedcitecounter=\count283
+\c@uniquelist=\count284
+\c@uniquename=\count285
+\c@refsection=\count286
+\c@refsegment=\count287
+\c@maxextratitle=\count288
+\c@maxextratitleyear=\count289
+\c@maxextraname=\count290
+\c@maxextradate=\count291
+\c@maxextraalpha=\count292
+\c@abbrvpenalty=\count293
+\c@highnamepenalty=\count294
+\c@lownamepenalty=\count295
+\c@maxparens=\count296
+\c@parenlevel=\count297
+\blx@tempcnta=\count298
+\blx@tempcntb=\count299
+\blx@tempcntc=\count300
+\blx@maxsection=\count301
+\blx@maxsegment@0=\count302
+\blx@notetype=\count303
+\blx@parenlevel@text=\count304
+\blx@parenlevel@foot=\count305
+\blx@sectionciteorder@0=\count306
+\blx@entrysetcounter=\count307
+\blx@biblioinstance=\count308
 \labelnumberwidth=\skip50
 \labelalphawidth=\skip51
 \biblabelsep=\skip52
@@ -299,9 +318,9 @@ Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 \blx@bcfin=\read2
 \blx@bcfout=\write3
 \blx@langwohyphens=\language86
-\c@mincomprange=\count307
-\c@maxcomprange=\count308
-\c@mincompwidth=\count309
+\c@mincomprange=\count309
+\c@maxcomprange=\count310
+\c@mincompwidth=\count311
 Package biblatex Info: Trying to load biblatex default data model...
 Package biblatex Info: ... file 'blx-dm.def' found.
 
@@ -316,86 +335,86 @@ File: apa.dbx 2020/08/28 v9.14 APA biblatex style data model
 )
 Package biblatex Info: Trying to load biblatex custom data model...
 Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
-\c@afterword=\count310
-\c@savedafterword=\count311
-\c@annotator=\count312
-\c@savedannotator=\count313
-\c@author=\count314
-\c@savedauthor=\count315
-\c@bookauthor=\count316
-\c@savedbookauthor=\count317
-\c@commentator=\count318
-\c@savedcommentator=\count319
-\c@editor=\count320
-\c@savededitor=\count321
-\c@editora=\count322
-\c@savededitora=\count323
-\c@editorb=\count324
-\c@savededitorb=\count325
-\c@editorc=\count326
-\c@savededitorc=\count327
-\c@foreword=\count328
-\c@savedforeword=\count329
-\c@holder=\count330
-\c@savedholder=\count331
-\c@introduction=\count332
-\c@savedintroduction=\count333
-\c@namea=\count334
-\c@savednamea=\count335
-\c@nameb=\count336
-\c@savednameb=\count337
-\c@namec=\count338
-\c@savednamec=\count339
-\c@translator=\count340
-\c@savedtranslator=\count341
-\c@shortauthor=\count342
-\c@savedshortauthor=\count343
-\c@shorteditor=\count344
-\c@savedshorteditor=\count345
-\c@groupauthor=\count346
-\c@savedgroupauthor=\count347
-\c@narrator=\count348
-\c@savednarrator=\count349
-\c@execproducer=\count350
-\c@savedexecproducer=\count351
-\c@execdirector=\count352
-\c@savedexecdirector=\count353
-\c@with=\count354
-\c@savedwith=\count355
-\c@labelname=\count356
-\c@savedlabelname=\count357
-\c@institution=\count358
-\c@savedinstitution=\count359
-\c@lista=\count360
-\c@savedlista=\count361
-\c@listb=\count362
-\c@savedlistb=\count363
-\c@listc=\count364
-\c@savedlistc=\count365
-\c@listd=\count366
-\c@savedlistd=\count367
-\c@liste=\count368
-\c@savedliste=\count369
-\c@listf=\count370
-\c@savedlistf=\count371
-\c@location=\count372
-\c@savedlocation=\count373
-\c@organization=\count374
-\c@savedorganization=\count375
-\c@origlocation=\count376
-\c@savedoriglocation=\count377
-\c@origpublisher=\count378
-\c@savedorigpublisher=\count379
-\c@publisher=\count380
-\c@savedpublisher=\count381
-\c@language=\count382
-\c@savedlanguage=\count383
-\c@origlanguage=\count384
-\c@savedoriglanguage=\count385
-\c@citation=\count386
-\c@savedcitation=\count387
-\c@pageref=\count388
-\c@savedpageref=\count389
+\c@afterword=\count312
+\c@savedafterword=\count313
+\c@annotator=\count314
+\c@savedannotator=\count315
+\c@author=\count316
+\c@savedauthor=\count317
+\c@bookauthor=\count318
+\c@savedbookauthor=\count319
+\c@commentator=\count320
+\c@savedcommentator=\count321
+\c@editor=\count322
+\c@savededitor=\count323
+\c@editora=\count324
+\c@savededitora=\count325
+\c@editorb=\count326
+\c@savededitorb=\count327
+\c@editorc=\count328
+\c@savededitorc=\count329
+\c@foreword=\count330
+\c@savedforeword=\count331
+\c@holder=\count332
+\c@savedholder=\count333
+\c@introduction=\count334
+\c@savedintroduction=\count335
+\c@namea=\count336
+\c@savednamea=\count337
+\c@nameb=\count338
+\c@savednameb=\count339
+\c@namec=\count340
+\c@savednamec=\count341
+\c@translator=\count342
+\c@savedtranslator=\count343
+\c@shortauthor=\count344
+\c@savedshortauthor=\count345
+\c@shorteditor=\count346
+\c@savedshorteditor=\count347
+\c@groupauthor=\count348
+\c@savedgroupauthor=\count349
+\c@narrator=\count350
+\c@savednarrator=\count351
+\c@execproducer=\count352
+\c@savedexecproducer=\count353
+\c@execdirector=\count354
+\c@savedexecdirector=\count355
+\c@with=\count356
+\c@savedwith=\count357
+\c@labelname=\count358
+\c@savedlabelname=\count359
+\c@institution=\count360
+\c@savedinstitution=\count361
+\c@lista=\count362
+\c@savedlista=\count363
+\c@listb=\count364
+\c@savedlistb=\count365
+\c@listc=\count366
+\c@savedlistc=\count367
+\c@listd=\count368
+\c@savedlistd=\count369
+\c@liste=\count370
+\c@savedliste=\count371
+\c@listf=\count372
+\c@savedlistf=\count373
+\c@location=\count374
+\c@savedlocation=\count375
+\c@organization=\count376
+\c@savedorganization=\count377
+\c@origlocation=\count378
+\c@savedoriglocation=\count379
+\c@origpublisher=\count380
+\c@savedorigpublisher=\count381
+\c@publisher=\count382
+\c@savedpublisher=\count383
+\c@language=\count384
+\c@savedlanguage=\count385
+\c@origlanguage=\count386
+\c@savedoriglanguage=\count387
+\c@citation=\count388
+\c@savedcitation=\count389
+\c@pageref=\count390
+\c@savedpageref=\count391
 \shorthandwidth=\skip58
 \shortjournalwidth=\skip59
 \shortserieswidth=\skip60
@@ -421,7 +440,7 @@ Package: expl3 2020-12-03 L3 programming layer (loader)
 
 (/usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2020-09-24 L3 backend support: PDF output (pdfTeX)
-\l__kernel_color_stack_int=\count390
+\l__kernel_color_stack_int=\count392
 \l__pdf_internal_box=\box50
 ))
 Package biblatex Info: expl3
@@ -443,19 +462,19 @@ Package biblatex Info: ... file 'biblatex.def' found.
 
 (/usr/share/texmf-dist/tex/latex/biblatex/biblatex.def
 File: biblatex.def 2020/08/23 v3.15a biblatex compatibility (PK/MW)
-\c@textcitecount=\count391
-\c@textcitetotal=\count392
-\c@textcitemaxnames=\count393
-\c@biburlbigbreakpenalty=\count394
-\c@biburlbreakpenalty=\count395
-\c@biburlnumpenalty=\count396
-\c@biburlucpenalty=\count397
-\c@biburllcpenalty=\count398
+\c@textcitecount=\count393
+\c@textcitetotal=\count394
+\c@textcitemaxnames=\count395
+\c@biburlbigbreakpenalty=\count396
+\c@biburlbreakpenalty=\count397
+\c@biburlnumpenalty=\count398
+\c@biburlucpenalty=\count399
+\c@biburllcpenalty=\count400
 \biburlbigskip=\muskip17
 \biburlnumskip=\muskip18
 \biburlucskip=\muskip19
 \biburllcskip=\muskip20
-\c@smartand=\count399
+\c@smartand=\count401
 )
 Package biblatex Info: Trying to load bibliography style 'apa'...
 Package biblatex Info: ... file 'apa.bbx' found.
@@ -467,8 +486,8 @@ Package biblatex Info: ... file 'standard.bbx' found.
 
 (/usr/share/texmf-dist/tex/latex/biblatex/bbx/standard.bbx
 File: standard.bbx 2020/08/23 v3.15a biblatex bibliography style (PK/MW)
-\c@bbx:relatedcount=\count400
-\c@bbx:relatedtotal=\count401
+\c@bbx:relatedcount=\count402
+\c@bbx:relatedtotal=\count403
 ))
 Package biblatex Info: Trying to load citation style 'apa'...
 Package biblatex Info: ... file 'apa.cbx' found.
@@ -516,39 +535,39 @@ s
 \f@nch@O@olf=\skip79
 \f@nch@O@orf=\skip80
 )
-\@quotelevel=\count402
-\@quotereset=\count403
+\@quotelevel=\count404
+\@quotereset=\count405
 
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
+(/home/victormp/BayesWorkflow/report/hci-report.aux)
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
 
 (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count404
-\scratchdimen=\dimen147
+\scratchcounter=\count406
+\scratchdimen=\dimen154
 \scratchbox=\box51
-\nofMPsegments=\count405
-\nofMParguments=\count406
+\nofMPsegments=\count407
+\nofMParguments=\count408
 \everyMPshowfont=\toks21
-\MPscratchCnt=\count407
-\MPscratchDim=\dimen148
-\MPnumerator=\count408
-\makeMPintoPDFobject=\count409
+\MPscratchCnt=\count409
+\MPscratchDim=\dimen155
+\MPnumerator=\count410
+\makeMPintoPDFobject=\count411
 \everyMPtoPDFconversion=\toks22
 ) (/usr/share/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -559,7 +578,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 28.
+Package hyperref Info: Link coloring ON on input line 31.
 
 (/usr/share/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
@@ -570,24 +589,27 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 (/usr/share/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count410
+\c@section@level=\count412
 )
-LaTeX Info: Redefining \ref on input line 28.
-LaTeX Info: Redefining \pageref on input line 28.
-LaTeX Info: Redefining \nameref on input line 28.
+LaTeX Info: Redefining \ref on input line 31.
+LaTeX Info: Redefining \pageref on input line 31.
+LaTeX Info: Redefining \nameref on input line 31.
 
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.out)
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.out)
+(/home/victormp/BayesWorkflow/report/hci-report.out)
+(/home/victormp/BayesWorkflow/report/hci-report.out)
 \@outlinefile=\write4
-LaTeX Info: Redefining \celsius on input line 28.
-Package gensymb Info: Faking symbols for \degree and \celsius on input line 28.
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: float package is loaded.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Info: Redefining \celsius on input line 31.
+Package gensymb Info: Faking symbols for \degree and \celsius on input line 31.
 
 
 
 Package gensymb Warning: Not defining \perthousand.
 
-LaTeX Info: Redefining \ohm on input line 28.
-Package gensymb Info: Using \Omega for \ohm on input line 28.
+LaTeX Info: Redefining \ohm on input line 31.
+Package gensymb Info: Using \Omega for \ohm on input line 31.
 
 Package gensymb Warning: Not defining \micro.
 
@@ -623,52 +645,73 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'hci-report.bbl' found.
 
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.bbl)
-Package biblatex Info: Reference section=0 on input line 28.
-Package biblatex Info: Reference segment=0 on input line 28.
+(/home/victormp/BayesWorkflow/report/hci-report.bbl)
+Package biblatex Info: Reference section=0 on input line 31.
+Package biblatex Info: Reference segment=0 on input line 31.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 30.
+(Font)              <14.4> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 30.
+(Font)              <7> on input line 33.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+(/home/victormp/BayesWorkflow/report/hci-report.toc)
+\tf@toc=\write5
+
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
 Make it at least 14.49998pt.
 We now make it that large for the rest of the document.
 This may cause the page layout to be inconsistent, however.
 
-[2] [3] [4] [5] [6] [7] [8] [9] [10] [11]
+[2] [3] [4] [5] [6]
+<../img/Pretty-Consistent.png, id=98, 828.696pt x 479.391pt>
+File: ../img/Pretty-Consistent.png Graphic file (type png)
+<use ../img/Pretty-Consistent.png>
+Package pdftex.def Info: ../img/Pretty-Consistent.png  used on input line 177.
+(pdftex.def)             Requested size: 414.34698pt x 239.69492pt.
+ [7] [8 <../img/Pretty-Consistent.PNG>] [9] [10] [11]
+[12]
+<../img/Quiz-image.png, id=144, 791.95876pt x 467.94826pt>
+File: ../img/Quiz-image.png Graphic file (type png)
+<use ../img/Quiz-image.png>
+Package pdftex.def Info: ../img/Quiz-image.png  used on input line 327.
+(pdftex.def)             Requested size: 395.97841pt x 233.97356pt.
+ [13 <../img/Quiz-image.PNG>] [14]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 330.
+(Font)              <12> on input line 374.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 330.
+(Font)              <8> on input line 374.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 330.
- [12] [13] [14]
-(/home/victormp/BayesWorkflow/report/pdf/hci-report.aux)
+(Font)              <6> on input line 374.
+ [15]
+
+Package caption Warning: Unused \captionsetup[ContinuedFloat] on input line 11.
+
+See the caption package documentation for explanation.
+
+[16] (/home/victormp/BayesWorkflow/report/hci-report.aux)
 Package rerunfilecheck Info: File `hci-report.out' has not changed.
 (rerunfilecheck)             Checksum: 35FED6E43014811110FFE4CEEFD52575;433.
 Package logreq Info: Writing requests to 'hci-report.run.xml'.
  ) 
 Here is how much of TeX's memory you used:
- 13996 strings out of 479383
- 247942 string characters out of 5875830
- 1057004 words of memory out of 5000000
- 30897 multiletter control sequences out of 15000+600000
- 423982 words of font info for 45 fonts, out of 8000000 for 9000
+ 15211 strings out of 479383
+ 271759 string characters out of 5875830
+ 1073488 words of memory out of 5000000
+ 32094 multiletter control sequences out of 15000+600000
+ 432416 words of font info for 48 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 66i,11n,73p,779b,4803s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 66i,11n,73p,775b,4803s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/tex-gyre/q-rm.enc}</usr/share/texmf-di
 st/fonts/type1/public/tex-gyre/qtmb.pfb></usr/share/texmf-dist/fonts/type1/publ
 ic/tex-gyre/qtmr.pfb></usr/share/texmf-dist/fonts/type1/public/tex-gyre/qtmri.p
 fb>
-Output written on /home/victormp/BayesWorkflow/report/pdf/hci-report.pdf (14 pa
-ges, 111728 bytes).
+Output written on /home/victormp/BayesWorkflow/report/hci-report.pdf (16 pages,
+ 458205 bytes).
 PDF statistics:
- 172 PDF objects out of 1000 (max. 8388607)
- 151 compressed objects within 2 object streams
- 35 named destinations out of 1000 (max. 500000)
- 73 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 204 PDF objects out of 1000 (max. 8388607)
+ 175 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 83 words of extra memory for PDF output out of 10000 (max. 10000000)
 

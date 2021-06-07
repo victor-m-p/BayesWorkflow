@@ -1,9 +1,0 @@
-[0] Config.pm:312> INFO - This is Biber 2.15
-[0] Config.pm:315> INFO - Logfile is '/home/victormp/BayesWorkflow/report/pdf/report.blg'
-[86] biber:330> INFO - === Tue Jun  1, 2021, 10:11:08
-[107] Biber.pm:415> INFO - Reading '/home/victormp/BayesWorkflow/report/pdf/report.bcf'
-[194] Biber.pm:952> INFO - Found 0 citekeys in bib section 0
-[200] Utils.pm:395> WARN - The file '/home/victormp/BayesWorkflow/report/pdf/report.bcf' does not contain any citations!
-[214] bbl.pm:651> INFO - Writing '/home/victormp/BayesWorkflow/report/pdf/report.bbl' with encoding 'UTF-8'
-[214] bbl.pm:754> INFO - Output to /home/victormp/BayesWorkflow/report/pdf/report.bbl
-[214] Biber.pm:128> INFO - WARNINGS: 1
