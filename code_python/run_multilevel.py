@@ -74,7 +74,7 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
     # sample prior predictive
     # https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html
     with m:
-        prior = pm.sample_prior_predictive(700) # small, but only for pp. 
+        prior = pm.sample_prior_predictive(700, random_seed = RANDOM_SEED) # small, but only for pp. 
         m_idata = az.from_pymc3(prior=prior)
     
     # prior predictive
@@ -115,7 +115,8 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
             var_names = [
                 "y_pred",
                 "alpha",
-                "beta"])
+                "beta"],
+            random_seed = RANDOM_SEED)
         idata_postpred = az.from_pymc3(posterior_predictive=post_pred)
     m_idata.extend(idata_postpred)
 

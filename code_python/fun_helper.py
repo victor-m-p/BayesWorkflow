@@ -23,28 +23,6 @@ def train_test(d, split_column, train_size = .75):
     test = d[d[split_column] > min_val+length]
     return train, test
 
-'''
-# sampling models -- should not be in one step. 
-def sample_mod(
-    model, 
-    tune_draw = 2000, 
-    post_pred_draws = 4000,
-    prior_pred_draws = 4000):
-    
-    with model: 
-        trace = pm.sample(
-            return_inferencedata = False, 
-            draws = tune_draw,
-            tune = tune_draw,
-            target_accept = .99,
-            max_treedepth = 20) # tuning!
-        post_pred = pm.sample_posterior_predictive(trace, samples = post_pred_draws)
-        prior_pred = pm.sample_prior_predictive(samples = prior_pred_draws)
-        m_idata = az.from_pymc3(trace = trace, posterior_predictive=post_pred, prior=prior_pred)
-    
-    return m_idata
-'''
-
 # kruschke/plate diagram
 def plot_plate(compiled_model, model_type): 
     g = pm.model_to_graphviz(compiled_model) 
@@ -76,7 +54,7 @@ def posterior_pred(m_idata, model_type, prior_level, n_draws):
 
 # plot trace
 def plot_trace(m_idata, model_type, prior_level):
-    az.plot_trace(m_idata, figsize = (15, 15)) # square for R compatibility
+    az.plot_trace(m_idata, figsize = (4.8, 4.8)) # for R compatibility
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_plot_trace.jpeg")
     
 # export summary
@@ -170,12 +148,3 @@ def hdi_param(m_idata, model_type, prior_level):
     
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_param.jpeg",
                 dpi = 300)
-'''
-# updating checks
-def updating_check(m_idata, n_prior = 100, n_posterior = 100): 
-    fig, axes = plt.subplots(nrows = 2)
-
-    az.plot_ppc(m_idata, group = "prior", num_pp_samples = n_prior, ax = axes[0])
-    az.plot_ppc(m_idata, num_pp_samples = n_posterior, ax = axes[1])
-    plt.draw()
-'''

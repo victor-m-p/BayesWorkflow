@@ -96,7 +96,7 @@ if choice == "Introduction":
     You will see boxes with the titles *Code-Monkey*, *Language-Learner* and *Concept-Guru*. These let you dive deeper into the material:
     
     * :monkey: "Code-Monkey": Display code to reproduce analysis
-    * :keyboard: "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * :keyboard: ":keyboard: Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
     * :male_mage: "Concept-Guru": Conceptual deep-dives
     
     Some of them will be expanded by default because I think you *should* see them.
@@ -158,12 +158,12 @@ elif choice == "Simulation & EDA":
     
     We might also be interested in the variability between aliens or our left-over uncertainty, but let's table that for now. 
     
-    Remember to check out the "Code-Monkey" boxes to follow along with the code. 
+    Remember to check out the :monkey: Code-Monkey boxes to follow along with the code. 
     
     '''
     
     ### code ###
-    expander = st.beta_expander("Code-Monkey: Reproducibility")
+    expander = st.beta_expander("🐒 Code-Monkey: Reproducibility")
     py_reproducibility = ct.py_reproducibility()
     
     with expander: 
@@ -171,7 +171,7 @@ elif choice == "Simulation & EDA":
         
     
     ### code ##
-    expander = st.beta_expander("Code-Monkey: Simulation")
+    expander = st.beta_expander('🐒 Code-Monkey: Simulation')
     py_sim = ct.py_sim()
     
     with expander: 
@@ -193,7 +193,7 @@ elif choice == "Simulation & EDA":
         st.image("plots_R/EDA.png")
     
     ### code ###
-    expander = st.beta_expander("Code-Monkey: EDA")
+    expander = st.beta_expander("🐒 Code-Monkey: EDA")
     
     py_EDA = ct.py_EDA()
     R_EDA = ct.R_EDA()
@@ -232,7 +232,7 @@ elif choice == "Complete Pooling (model 1)":
     py_reproducibility = ct.py_reproducibility()
     R_reproducibility = ct.R_reproducibility()
     
-    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
     
     with expander: 
         col1_reproducibility, col2_reproducibility = st.beta_columns(2)
@@ -245,7 +245,7 @@ elif choice == "Complete Pooling (model 1)":
     py_preprocessing = ct.py_preprocessing()
     R_preprocessing = ct.R_preprocessing()
     
-    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing")
     
     with expander: 
         col1, col2 = st.beta_columns(2)
@@ -290,7 +290,7 @@ elif choice == "Complete Pooling (model 1)":
     py_model = ct.py_pooled(model_name, prior_choice)
     r_model = ct.R_pooled(model_name, model_formula, prior_name, prior_choice)
 
-    expander = st.beta_expander("Code-Monkey: Model specification")
+    expander = st.beta_expander("🐒 Code-Monkey: Model specification")
     with expander: 
         col1_model, col2_model = st.beta_columns(2)
         
@@ -300,8 +300,8 @@ elif choice == "Complete Pooling (model 1)":
         with col2_model: 
             st.code(r_model)
     
-    ### language-learner ###
-    expander = st.beta_expander("Language-Learner: Model specification")
+    ### :keyboard: Language-Learner ###
+    expander = st.beta_expander("⌨️ Language-Learner: Model specification")
     
     with expander: 
 
@@ -358,7 +358,7 @@ elif choice == "Complete Pooling (model 1)":
     ### code ###
     py_plate = ct.py_plate(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    expander = st.beta_expander("🐒 Code-Monkey: Plate Notation")
     
     with expander: 
         st.code(py_plate)
@@ -395,7 +395,7 @@ elif choice == "Complete Pooling (model 1)":
     py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    expander = st.beta_expander("🐒 Code-Monkey: Prior predictive checks")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -416,7 +416,7 @@ elif choice == "Complete Pooling (model 1)":
     py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
-    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -453,7 +453,7 @@ elif choice == "Complete Pooling (model 1)":
     py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    expander = st.beta_expander("🐒 Code-Monkey: Trace-plot")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -484,7 +484,7 @@ elif choice == "Complete Pooling (model 1)":
     py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Summary")
+    expander = st.beta_expander("🐒 Code-Monkey: Summary")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -537,7 +537,7 @@ elif choice == "Complete Pooling (model 1)":
     py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    expander = st.beta_expander("🐒 Code-Monkey: Posterior predictive")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -547,7 +547,7 @@ elif choice == "Complete Pooling (model 1)":
     
     
     ### Quiz ###
-    expander = st.beta_expander("Concept-Guru: Posterior Predictive Checks")
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: Posterior Predictive Checks")
     #selection_quiz = st.multiselect(
     #    "QUIZ: The posterior predictive check indicates our model:", 
     #    ("reasonably captures patterns in the data (accept model)", "does not reliably capture patterns in the data (reject model)"),
@@ -636,7 +636,7 @@ elif choice == "Complete Pooling (model 1)":
     elif hdi_type == "full": 
         py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
     
-    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -671,7 +671,7 @@ elif choice == "Complete Pooling (model 1)":
     py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
-    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI parameter intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -710,7 +710,7 @@ elif choice == "Multilevel (model 2)":
     py_reproducibility = ct.py_reproducibility()
     R_reproducibility = ct.R_reproducibility()
     
-    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
     
     with expander: 
         col1_reproducibility, col2_reproducibility = st.beta_columns(2)
@@ -723,7 +723,7 @@ elif choice == "Multilevel (model 2)":
     py_preprocessing = ct.py_preprocessing()
     R_preprocessing = ct.R_preprocessing()
     
-    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing")
     
     with expander: 
         col1, col2 = st.beta_columns(2)
@@ -760,7 +760,7 @@ elif choice == "Multilevel (model 2)":
     py_model = ct.py_multilevel(model_name, prior_choice)
     r_model = ct.R_multilevel(model_name, model_formula, prior_name, prior_choice)
 
-    expander = st.beta_expander("Code-Monkey: Model specification")
+    expander = st.beta_expander("🐒 Code-Monkey: Model specification")
     with expander: 
         col1_model, col2_model = st.beta_columns(2)
         
@@ -793,7 +793,7 @@ elif choice == "Multilevel (model 2)":
     ### code ###
     py_plate = ct.py_plate(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    expander = st.beta_expander("🐒 Code-Monkey: Plate Notation")
     
     with expander: 
         st.code(py_plate)
@@ -830,7 +830,7 @@ elif choice == "Multilevel (model 2)":
     py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    expander = st.beta_expander("🐒 Code-Monkey: Prior predictive checks")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -852,7 +852,7 @@ elif choice == "Multilevel (model 2)":
     py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
-    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -884,7 +884,7 @@ elif choice == "Multilevel (model 2)":
     py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    expander = st.beta_expander("🐒 Code-Monkey: Trace-plot")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -911,7 +911,7 @@ elif choice == "Multilevel (model 2)":
     py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Summary")
+    expander = st.beta_expander("🐒 Code-Monkey: Summary")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -968,7 +968,7 @@ elif choice == "Multilevel (model 2)":
     py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    expander = st.beta_expander("🐒 Code-Monkey: Posterior predictive")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1023,7 +1023,7 @@ elif choice == "Multilevel (model 2)":
         py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
-    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1059,7 +1059,7 @@ elif choice == "Multilevel (model 2)":
     py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
-    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI parameter intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1098,7 +1098,7 @@ elif choice == "Student-t (model 3)":
     py_reproducibility = ct.py_reproducibility()
     R_reproducibility = ct.R_reproducibility()
     
-    expander = st.beta_expander("Code-Monkey: Packages & Reproducibility")
+    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
     
     with expander: 
         col1_reproducibility, col2_reproducibility = st.beta_columns(2)
@@ -1111,7 +1111,7 @@ elif choice == "Student-t (model 3)":
     py_preprocessing = ct.py_preprocessing()
     R_preprocessing = ct.R_preprocessing()
     
-    expander = st.beta_expander("Code-Monkey: Preprocessing")
+    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing")
     
     with expander: 
         col1, col2 = st.beta_columns(2)
@@ -1148,7 +1148,7 @@ elif choice == "Student-t (model 3)":
     py_model = ct.py_student(model_name, prior_choice)
     r_model = ct.R_student(model_name, model_formula, prior_name, prior_choice)
 
-    expander = st.beta_expander("Code-Monkey: Model specification")
+    expander = st.beta_expander("🐒 Code-Monkey: Model specification")
     with expander: 
         col1_model, col2_model = st.beta_columns(2)
         
@@ -1181,7 +1181,7 @@ elif choice == "Student-t (model 3)":
     ### code ###
     py_plate = ct.py_plate(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Plate Notation")
+    expander = st.beta_expander("🐒 Code-Monkey: Plate Notation")
     
     with expander: 
         st.code(py_plate)
@@ -1218,7 +1218,7 @@ elif choice == "Student-t (model 3)":
     py_pp = ct.py_pp(model_name, idata_name)
     R_pp = ct.R_pp(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Prior predictive checks")
+    expander = st.beta_expander("🐒 Code-Monkey: Prior predictive checks")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1240,7 +1240,7 @@ elif choice == "Student-t (model 3)":
     py_sample = ct.py_sample(model_name, idata_name)
     R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
     
-    expander = st.beta_expander("Code-Monkey: Sample posterior")
+    expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1272,7 +1272,7 @@ elif choice == "Student-t (model 3)":
     py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    expander = st.beta_expander("🐒 Code-Monkey: Trace-plot")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1299,7 +1299,7 @@ elif choice == "Student-t (model 3)":
     py_summary = ct.py_summary(idata_name)
     R_summary = ct.R_summary(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Summary")
+    expander = st.beta_expander("🐒 Code-Monkey: Summary")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1356,7 +1356,7 @@ elif choice == "Student-t (model 3)":
     py_pp2 = ct.py_post_pred(model_name, idata_name)
     R_pp2 = ct.R_post_pred(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Posterior predictive")
+    expander = st.beta_expander("🐒 Code-Monkey: Posterior predictive")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1411,7 +1411,7 @@ elif choice == "Student-t (model 3)":
         py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
-    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1447,7 +1447,7 @@ elif choice == "Student-t (model 3)":
     py_hdi_param = ct.py_hdi_param(idata_name)
     R_hdi_param = ct.R_hdi_param(model_name)
     
-    expander = st.beta_expander("Code-Monkey: HDI parameter intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI parameter intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1473,7 +1473,7 @@ elif choice == "Model Comparison":
     
     2. Using posterior predictive checks (& potentially predictions on unseen data). 
     
-    If you want to know more check the 'Concept-Guru' section. 
+    If you want to know more check the 🧙‍♂️ Concept-Guru section. 
     
     NB: WE NEED BOTH PREDICTIVE AND FIT!! (different uncertainty)...
     (CH4 in recoded for this difference) (CH 12 in recoded for multilevel).
@@ -1484,7 +1484,7 @@ elif choice == "Model Comparison":
     
     '''
     
-    expander = st.beta_expander("Concept-Guru: Model Comparison")
+    expander = st.beta_expander("🧙‍♂️ Model Comparison")
     
     with expander: 
         
@@ -1535,7 +1535,7 @@ elif choice == "Model Comparison":
     py_trace = ct.py_trace(idata_name)
     R_trace = ct.R_trace(model_name)
     
-    expander = st.beta_expander("Code-Monkey: Trace-plot")
+    expander = st.beta_expander("🐒 Code-Monkey: Trace-plot")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1593,7 +1593,7 @@ elif choice == "Model Comparison":
         py_hdi = ct.py_hdi_data_full(uncertainty, idata_name)
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
     
-    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1650,7 +1650,7 @@ elif choice == "Prediction":
     py_prep = ct.py_pred_prep(model_name, idata_name)
     R_prep = ct.R_pred_prep()
     
-    expander = st.beta_expander("Code-Monkey: preprocessing & sampling")
+    expander = st.beta_expander("🐒 Code-Monkey: preprocessing & sampling")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
@@ -1684,7 +1684,7 @@ elif choice == "Prediction":
     py_pred = ct.py_hdi_data_full(uncertainty, idata_name)
     R_pred = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
     
-    expander = st.beta_expander("Code-Monkey: HDI prediction intervals")
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 

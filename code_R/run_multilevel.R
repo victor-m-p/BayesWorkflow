@@ -14,6 +14,8 @@ pacman::p_load(tidyverse,
                tidybayes,
                bayesplot)
 
+RANDOM_SEED = 42
+
 # load functions from fun_models.R
 source("fun_models.R")
 source("fun_helper.R")
@@ -97,7 +99,8 @@ m_multilevel_specific_prior <- fit_mod(
   data = train,
   prior = prior_multilevel_specific,
   sample_prior = "only",
-  file = "../models_R/m_multilevel_specific_prior"
+  file = "../models_R/m_multilevel_specific_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_multilevel_generic_prior <- fit_mod(
@@ -106,7 +109,8 @@ m_multilevel_generic_prior <- fit_mod(
   data = train,
   prior = prior_multilevel_generic,
   sample_prior = "only",
-  file = "../models_R/m_multilevel_generic_prior"
+  file = "../models_R/m_multilevel_generic_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_multilevel_weak_prior <- fit_mod(
@@ -115,7 +119,8 @@ m_multilevel_weak_prior <- fit_mod(
   data = train,
   prior = prior_multilevel_weak,
   sample_prior = "only",
-  file = "../models_R/m_multilevel_weak_prior"
+  file = "../models_R/m_multilevel_weak_prior",
+  random_seed = RANDOM_SEED
 )
 
 
@@ -158,7 +163,8 @@ m_multilevel_specific_fit <- fit_mod(
   data = train,
   prior = prior_multilevel_specific,
   sample_prior = TRUE,
-  file = "../models_R/m_multilevel_specific_fit"
+  file = "../models_R/m_multilevel_specific_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_multilevel_generic_fit <- fit_mod(
@@ -167,7 +173,8 @@ m_multilevel_generic_fit <- fit_mod(
   data = train,
   prior = prior_multilevel_generic,
   sample_prior = TRUE,
-  file = "../models_R/m_multilevel_generic_fit"
+  file = "../models_R/m_multilevel_generic_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_multilevel_weak_fit <- fit_mod(
@@ -176,7 +183,8 @@ m_multilevel_weak_fit <- fit_mod(
   data = train,
   prior = prior_multilevel_weak,
   sample_prior = TRUE,
-  file = "../models_R/m_multilevel_weak_fit"
+  file = "../models_R/m_multilevel_weak_fit",
+  random_seed = RANDOM_SEED
 )
 
 
@@ -240,7 +248,7 @@ save_plot(path = "../plots_R/multilevel_weak_posterior_pred.png")
 
 # specific
 fixed_interval_groups(fit = m_multilevel_specific_fit,
-                    title = "Prediction intervals (fixed)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -248,7 +256,7 @@ save_plot(path = "../plots_R/multilevel_specific_HDI_fixed.png")
 
 # generic
 fixed_interval_groups(fit = m_multilevel_generic_fit,
-                    title = "Prediction intervals (fixed)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -256,7 +264,7 @@ save_plot(path = "../plots_R/multilevel_generic_HDI_fixed.png")
 
 # weak
 fixed_interval_groups(fit = m_multilevel_weak_fit,
-                    title = "Prediction intervals (fixed)",
+                    title = "R/brms: Prediction intervals (fixed)",
                     data = train,
                     n_time = 100)
 
@@ -270,7 +278,7 @@ save_plot(path = "../plots_R/multilevel_weak_HDI_fixed.png")
 
 # specific
 prediction_interval_groups(fit = m_multilevel_specific_fit, 
-                           title = "Prediction intervals (full)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 
@@ -278,7 +286,7 @@ save_plot(path = "../plots_R/multilevel_specific_HDI_full.png")
 
 # generic
 prediction_interval_groups(fit = m_multilevel_generic_fit, 
-                           title = "Prediction intervals (full)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 
@@ -286,7 +294,7 @@ save_plot(path = "../plots_R/multilevel_generic_HDI_full.png")
 
 # weak
 prediction_interval_groups(fit = m_multilevel_weak_fit, 
-                           title = "Prediction intervals (full)",
+                           title = "R/brms: Prediction intervals (full)",
                            data = train,
                            n_time = 100)
 

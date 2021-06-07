@@ -13,6 +13,7 @@ pacman::p_load(tidyverse,
                modelr,
                tidybayes,
                bayesplot)
+RANDOM_SEED = 42
 
 # load functions from fun_models.R
 source("fun_models.R")
@@ -92,7 +93,8 @@ m_pooled_specific_prior <- fit_mod(
   data = train,
   prior = prior_pooled_specific,
   sample_prior = "only",
-  file = "../models_R/m_pooled_specific_prior"
+  file = "../models_R/m_pooled_specific_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_pooled_generic_prior <- fit_mod(
@@ -101,7 +103,8 @@ m_pooled_generic_prior <- fit_mod(
   data = train,
   prior = prior_pooled_generic,
   sample_prior = "only",
-  file = "../models_R/m_pooled_generic_prior"
+  file = "../models_R/m_pooled_generic_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_pooled_weak_prior <- fit_mod(
@@ -110,7 +113,8 @@ m_pooled_weak_prior <- fit_mod(
   data = train,
   prior = prior_pooled_weak,
   sample_prior = "only",
-  file = "../models_R/m_pooled_weak_prior"
+  file = "../models_R/m_pooled_weak_prior",
+  random_seed = RANDOM_SEED
 )
 
 
@@ -154,7 +158,8 @@ m_pooled_specific_fit <- fit_mod(
   data = train,
   prior = prior_pooled_specific,
   sample_prior = TRUE,
-  file = "../models_R/m_pooled_specific_fit"
+  file = "../models_R/m_pooled_specific_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_pooled_generic_fit <- fit_mod(
@@ -163,7 +168,8 @@ m_pooled_generic_fit <- fit_mod(
   data = train,
   prior = prior_pooled_generic,
   sample_prior = TRUE,
-  file = "../models_R/m_pooled_generic_fit"
+  file = "../models_R/m_pooled_generic_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_pooled_weak_fit <- fit_mod(
@@ -172,7 +178,8 @@ m_pooled_weak_fit <- fit_mod(
   data = train,
   prior = prior_pooled_weak,
   sample_prior = TRUE,
-  file = "../models_R/m_pooled_weak_fit"
+  file = "../models_R/m_pooled_weak_fit",
+  random_seed = RANDOM_SEED
 )
 
 

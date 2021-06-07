@@ -4,7 +4,8 @@ fit_mod <- function(formula,
                     data,
                     prior,
                     sample_prior,
-                    file){
+                    file, 
+                    random_seed){
   
   b <- brm(
     formula = formula,
@@ -18,7 +19,7 @@ fit_mod <- function(formula,
     file = file,
     file_refit = "on_change",
     threads = threading(2),
-    seed = 42,
+    seed = random_seed,
     control = list(adapt_delta = .99, ### CHANGE
                    max_treedepth = 20) ### CHANGE
   )

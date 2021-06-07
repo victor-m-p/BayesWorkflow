@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import fun_helper as fh
 
 ## simulate data ##
-np.random.seed(17) # reproducibility
+np.random.seed(42) # reproducibility
 n_id = 15 # 15 people (idx)
 n_time = 15 # 15 time-steps (t)
 idx = np.repeat(range(n_id), n_time)

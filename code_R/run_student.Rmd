@@ -13,6 +13,8 @@ pacman::p_load(tidyverse,
                tidybayes,
                bayesplot)
 
+RANDOM_SEED = 42
+
 # load functions from fun_models.R
 source("fun_models.R")
 source("fun_helper.R")
@@ -54,9 +56,7 @@ Get priors and set priors.
 # fit the first model
 get_prior(formula = f_student,
           data = train,
-          family = student,
-          
-)
+          family = student)
 
 # set priors: three levels.
 prior_student_specific <- c(
@@ -99,7 +99,8 @@ m_student_specific_prior <- fit_mod(
   data = train,
   prior = prior_student_specific,
   sample_prior = "only",
-  file = "../models_R/m_student_specific_prior"
+  file = "../models_R/m_student_specific_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_student_generic_prior <- fit_mod(
@@ -108,7 +109,8 @@ m_student_generic_prior <- fit_mod(
   data = train,
   prior = prior_student_generic,
   sample_prior = "only",
-  file = "../models_R/m_student_generic_prior"
+  file = "../models_R/m_student_generic_prior",
+  random_seed = RANDOM_SEED
 )
 
 m_student_weak_prior <- fit_mod(
@@ -117,7 +119,8 @@ m_student_weak_prior <- fit_mod(
   data = train,
   prior = prior_student_weak,
   sample_prior = "only",
-  file = "../models_R/m_student_weak_prior"
+  file = "../models_R/m_student_weak_prior",
+  random_seed = RANDOM_SEED
 )
 
 ```
@@ -160,7 +163,8 @@ m_student_specific_fit <- fit_mod(
   data = train,
   prior = prior_student_specific,
   sample_prior = TRUE,
-  file = "../models_R/m_student_specific_fit"
+  file = "../models_R/m_student_specific_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_student_generic_fit <- fit_mod(
@@ -169,7 +173,8 @@ m_student_generic_fit <- fit_mod(
   data = train,
   prior = prior_student_generic,
   sample_prior = TRUE,
-  file = "../models_R/m_student_generic_fit"
+  file = "../models_R/m_student_generic_fit",
+  random_seed = RANDOM_SEED
 )
 
 m_student_weak_fit <- fit_mod(
@@ -178,7 +183,8 @@ m_student_weak_fit <- fit_mod(
   data = train,
   prior = prior_student_weak,
   sample_prior = TRUE,
-  file = "../models_R/m_student_weak_fit"
+  file = "../models_R/m_student_weak_fit",
+  random_seed = RANDOM_SEED
 )
 
 ```

@@ -1,4 +1,4 @@
-# knit .Rmd to .R to run whole pipeline from .sh script. 
+# knit .Rmd to .R to run whole pipeline from .sh script.
 library(knitr)
 purl("run_data.Rmd", output = "run_data.R", documentation = 2)
 purl("run_pooled.Rmd", output = "run_pooled.R", documentation = 2)

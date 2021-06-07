@@ -161,7 +161,7 @@ def py_pp(model_name, idata_name): # m_pooled, m_multilevel, m_student
 ### python: prior predictive checks ###
 # sample prior predictive 
 with {model_name}:
-    prior = pm.sample_prior_predictive(700) 
+    prior = pm.sample_prior_predictive(700, random_seed = RANDOM_SEED) 
     {idata_name} = az.from_pymc3(prior=prior)
     
 # set up plot 
@@ -222,7 +222,8 @@ with {model_name}:
         var_names = [
             "y_pred",
             "alpha",
-            "beta"])
+            "beta"],
+        random_seed = RANDOM_SEED)
     idata_postpred = az.from_pymc3(
         posterior_predictive=post_pred)
 {idata_name}.extend(idata_postpred) # add to idata
@@ -420,7 +421,7 @@ idx_test = test.idx.values.reshape((n_idx_test, n_time_test))
 with {model_name}:
     pm.set_data({{"t_shared": t_test, "idx_shared": idx_test}})
     stl_pred = pm.fast_sample_posterior_predictive(
-        {idata_name}.posterior, random_seed=32
+        {idata_name}.posterior, random_seed=RANDOM_SEED
     )
     az.from_pymc3_predictions(
         stl_pred, idata_orig={idata_name}, inplace=True, coords=prediction_coords
@@ -431,7 +432,7 @@ with {model_name}:
 def py_sim(): 
     py_code = f'''
 ### python: simulate data ###
-np.random.seed(17) # reproducibility
+np.random.seed(42) # reproducibility
 n_id = 15 # 15 people (idx)
 n_time = 15 # 15 time-steps (t)
 idx = np.repeat(range(n_id), n_time)
@@ -512,7 +513,8 @@ def R_pooled(model_name, model_formula, prior_name, sigma_choice):
     data = train,
     prior = {prior_name},
     sample_prior = "only",
-    backend = "cmdstanr")
+    backend = "cmdstanr",
+    seed = RANDOM_SEED)
 '''
     return R_code
 
@@ -565,7 +567,8 @@ prior_student_specific <- c(
     data = train,
     prior = {prior_name},
     sample_prior = "only",
-    backend = "cmdstanr")
+    backend = "cmdstanr",
+    seed = RANDOM_SEED)
     '''
     return R_code
     

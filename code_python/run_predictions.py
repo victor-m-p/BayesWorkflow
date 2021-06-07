@@ -12,6 +12,7 @@ import fun_models as fm
 import fun_helper as fh
 import dataframe_image as dfi
 import xarray as xr
+RANDOM_SEED = 42
 
 ### load data ###
 train = pd.read_csv("../data/train.csv")
@@ -83,7 +84,7 @@ idx_test = test.idx.values.reshape((n_idx_test, n_time_test))
 with m:
     pm.set_data({"t_shared": t_test, "idx_shared": idx_test})
     stl_pred = pm.fast_sample_posterior_predictive(
-        m_idata.posterior, random_seed=32
+        m_idata.posterior, random_seed=RANDOM_SEED
     )
     az.from_pymc3_predictions(
         stl_pred, idata_orig=m_idata, inplace=True, coords=prediction_coords

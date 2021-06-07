@@ -1,4 +1,5 @@
 #!/bin/sh
+Rscript knit_scripts.R
 Rscript run_data.R
 Rscript run_pooled.R
 Rscript run_multilevel.R
