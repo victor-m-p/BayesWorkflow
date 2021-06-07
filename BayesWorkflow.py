@@ -1706,9 +1706,21 @@ elif choice == "Prediction":
 elif choice == "References & Inspiration":
     
     '''
+    # Bayesian statistics
+    
+    * Collection of good books: https://docs.pymc.io/learn.html
+    '''
+    
+    '''
     # python/pyMC3: 
+    
+    * Collection of pyMC3 ressources, including recodings of Rethinking Statistics (McElreath): https://github.com/pymc-devs/resources
+    * Example notebooks (some more advanced analyses): https://docs.pymc.io/nb_examples/index.html
     '''
     
     '''
     # R/brms: 
+    
+    * Statistical Rethinking (McElreath) recoded in brms by Solomon Kurz: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/
+    * List of blogposts (some advanced analyses): https://paul-buerkner.github.io/blog/brms-blogposts/
     '''
