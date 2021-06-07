@@ -637,7 +637,7 @@ elif choice == "Multilevel (model 2)":
     idata_name = "multilevel_idata"
     
     r'''
-    # Candidate model 1 (Complete Pooling)
+    # Candidate model 2 (Multilevel model)
     Our second candidate model will be Multilevel model with: 
     
     1. Random intercepts ($\alpha$) &
@@ -975,7 +975,7 @@ elif choice == "Student-t (model 3)":
     idata_name = "student_idata"
     
     r'''
-    # Candidate model 1 (Complete Pooling)
+    # Candidate model 3 (Student-T likelihood function)
     Our third candidate model will be multilevel model (still random slopes and intercept)
     but with a student-t likelihood function. Notice that this requires us to specify
     one additional parameter ($\nu$). 
