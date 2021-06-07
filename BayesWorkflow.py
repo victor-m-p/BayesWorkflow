@@ -688,8 +688,8 @@ elif choice == "Multilevel (model 2)":
     st.latex(r''' 
         y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
         \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
-        \beta_{varying} \sim Normal(\beta_j, \beta_{sigma_j}) \\
-        \alpha_{varying} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \beta_{varying_j} \sim Normal(\beta_j, \beta_{sigma_j}) \\
+        \alpha_{varying_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
         \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
         \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
@@ -1019,8 +1019,8 @@ elif choice == "Student-t (model 3)":
     st.latex(r''' 
         y_{i, j} \sim StudentT(\mu_{i, j}, \sigma, \nu) \\
         \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
-        \beta_{varying} \sim Normal(\beta_j, \beta_{sigma_j}) \\
-        \alpha_{varying} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \beta_{varying_j} \sim Normal(\beta_j, \beta_{sigma_j}) \\
+        \alpha_{varying_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
         \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
         \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
