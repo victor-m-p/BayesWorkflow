@@ -68,13 +68,9 @@ if choice == "Introduction":
     # Purpose 
     
     This notebook attempts to show how to carry out two (almost) identical bayesian analyses, using python (pyMC3) and R (brms). 
-    
     The main purpose of this app is to show users with experience in one language how to carry out a bayesian analysis in the other. 
-    
     I have specifically had people who are looking to transition from R/brms to python/pyMC3 in mind, but people coming from python should also find the app interesting.
-    
     I have tried to explain the code and concepts in selected parts, but this is not supposed to be an exhaustive guide to bayesian statistics nor pyMC3 or brms. 
-    
     If you want to dive deeper into either bayesian statistics or more advanced analyses I have provided a list of good resources in the appendix (References & Inspiration).
     
     '''
@@ -83,9 +79,7 @@ if choice == "Introduction":
     # How to use 
     
     For all parts of the analysis (for both languages) you can access reproducible code, and easily copy it to clipboard.
-    
     I hope that this will encourage you to run the code alongside the app, since this is the only way to really understand what is going on.
-    
     While building a bridge between python/pyMC3 and R/brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better bayesin workflow.
     
     '''
@@ -96,13 +90,9 @@ if choice == "Introduction":
     You will see boxes with the titles *Code-Monkey*, *Language-Learner* and *Concept-Guru*. These let you dive deeper into the material:
     
     * :monkey: "Code-Monkey": Display code to reproduce analysis
-    * :keyboard: ":keyboard: Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * :keyboard: "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
     * :male_mage: "Concept-Guru": Conceptual deep-dives
-    
-    Some of them will be expanded by default because I think you *should* see them.
-    
-    Some of them you can expand if you want to dive deeper into either the code or the concepts behind the code.
-    
+
     '''
     
     '''
@@ -112,8 +102,7 @@ if choice == "Introduction":
     
     with col1: 
             '''
-        The notebook follows a workflow close to what is presented in Gelman (2020). 
-        
+        The notebook follows a workflow close to what is presented in Gelman 2020 (see figure). 
         Some parts are not included (yet), but we will cover the following: 
         
         1. Fake data simulation 
@@ -143,21 +132,16 @@ elif choice == "Simulation & EDA":
     # Data (Simulation)
 
     For this analysis we will simulate our own data. This is nice, because we will know the "true" parameter values. 
-    
     We can spin our own story about what the data corresponds to. 
     
     * *x-value* corresponds to consecutive years (t) 
     
-    * *y-value* corresponds to grading on the danish citizenship test. 
+    * *y-value* corresponds to grading on the danish citizenship test
     
-    * *ID-value* corresponds to individual aliens. 
+    * *ID-value* corresponds to individual aliens
     
-    Based on 15 consecutive years of data (t) and corresponding gradings (y) and a sample of 15 aliens (ID) 
-    
-    we want to infer how fast how aliens learn about danish culture (beta), and how much they know when they arrive (alpha). 
-    
+    Based on 15 consecutive years of data (t) and corresponding gradings (y) and a sample of 15 aliens (ID) we want to infer how fast how aliens learn about danish culture (beta), and how much they know when they arrive (alpha). 
     We might also be interested in the variability between aliens or our left-over uncertainty, but let's table that for now. 
-    
     Remember to check out the :monkey: Code-Monkey boxes to follow along with the code. 
     
     '''
@@ -221,9 +205,7 @@ elif choice == "Complete Pooling (model 1)":
     # Candidate model 1 (Complete Pooling)
     
     Our first candidate model will be a complete pooling model. 
-    
     This model treats each observation at each time-point as if it belongs to the same alien (ID). 
-    
     You might already feel that this is not a satisfactory model, but bear with me. 
     
     '''
@@ -257,23 +239,22 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Model specification (math)
     
-    We can formulate the complete pooling model as follows. 
+    We can formulate the complete pooling model (with generic priors):
     
     '''
     
     st.latex(r''' 
         y_i \sim Normal(\mu_i, \sigma) \\
         \mu = \alpha + \beta \cdot x_i \\
-        \alpha \sim Normal(0, 1) \\
-        \beta \sim Normal(0, 1) \\
-        \sigma \sim HalfNormal(0, 1)
+        \alpha \sim Normal(1.5, 0.5) \\
+        \beta \sim Normal(0, 0.5) \\
+        \sigma \sim HalfNormal(0.5)
         ''')
     
     '''
     # Model specification (code)
     
     Now we need to translate this into pyMC3 and brms code. 
-    
     Throughout the app you can choose which prior-level to display code & plots for. 
     
     '''
@@ -309,35 +290,25 @@ elif choice == "Complete Pooling (model 1)":
             # Shared Variables: 
             
             In the pyMC3 code (left) we have created something called a shared variable for our x variable, time (t). 
-            
             This has to be done if we want to generate predictions based on new data (data that the model was not trained on).
-            
             We only need to create a shared variable for t here, because it is the only predictor variable in the model. 
-            
             pyMC3 relies on theano as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change in a different format. 
             
 
             # Likelihood and mu: 
             
             You will notice that in the brms code (right) we specify the same priors as in the pyMC3 code (left) and the same likelihood. 
-            
             In the pyMC3 code however we have to specify how the distributions are connected manually, whereas brms does this for us based on the formula we provide.
-            
             As such pyMC3 forces us to understand how the model actually works and is more flexible. This comes with the trade-off of being more difficult (at least initially). 
 
             
             # sigma: 
             
             We have specified a normal distribution for the sigma distribution in the brms priors (right), but we have specified a half-normal distribution for the sigma distribution i pyMC3 (left). 
-            
             This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow negative values). 
-            
             The reason why we can do this in brms is because it realizes that draws from the sigma distribution have to be positive. 
-            
             So, when it encounters a negative value it throws away that sample. This will then effectively give us a half-normal distribution. 
-            
             pyMC3 does not baby-sit in this way, and will throw an error if we try to specify a normal distribution for the sigma parameter. 
-            
             You can try this for yourself. 
             '''
     
@@ -345,9 +316,7 @@ elif choice == "Complete Pooling (model 1)":
     # Plate Notation 
     
     Something that is really nice in pyMC3 is that we can check whether we specified the model as we intended to. 
-    
     Our model is shown in plate notation, and which I think is less intuitive than the awesome Kruschke diagrams/plots (link). 
-    
     Once we learn to read them however, it is a useful check. 
     
     '''
@@ -367,10 +336,8 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Prior predictive checks
     
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
+    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html.
     By default I will show the code and plots for what they refer to as a "generic weakly informative prior".
-    
     Feel free to explore what happens with a much more informative prior, or with a very weak prior.
     
     '''
@@ -407,7 +374,6 @@ elif choice == "Complete Pooling (model 1)":
     # Sample posterior
     
     We have now verified that the we have specified our model correctly (plate) and let's say that we are happy with our prior predictive checks.
-    
     We should now sample the posterior. 
     
     '''
@@ -429,7 +395,6 @@ elif choice == "Complete Pooling (model 1)":
     # Check traces (sampling)
     
     The first thing we might want to check now is wheather the sampling/computation was successfull. 
-    
     I like to generate *trace plots* at this point. There are nice in depth diagnostic plots available in both R and brms if we see issues (link). 
     
     '''
@@ -460,12 +425,22 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_trace)
         with col2:
             st.code(R_trace) 
-            
+    
+    '''
+    
+    For all prior levels we see healthy traces to the right (catterpillars),
+    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
+    However, notice that the values for our parameters differ based on our priors.
+    The models fitted with either "Very Weak" or "Generic" priors are close, 
+    but the "Specific" priors bias the model heavily towards our priors. 
+    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
+    for more details on Arviz' plot_trace() and customization.  
+    '''
+    
     '''
     # Summary
     
     We can now (optionally) check the summary of the model. We might not be interested in the estimated parameters (yet)
-    
     but the summary also gives us information about the number of effective samples and R-hat values. 
     
     '''
@@ -490,25 +465,7 @@ elif choice == "Complete Pooling (model 1)":
         with col1: 
             st.code(py_summary)
         with col2:
-            st.code(R_summary) 
-    
-    '''
-    
-    For all prior levels we see healthy traces to the right (catterpillars),
-    
-    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
-    
-    However, notice that the values for our parameters differ based on our priors.
-    
-    The models fitted with either "Very Weak" or "Generic" priors are close, 
-    
-    but the "Specific" priors bias the model heavily towards our priors. 
-    
-    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
-    
-    for more details on Arviz' plot_trace() and customization.  
-    '''
-    
+            st.code(R_summary)
     
     '''
     # Posterior Predictive checks 
@@ -555,7 +512,7 @@ elif choice == "Complete Pooling (model 1)":
     with expander: 
         
         '''
-        QUIZ: Based on the posterior predictive check, which do you think is an appropriate response? (choose one)
+        **QUIZ**: Based on the posterior predictive check, which do you think is an appropriate response? (choose one)
         '''
         
         option_a = st.checkbox('The model reliably captures the important patterns in the data (accept model)')
@@ -566,11 +523,8 @@ elif choice == "Complete Pooling (model 1)":
             '''
             
             I disagree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
-            
             The posterior has long tails (is not normally distributed) which is not well captured by our model. 
-            
             We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
-            
             is improper, or that the model has not been specified with the appropriate random effects structure. 
             
             '''
@@ -578,11 +532,8 @@ elif choice == "Complete Pooling (model 1)":
         if option_b: 
             '''
             I agree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
-            
             The posterior has long tails (is not normally distributed) which is not well captured by our model. 
-            
             We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
-            
             is improper, or that the model has not been specified with the appropriate random effects structure. 
             '''
     
@@ -590,13 +541,9 @@ elif choice == "Complete Pooling (model 1)":
     # HDI (vs. data)
     
     We can also now run the model forward (i.e. generate predictions from the model). 
-    
     We can compare these model predictions with the data that the model is trained on, to check whether the model has captured the patterns in the data.
-    
     We can do this either for (a) fixed effects only or (b) with the full model uncertainty. 
-    
     If we generate predictions for fixed effects only, we will get predictions for the *mean* of the population. 
-    
     If we generate predictions with the full model uncertainty  (incl. sigma) we will get predictions for individuals.
     '''
     
@@ -692,17 +639,15 @@ elif choice == "Multilevel (model 2)":
     
     r'''
     # Candidate model 1 (Complete Pooling)
-    Our first candidate model will be a complete pooling model.
+    Our second candidate model will be Multilevel model with: 
     
-    This means that we treat each observations at each time-point
+    1. Random intercepts ($\alpha$) &
     
-    as if they belong to the same group/ID. 
+    2. Random slopes ($\beta$)
     
-    Before we get to play with the model we will need two things. 
-    
-    (1) importing packages
-    
-    (2) load and preprocsess data
+    NB: not taking into account (in the pyMC3 model) the correlation 
+    between intercepts and slopes (which is the "lkj(1)" parameter in brms).
+    For more, see: https://docs.pymc.io/notebooks/multilevel_modeling.html
     
     '''
     
@@ -733,15 +678,24 @@ elif choice == "Multilevel (model 2)":
             st.code(R_preprocessing) 
     
     '''
-    # Model specification (math)
+    # Model specification (math) 
+    
+    Specification is for the pyMC3 model without parameter for the 
+    correlation between random effects (lkj). Also here concretely
+    specified for the generic prior. 
+    
     '''
     
     st.latex(r''' 
-        y_i \sim Normal(\mu_i, \sigma) \\
-        \mu = \alpha + \beta \cdot x_i \\
-        \alpha \sim Normal(0, 1) \\
-        \beta \sim Normal(0, 1) \\
-        \sigma \sim HalfNormal(0, 1)
+        y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
+        \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
+        \beta_{varying} \sim Normal(\beta_j, \beta_{sigma_j}) \\
+        \alpha_{varying} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \alpha \sim Normal(1.5, 0.5) \\
+        \beta \sim Normal(0, 0.5) \\
+        \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
+        \beta_{sigma} \sim Normal(0, 0.5) \\
+        \sigma \sim HalfNormal(0.5)
         ''')
     
     '''
@@ -772,18 +726,6 @@ elif choice == "Multilevel (model 2)":
     
     '''
     # Plate Notation 
-    
-    There are many reasons why a prior predictive check can be bad
-    
-    (including of course, bad priors). Something that is really nice in
-    
-    pyMC3 though is that you can check whether you actually specified the
-    
-    model as you intended to. Your model is shown in plate notation,
-    
-    which can seem confusing, and which I think is less intuitive than the
-    
-    really nice Kruschke diagrams/plots (link). However, it is still useful. 
     
     '''
     
@@ -1080,17 +1022,9 @@ elif choice == "Student-t (model 3)":
     
     r'''
     # Candidate model 1 (Complete Pooling)
-    Our first candidate model will be a complete pooling model.
-    
-    This means that we treat each observations at each time-point
-    
-    as if they belong to the same group/ID. 
-    
-    Before we get to play with the model we will need two things. 
-    
-    (1) importing packages
-    
-    (2) load and preprocsess data
+    Our third candidate model will be multilevel model (still random slopes and intercept)
+    but with a student-t likelihood function. Notice that this requires us to specify
+    one additional parameter ($\nu$). 
     
     '''
     
@@ -1122,14 +1056,23 @@ elif choice == "Student-t (model 3)":
     
     '''
     # Model specification (math)
+    
+    Again, without the lkj parameter describing the correlation of 
+    random effects, and specified with generic priors. 
+    
     '''
     
     st.latex(r''' 
-        y_i \sim Normal(\mu_i, \sigma) \\
-        \mu = \alpha + \beta \cdot x_i \\
-        \alpha \sim Normal(0, 1) \\
-        \beta \sim Normal(0, 1) \\
-        \sigma \sim HalfNormal(0, 1)
+        y_{i, j} \sim StudentT(\mu_{i, j}, \sigma, \nu) \\
+        \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
+        \beta_{varying} \sim Normal(\beta_j, \beta_{sigma_j}) \\
+        \alpha_{varying} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \alpha \sim Normal(1.5, 0.5) \\
+        \beta \sim Normal(0, 0.5) \\
+        \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
+        \beta_{sigma} \sim Normal(0, 0.5) \\
+        \sigma \sim HalfNormal(0.5) \\
+        \nu \sim Gamma(2, 0.1)
         ''')
     
     '''
