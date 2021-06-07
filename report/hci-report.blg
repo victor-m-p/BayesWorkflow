@@ -1,27 +1,27 @@
 [0] Config.pm:312> INFO - This is Biber 2.15
 [0] Config.pm:315> INFO - Logfile is '/home/victormp/BayesWorkflow/report/hci-report.blg'
-[80] biber:330> INFO - === Mon Jun  7, 2021, 13:01:45
-[95] Biber.pm:415> INFO - Reading '/home/victormp/BayesWorkflow/report/hci-report.bcf'
-[180] Biber.pm:952> INFO - Found 10 citekeys in bib section 0
+[78] biber:330> INFO - === Mon Jun  7, 2021, 13:22:22
+[93] Biber.pm:415> INFO - Reading '/home/victormp/BayesWorkflow/report/hci-report.bcf'
+[179] Biber.pm:952> INFO - Found 10 citekeys in bib section 0
 [196] Biber.pm:4334> INFO - Processing section 0
-[207] Biber.pm:4523> INFO - Looking for bibtex format file 'report.bib' for section 0
-[208] bibtex.pm:1682> INFO - LaTeX decoding ...
+[208] Biber.pm:4523> INFO - Looking for bibtex format file 'report.bib' for section 0
+[209] bibtex.pm:1682> INFO - LaTeX decoding ...
 [222] bibtex.pm:1494> INFO - Found BibTeX data source '/home/victormp/BayesWorkflow/report/report.bib'
 [271] Utils.pm:395> WARN - month field 'apr' in entry 'Salvatier2016' is not an integer - this will probably not sort properly.
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 2, warning: 35 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 9, warning: 22 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 21, warning: 25 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 29, warning: 11 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 41, warning: 7 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 53, warning: 6 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 65, warning: 22 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 78, warning: 21 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 86, warning: 6 characters of junk seen at toplevel
-[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp__MKg/507919877d59c876d31ce1caa675374b_6279.utf8, line 100, warning: 5 characters of junk seen at toplevel
-[342] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[342] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[342] Biber.pm:4162> INFO - Sorting list 'apa/global//global/global' of type 'entry' with template 'apa' and locale 'en-US'
-[343] Biber.pm:4168> INFO - No sort tailoring available for locale 'en-US'
-[361] bbl.pm:651> INFO - Writing '/home/victormp/BayesWorkflow/report/hci-report.bbl' with encoding 'UTF-8'
-[372] bbl.pm:754> INFO - Output to /home/victormp/BayesWorkflow/report/hci-report.bbl
-[372] Biber.pm:128> INFO - WARNINGS: 11
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 2, warning: 35 characters of junk seen at toplevel
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 9, warning: 22 characters of junk seen at toplevel
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 21, warning: 25 characters of junk seen at toplevel
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 29, warning: 11 characters of junk seen at toplevel
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 41, warning: 7 characters of junk seen at toplevel
+[313] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 53, warning: 6 characters of junk seen at toplevel
+[314] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 65, warning: 22 characters of junk seen at toplevel
+[314] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 78, warning: 21 characters of junk seen at toplevel
+[314] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 86, warning: 6 characters of junk seen at toplevel
+[314] Utils.pm:395> WARN - BibTeX subsystem: /tmp/biber_tmp_1OaA/507919877d59c876d31ce1caa675374b_7576.utf8, line 100, warning: 5 characters of junk seen at toplevel
+[341] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[341] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[341] Biber.pm:4162> INFO - Sorting list 'apa/global//global/global' of type 'entry' with template 'apa' and locale 'en-US'
+[341] Biber.pm:4168> INFO - No sort tailoring available for locale 'en-US'
+[358] bbl.pm:651> INFO - Writing '/home/victormp/BayesWorkflow/report/hci-report.bbl' with encoding 'UTF-8'
+[368] bbl.pm:754> INFO - Output to /home/victormp/BayesWorkflow/report/hci-report.bbl
+[369] Biber.pm:128> INFO - WARNINGS: 11
