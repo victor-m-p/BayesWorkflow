@@ -596,7 +596,6 @@ elif choice == "Complete Pooling (model 1)":
     
     The last thing we might want to inspect at this point is the estimated distributions (and HDI intervals) for our inferred parameters. 
     
-    
     '''
     
     ### plot ###
@@ -743,14 +742,6 @@ elif choice == "Multilevel (model 2)":
     '''
     # Prior predictive checks
     
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
-    Our main model is run with what they refer to as a "generic weakly informative prior".
-    
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
-    
     '''
     ### plot ###
     selection_pp_pool = st.radio(
@@ -782,12 +773,7 @@ elif choice == "Multilevel (model 2)":
     
     '''
     # Sample posterior
-    
-    We have now verified that the we have specified our model correctly (plate)
-    
-    and let's say that we are happy with our prior predictive checks.
-    
-    We should now sample the posterior. 
+
     '''
     
     ### code ###
@@ -860,33 +846,9 @@ elif choice == "Multilevel (model 2)":
             st.code(py_summary)
         with col2:
             st.code(R_summary) 
-    
-    '''
-    
-    For all prior levels we see healthy traces to the right (catterpillars),
-    
-    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
-    
-    However, notice that the values for our parameters differ based on our priors.
-    
-    The models fitted with either "Very Weak" or "Generic" priors are close, 
-    
-    but the "Specific" priors bias the model heavily towards our priors. 
-    
-    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
-    
-    for more details on Arviz' plot_trace() and customization.  
-    '''
-    
-    
+
     '''
     # Posterior Predictive checks 
-    
-    We have now accepted our prior predictive check and verified
-    
-    that computation (sampling) was okay. 
-    
-    We will now look at posterior predictive checks. 
     
     '''
     
@@ -920,10 +882,6 @@ elif choice == "Multilevel (model 2)":
 
     '''
     # HDI (vs. data)
-    
-    Something about how there are different things we can look at,
-    
-    e.g. fixed effects, all uncertainty (three levels actually). 
     
     '''
     
@@ -975,10 +933,6 @@ elif choice == "Multilevel (model 2)":
             
     '''
     # HDI (parameters)
-    
-    The last thing we might want to check is 
-    
-    how the model has estimated the parameters we care about. 
     
     '''
     
@@ -1104,18 +1058,6 @@ elif choice == "Student-t (model 3)":
     '''
     # Plate Notation 
     
-    There are many reasons why a prior predictive check can be bad
-    
-    (including of course, bad priors). Something that is really nice in
-    
-    pyMC3 though is that you can check whether you actually specified the
-    
-    model as you intended to. Your model is shown in plate notation,
-    
-    which can seem confusing, and which I think is less intuitive than the
-    
-    really nice Kruschke diagrams/plots (link). However, it is still useful. 
-    
     '''
     
     ### plot ###
@@ -1131,14 +1073,6 @@ elif choice == "Student-t (model 3)":
     
     '''
     # Prior predictive checks
-    
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html
-    
-    Our main model is run with what they refer to as a "generic weakly informative prior".
-    
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
-    
-    NB: Notice the x-axis. 
     
     '''
     ### plot ###
@@ -1172,11 +1106,6 @@ elif choice == "Student-t (model 3)":
     '''
     # Sample posterior
     
-    We have now verified that the we have specified our model correctly (plate)
-    
-    and let's say that we are happy with our prior predictive checks.
-    
-    We should now sample the posterior. 
     '''
     
     ### code ###
@@ -1249,33 +1178,9 @@ elif choice == "Student-t (model 3)":
             st.code(py_summary)
         with col2:
             st.code(R_summary) 
-    
-    '''
-    
-    For all prior levels we see healthy traces to the right (catterpillars),
-    
-    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
-    
-    However, notice that the values for our parameters differ based on our priors.
-    
-    The models fitted with either "Very Weak" or "Generic" priors are close, 
-    
-    but the "Specific" priors bias the model heavily towards our priors. 
-    
-    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
-    
-    for more details on Arviz' plot_trace() and customization.  
-    '''
-    
-    
+
     '''
     # Posterior Predictive checks 
-    
-    We have now accepted our prior predictive check and verified
-    
-    that computation (sampling) was okay. 
-    
-    We will now look at posterior predictive checks. 
     
     '''
     
@@ -1309,10 +1214,6 @@ elif choice == "Student-t (model 3)":
 
     '''
     # HDI (vs. data)
-    
-    Something about how there are different things we can look at,
-    
-    e.g. fixed effects, all uncertainty (three levels actually). 
     
     '''
     
@@ -1365,10 +1266,6 @@ elif choice == "Student-t (model 3)":
     '''
     # HDI (parameters)
     
-    The last thing we might want to check is 
-    
-    how the model has estimated the parameters we care about. 
-    
     '''
     
     ### plot ###
@@ -1418,13 +1315,6 @@ elif choice == "Model Comparison":
     
     If you want to know more check the 🧙‍♂️ Concept-Guru section. 
     
-    NB: WE NEED BOTH PREDICTIVE AND FIT!! (different uncertainty)...
-    (CH4 in recoded for this difference) (CH 12 in recoded for multilevel).
-    Depends on whether we want to plot plausible average height or 
-    whether we want to plot simulated heights of individuals. 
-    Obviously there will be more variability in the second one 
-    (see recoded CH4 and McElreath). 
-    
     '''
     
     expander = st.beta_expander("🧙‍♂️ Model Comparison")
@@ -1432,16 +1322,11 @@ elif choice == "Model Comparison":
     with expander: 
         
         '''
-        The second one always works. Since Bayesian models are always generative (see McElreath)
-        
+        The second one always works (pp checks). Since Bayesian models are always generative (see McElreath)
         we can simulate/generate new data based on our fitted distributions over parameters
-        
         and our likelihood function. 
-        
         The first is typically invalid if we want to compare models with different
-        
         likelihood functions. In our specific case however (Gaussian and Student-t) however,
-        
         it is valid (find source). 
         '''
     
@@ -1450,7 +1335,6 @@ elif choice == "Model Comparison":
     # Compare posterior predictive
     
     Which one do you think looks the most reasonable?
-    
     Are there any of the models that look particularly worse?
     
     '''
@@ -1490,9 +1374,7 @@ elif choice == "Model Comparison":
     # Compare HDI
     
     Now lets look at model predictions,
-    
     both for fixed effects only, and with the full uncertainty. 
-    
     Again: which model do you think we should prefer?
     
     '''
@@ -1554,12 +1436,9 @@ elif choice == "Model Comparison":
     st.image(f"plots_python/loo_comparison.png")
     
     '''
-    Overthinking, that loo is leave-one-out approximation. 
-    
+    add "Concept-Guru", explaining that loo is leave-one-out approximation. 
     Here it is indicated that pooled model "underfits" and that
-    
     student-t model "overfits" (i.e. the extra parameter (nu "v"))
-    
     is not giving us enough to earn its keep. 
     
     '''
@@ -1574,17 +1453,11 @@ elif choice == "Prediction":
     # Prediction on unseen data
     
     This will be only a brief introduction to prediction in pyMC3/brms,
-    
     and will only cover predicting (1) groups that are already in the data
-    
     and (2) only the trend for the group (not clusters / individuals). 
-    
     If you want to see more prediction (e.g. on new groups or on individuals)
-    
     Then please let me know. The process is largely the same though, and 
-    
     you can check the "References & Inspiration" page to see where to go next. 
-    
     In this section we will only be predicting based on the "multilevel model". 
     
     '''
@@ -1605,7 +1478,7 @@ elif choice == "Prediction":
     
     # HDI prediction interval 
     
-    (perhaps we should at least have both mean forecast and individual forecast).
+    NB: (perhaps we should at least have both mean forecast and individual forecast).
     
     '''
     
