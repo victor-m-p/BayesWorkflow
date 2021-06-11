@@ -46,8 +46,12 @@ dataset = xr.Dataset(
     'y_data': (dims, y_train)},
     coords = coords)
 
+# more coords
+coords["param"] = ["alpha", "beta"]
+coords["param_bis"] = ["alpha", "beta"]
+
 ### compile the model (this cannot be saved, only the idata) ###
-m = fm.multilevel(
+m = fm.covariation(
     t = t_train, 
     idx = idx_train, 
     y = y_train, 
@@ -56,7 +60,7 @@ m = fm.multilevel(
     sigma = 0.5)
 
 # load idata #
-m_idata = az.from_netcdf("../models_python/idata_multilevel_generic.nc")
+m_idata = az.from_netcdf("../models_python/idata_covariation_generic.nc")
 
 ### Predictions ###
 # load test data
@@ -96,7 +100,7 @@ fh.plot_hdi(
     y = y_test,
     n_idx = n_idx_test,
     m_idata = m_idata,
-    model_type = "multilevel",
+    model_type = "covariation",
     prior_level = "generic",
     kind = "predictions"
 )

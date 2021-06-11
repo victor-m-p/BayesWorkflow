@@ -115,7 +115,9 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
             var_names = [
                 "y_pred",
                 "alpha",
-                "beta"],
+                "beta",
+                "alpha_mu",
+                "beta_mu"],
             random_seed = RANDOM_SEED)
         idata_postpred = az.from_pymc3(posterior_predictive=post_pred)
     m_idata.extend(idata_postpred)

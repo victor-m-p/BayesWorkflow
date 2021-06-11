@@ -3,13 +3,6 @@ title: "Untitled"
 output: html_document
 ---
 
-to knitr?
-
-```{r}
-library(knitr)
-purl("run_pooled.Rmd", output = "run_pooled.R", documentation = 2)
-```
-
 
 
 setup
@@ -29,53 +22,141 @@ source("fun_models.R")
 source("fun_helper.R")
 ```
 
-load the model
+load data
 
 ```{r}
-
-# sampled models
-m_pooled_posterior <- readRDS("../models_R/m_multilevel_generic_fit.rds")
-
-```
-
-load test data
-
-```{r}
-
 # read test data
 train <- read_csv("../data/train.csv") %>%
   mutate(idx = as_factor(idx))
 
-```
-
-```{r}
-library(bayesplot)
-mcmc_intervals(m_pooled_posterior,
-          pars = c("b_Intercept",
-                   "b_t",
-                   "sigma")) +
-  ggtitle("title")
-
-
 
 ```
 
-good alternative
-https://cran.r-project.org/web/packages/bayesplot/vignettes/plotting-mcmc-draws.html
+model
+
 ```{r}
 
-# not clear what the size is or whether we have control
-mcmc_areas(
-  m_pooled_posterior,
-          pars = c("b_Intercept",
-                   "b_t",
-                   "sigma"),
-  prob = 0.8, # 80% intervals
-  prob_outer = 0.99, # 99%
-  point_est = "mean"
-) + 
-  ggtitle("R/brms: Ridgeplot 80% HDI")
+# specify model
+f <- bf(y ~ 0 + Intercept + t + (1+t|idx))
 
-# 
+# get priors
+get_prior(f,
+          data = train,
+          family = gaussian)
+
+# set priors
+prior_fit <- c(
+  prior(normal(1.5, 0.5), class = b, coef = Intercept),
+  prior(normal(0, 0.5), class = b, coef = t),
+  prior(normal(0, 0.5), class = sd),
+  prior(normal(0, 0.5), class = sigma),
+  prior(lkj(1), class = cor)
+)
+
+# sample model
+fit <- brm(
+  data = train,
+  formula = f,
+  prior = prior_fit,
+  backend = "cmdstanr",
+  sample_prior = T,
+  control = list(adapt_delta = .99, ### CHANGE
+                max_treedepth = 20)
+)
+
+summary(fit)
+
+```
+
+test predictions
+
+```{r}
+
+train %>% 
+  data_grid(t = seq_range(t, n = 100), idx) %>%
+  add_predicted_draws(fit,
+                      ) %>%
+  ggplot(aes(x = t, y = y)) + 
+  stat_lineribbon(aes(y = .prediction), 
+                  .width = c(.95, .8), 
+                  color = "#08519C") +
+  geom_jitter(data = train, 
+              color = "navyblue", 
+              shape = 1, 
+              alpha = 0.5, 
+              size = 2, 
+              width = 0.1) + 
+  scale_fill_brewer() 
+
+```
+
+
+```{r}
+
+# test the HDI
+train %>%
+  data_grid(t = seq_range(t, n = 100), idx) %>%
+  add_fitted_draws(fit,
+                   re_formula = NA) %>%
+  ggplot(aes(x = t, y = y)) + 
+  stat_lineribbon(aes(y = .value), 
+                  .width = c(.95, .8), 
+                  color = "#08519C") +
+  geom_jitter(data = train, 
+              color = "navyblue", 
+              shape = 1,
+              alpha = 0.5, 
+              size = 2, 
+              width = 0.1) + 
+  scale_fill_brewer() 
+
+```
+
+```{r}
+# specify model
+f2 <- bf(y ~ 1 + t + (1|idx) + (1|t))
+
+# get priors
+get_prior(f2,
+          data = train,
+          family = gaussian)
+
+# set priors
+prior_fit2 <- c(
+  prior(normal(1.5, 0.05), class = Intercept),
+  prior(normal(0, 0.05), class = b),
+  prior(normal(0, 0.05), class = sd),
+  prior(normal(0, 0.05), class = sigma)
+)
+
+# sample model
+fit2 <- brm(
+  data = train,
+  formula = f2,
+  prior = prior_fit2,
+  backend = "cmdstanr",
+  sample_prior = T,
+  control = list(adapt_delta = .99, ### CHANGE
+                max_treedepth = 20)
+)
+
+```
+
+```{r}
+train %>%
+  data_grid(t = seq_range(t, n = 100), idx) %>%
+  add_fitted_draws(fit2,
+                   re_formula = NA) %>%
+  ggplot(aes(x = t, y = y)) + 
+  stat_lineribbon(aes(y = .value), 
+                  .width = c(.95, .8), 
+                  color = "#08519C") +
+  geom_jitter(data = train, 
+              color = "navyblue", 
+              shape = 1,
+              alpha = 0.5, 
+              size = 2, 
+              width = 0.1) + 
+  scale_fill_brewer() 
 ```
 

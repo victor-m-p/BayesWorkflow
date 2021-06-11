@@ -31,18 +31,18 @@ translation_uncertainty = {
 
 translation_model = {
     'Pooled': 'pooled',
-    'Multilevel': 'multilevel',
-    'Student-t': 'student'}
+    'Multilevel': 'intercept',
+    'Student-t': 'covariation'}
 
 translation_mod_name = {
     'Pooled': 'm_pooled',
-    'Multilevel': 'm_multilevel',
-    'Student-t': 'm_student'}
+    'Multilevel': 'm_intercept',
+    'Student-t': 'm_covariation'}
 
 translation_idata = {
     'Pooled': 'pooled_idata',
-    'Multilevel': 'multilevel_idata',
-    'Student-t': 'student_idata'
+    'Multilevel': 'intercept_idata',
+    'Student-t': 'covariation_idata'
 }
 
 translation_code = {
@@ -59,7 +59,7 @@ translation_sigma = {
 # other layout options?
 # 1. taking less space
 # 2. perhaps not
-choice = st.sidebar.radio('Sections:', ["Introduction", "Simulation & EDA", "Complete Pooling (model 1)", "Multilevel (model 2)", "Student-t (model 3)", "Model Comparison", "Prediction", "References & Inspiration"])
+choice = st.sidebar.radio('Sections:', ["Introduction", "Simulation & EDA", "Complete Pooling (model 1)", "Random Intercepts (model 2)", "Multilevel Covariation (model 3)", "Model Comparison", "Prediction", "References & Inspiration"])
 
 
 if choice == "Introduction":
@@ -287,6 +287,18 @@ elif choice == "Complete Pooling (model 1)":
     with expander: 
 
             '''
+            
+            # model formula vs. manual specification: 
+            
+            In brms we specify our model via a model formula (see right). In pyMC3 we can either explicitly specify our model,
+            or we can do it via a model formula (implemented in the glm module). I will use the explicit notation here, because it 
+            forces me to understand how the model works. The model formula might seem more intuitive or user friendly, 
+            but I think that it is too easy to go wrong when we do not know what is happening under the hood. 
+            
+            for example, notice that we have specified the intercept with the special 0 + Intercept syntax, rather than the more common 1 + ... syntax. 
+            We should do this if we have not mean-centered our predictors and are creating a model that is not an intercept only model (which is the case here).
+            You can read more about this here: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/horoscopes-insights.html#use-the-0-intercept-syntax
+            
             # Shared Variables: 
             
             In the pyMC3 code (left) we have created something called a shared variable for our x variable, time (t). 
@@ -294,15 +306,7 @@ elif choice == "Complete Pooling (model 1)":
             We only need to create a shared variable for t here, because it is the only predictor variable in the model. 
             pyMC3 relies on theano as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change in a different format. 
             
-
-            # Likelihood and mu: 
-            
-            You will notice that in the brms code (right) we specify the same priors as in the pyMC3 code (left) and the same likelihood. 
-            In the pyMC3 code however we have to specify how the distributions are connected manually, whereas brms does this for us based on the formula we provide.
-            As such pyMC3 forces us to understand how the model actually works and is more flexible. This comes with the trade-off of being more difficult (at least initially). 
-
-            
-            # sigma: 
+            # Sigma (Normal or HalfNormal?): 
             
             We have specified a normal distribution for the sigma distribution in the brms priors (right), but we have specified a half-normal distribution for the sigma distribution i pyMC3 (left). 
             This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow negative values). 
@@ -625,28 +629,21 @@ elif choice == "Complete Pooling (model 1)":
         with col2:
             st.code(R_hdi_param) 
     
-elif choice == "Multilevel (model 2)":
+elif choice == "Random Intercepts (model 2)":
     
     # for f-strings.
-    model_context = "multilevel"
-    model_name = "m_multilevel" # should be in args
-    model_formula = "f_multilevel" # should be in args
+    model_context = "intercept"
+    model_name = "m_intercept" # should be in args
+    model_formula = "f_intercept" # should be in args
     model_family = "gaussian" 
-    prior_name = "prior_multilevel" # should be in args
+    prior_name = "prior_intercept" # should be in args
     data_type = "train"
-    idata_name = "multilevel_idata"
+    idata_name = "intercept_idata"
     
     r'''
-    # Candidate model 2 (Multilevel model)
-    Our second candidate model will be Multilevel model with: 
-    
-    1. Random intercepts ($\alpha$) &
-    
-    2. Random slopes ($\beta$)
-    
-    NB: not taking into account (in the pyMC3 model) the correlation 
-    between intercepts and slopes (which is the "lkj(1)" parameter in brms).
-    For more, see: https://docs.pymc.io/notebooks/multilevel_modeling.html
+    # Candidate model 2 (Random intercepts)
+    Our second candidate model will extend the first to include random intercepts ($\alpha$),
+    and thus be our first multilevel (hierarchical) model. 
     
     '''
     
@@ -687,13 +684,11 @@ elif choice == "Multilevel (model 2)":
     
     st.latex(r''' 
         y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
-        \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
-        \beta_{varying_j} \sim Normal(\beta_j, \beta_{sigma_j}) \\
-        \alpha_{varying_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \mu_{i, j} = \alpha_{var_j} + \beta \cdot x_i \\
+        \alpha_{var_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
         \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
         \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
-        \beta_{sigma} \sim Normal(0, 0.5) \\
         \sigma \sim HalfNormal(0.5)
         ''')
     
@@ -710,8 +705,8 @@ elif choice == "Multilevel (model 2)":
     prior_choice = translation_sigma.get(selection_prior)
     
     ### code ###
-    py_model = ct.py_multilevel(model_name, prior_choice)
-    r_model = ct.R_multilevel(model_name, model_formula, prior_name, prior_choice)
+    py_model = ct.py_intercept(model_name, prior_choice)
+    r_model = ct.R_intercept(model_name, model_formula, prior_name, prior_choice)
 
     expander = st.beta_expander("🐒 Code-Monkey: Model specification")
     with expander: 
@@ -963,22 +958,29 @@ elif choice == "Multilevel (model 2)":
         with col2:
             st.code(R_hdi_param) 
     
-elif choice == "Student-t (model 3)":
+elif choice == "Multilevel Covariation (model 3)":
     
     # for f-strings.
-    model_context = "student"
-    model_name = "m_student" # should be in args
-    model_formula = "f_student" # should be in args
+    model_context = "covariation"
+    model_name = "m_covariation" # should be in args
+    model_formula = "f_covariation" # should be in args
     model_family = "gaussian" 
-    prior_name = "prior_student" # should be in args
+    prior_name = "prior_covariation" # should be in args
     data_type = "train"
-    idata_name = "student_idata"
+    idata_name = "covariation_idata"
     
     r'''
-    # Candidate model 3 (Student-T likelihood function)
-    Our third candidate model will be multilevel model (still random slopes and intercept)
-    but with a student-t likelihood function. Notice that this requires us to specify
-    one additional parameter ($\nu$). 
+    # Candidate model 3 (Random intercepts and slopes with covariation)
+    Our third candidate model will be a multilevel model with both random
+    intercepts and random slopes. The model will also model the covariance
+    of the random intercepts and random slopes. This is almost always desirable,
+    and is what happens by default in brms when we specify the (1+t|idx) formula. 
+    In pyMC3 we have to build this ourselves of course. There is still a lot I 
+    don't understand with regards to this, so do correct me & check the example docs.
+    
+    for R/brms, check: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html 
+    
+    for python/pyMC3, check: https://docs.pymc.io/notebooks/multilevel_modeling.html 
     
     '''
     
@@ -1011,26 +1013,39 @@ elif choice == "Student-t (model 3)":
     '''
     # Model specification (math)
     
-    Again, without the lkj parameter describing the correlation of 
-    random effects, and specified with generic priors. 
+    Here, we specify our new model with random intercepts and slopes,
+    as well as the covariance/correlation distributed as LKJ.
+    For a more thorough explanation and reference, see: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction
     
     '''
     
     st.latex(r''' 
-        y_{i, j} \sim StudentT(\mu_{i, j}, \sigma, \nu) \\
-        \mu_{i, j} = \alpha_{varying_j} + \beta_{varying_j} \cdot x_i \\
-        \beta_{varying_j} \sim Normal(\beta_j, \beta_{sigma_j}) \\
-        \alpha_{varying_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
+        \mu_{i, j} = \alpha_{idx_j} + \beta_{idx_j} \cdot x_i \\
+        \begin{bmatrix} \alpha_{idx} \\ \beta_{idx} \end{bmatrix} \sim MvNormal \left( \begin{bmatrix} \alpha \\ \beta \end{bmatrix}, \mathbf{S} \right) \\
+        \mathbf{S} = \begin{pmatrix} \sigma_{\alpha} & 0 \\ 0 & \sigma_{\beta} \end{pmatrix} \mathbf{R} \begin{pmatrix} \sigma_{\alpha} & 0 \\ 0 & \sigma_{\beta} \end{pmatrix} \\ 
         \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
-        \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
-        \beta_{sigma} \sim Normal(0, 0.5) \\
         \sigma \sim HalfNormal(0.5) \\
-        \nu \sim Gamma(2, 0.1)
+        \sigma_{\alpha} \sim HalfNormal(0.5) \\
+        \sigma_{\beta} \sim HalfNormal(0.5) \\
+        \mathbf{R} \sim LKJcorr(2)
         ''')
     
     '''
+    Where **S** is the covariance matrix and **R** is the corresponding correlation matrix. 
+    **R** is distributed as **LKJcorr(2)**.
+    Again, see: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction
+    '''
+    
+    '''
     # Model specification (code)
+    
+    As you will notice our code translation is not in both cases a one-to-one mapping.
+    It is pretty complicated, and the implementation which appears to be most common
+    in pyMC3 deviates slightly. As we will see from our plots and inference however, the
+    two models we create (in brms and pyMC3) appear to be more or less identical. 
+    
     '''
     
     ### code prep ###
@@ -1042,8 +1057,8 @@ elif choice == "Student-t (model 3)":
     prior_choice = translation_sigma.get(selection_prior)
     
     ### code ###
-    py_model = ct.py_student(model_name, prior_choice)
-    r_model = ct.R_student(model_name, model_formula, prior_name, prior_choice)
+    py_model = ct.py_covariation(model_name, prior_choice)
+    r_model = ct.R_covariation(model_name, model_formula, prior_name, prior_choice)
 
     expander = st.beta_expander("🐒 Code-Monkey: Model specification")
     with expander: 
@@ -1445,8 +1460,8 @@ elif choice == "Model Comparison":
 
 elif choice == "Prediction": 
     
-    model_name = "m_multilevel"
-    idata_name = "multilevel_idata"
+    model_name = "m_covariation"
+    idata_name = "covariation_idata"
     data_type = "test"
     
     '''
@@ -1486,10 +1501,10 @@ elif choice == "Prediction":
     col1, col2 = st.beta_columns(2)
     
     with col1: 
-        st.image("plots_python/multilevel_generic_HDI_predictions.jpeg") 
+        st.image("plots_python/covariation_generic_HDI_predictions.jpeg") 
     
     with col2: 
-        st.image("plots_R/multilevel_generic_HDI_predictions.png")
+        st.image("plots_R/covariation_generic_HDI_predictions.png")
     
     ### code ###
     # manually set for now. 

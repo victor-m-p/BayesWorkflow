@@ -54,7 +54,7 @@ m_pooled = fm.pooled(
     sigma = 0.5
 )
 
-m_multilevel = fm.multilevel(
+m_intercept = fm.intercept(
     t = t_train, 
     idx = idx_train, 
     y = y_train, 
@@ -62,7 +62,11 @@ m_multilevel = fm.multilevel(
     dims = dims, 
     sigma = 0.5)
 
-m_student = fm.student(
+# more coords
+coords["param"] = ["alpha", "beta"]
+coords["param_bis"] = ["alpha", "beta"]
+
+m_covariation = fm.covariation(
     t = t_train, 
     idx = idx_train, 
     y = y_train, 
@@ -73,14 +77,14 @@ m_student = fm.student(
 
 ## load the idata 
 idata_pooled = az.from_netcdf("../models_python/idata_pooled_generic.nc")
-idata_multilevel = az.from_netcdf("../models_python/idata_multilevel_generic.nc")
-idata_student  = az.from_netcdf("../models_python/idata_student_generic.nc")
+idata_intercept = az.from_netcdf("../models_python/idata_intercept_generic.nc")
+idata_covariation  = az.from_netcdf("../models_python/idata_covariation_generic.nc")
 
 ## model comparison
 loo_overview = az.compare({
     "m_pooled": idata_pooled,
-    "m_multilevel": idata_multilevel,
-    "m_student": idata_student})
+    "m_intercept": idata_intercept,
+    "m_covariation": idata_covariation})
 
 ## export it 
 dfi.export(

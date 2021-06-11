@@ -40,8 +40,8 @@ train <- train %>%
 
 # sampled models
 m_pooled_posterior <- readRDS("../models_R/m_pooled_generic_fit.rds")
-m_multilevel_posterior <- readRDS("../models_R/m_multilevel_generic_fit.rds")
-m_student_posterior <- readRDS("../models_R/m_student_generic_fit.rds")
+m_intercept_posterior <- readRDS("../models_R/m_intercept_generic_fit.rds")
+m_covariation_posterior <- readRDS("../models_R/m_covariation_generic_fit.rds")
 
 
 #' 
@@ -54,20 +54,20 @@ m_student_posterior <- readRDS("../models_R/m_student_generic_fit.rds")
 m_pooled_posterior <- add_criterion(m_pooled_posterior, 
                                     criterion = c("loo", "bayes_R2"))
 
-m_multilevel_posterior <- add_criterion(m_multilevel_posterior, 
+m_intercept_posterior <- add_criterion(m_intercept_posterior, 
                                         criterion = c("loo", "bayes_R2"))
 
-m_student_posterior <- add_criterion(m_student_posterior, 
+m_covariation_posterior <- add_criterion(m_covariation_posterior, 
                                      criterion = c("loo", "bayes_R2")) # one problematic observation.
 
 # run loo compare
 loo_compare(m_pooled_posterior,
-            m_multilevel_posterior,
-            m_student_posterior)
+            m_intercept_posterior,
+            m_covariation_posterior)
 
 # also uses stacking (and gives the same as pyMC3)
 loo_model_weights(m_pooled_posterior,
-                  m_multilevel_posterior,
-                  m_student_posterior)
+                  m_intercept_posterior,
+                  m_covariation_posterior)
 
 

@@ -46,7 +46,7 @@ train <- read_csv("../data/train.csv") %>%
 ## -----------------------------------------------------------------------------
 
 #formula 
-f_multilevel <- bf(y ~ 1 + t + (1+t|idx)) # random eff. structure
+f_multilevel <- bf(y ~ 0 + Intercept + t + (1|t) + (1|idx)) 
 
 
 #' 
@@ -57,33 +57,28 @@ f_multilevel <- bf(y ~ 1 + t + (1+t|idx)) # random eff. structure
 # fit the first model
 get_prior(formula = f_multilevel,
           data = train,
-          family = gaussian,
-          
-)
+          family = gaussian)
 
 # set priors: three levels.
 prior_multilevel_specific <- c(
-  prior(normal(0, 0.05), class = b),
-  prior(normal(1.5, 0.05), class = Intercept),
+  prior(normal(0, 0.05), class = b, coef = t),
+  prior(normal(1.5, 0.05), class = b, coef = Intercept),
   prior(normal(0, 0.05), class = sd),
-  prior(normal(0, 0.05), class = sigma),
-  prior(lkj(1), class = cor)
+  prior(normal(0, 0.05), class = sigma)
 )
 
 prior_multilevel_generic <- c(
-  prior(normal(0, 0.5), class = b),
-  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = b, coef = t),
+  prior(normal(1.5, 0.5), class = b, coef = Intercept),
   prior(normal(0, 0.5), class = sd),
-  prior(normal(0, 0.5), class = sigma),
-  prior(lkj(1), class = cor)
+  prior(normal(0, 0.5), class = sigma)
 )
 
 prior_multilevel_weak <- c(
-  prior(normal(0, 5), class = b),
-  prior(normal(1.5, 5), class = Intercept),
+  prior(normal(0, 5), class = b, coef = t),
+  prior(normal(1.5, 5), class = b, coef = Intercept),
   prior(normal(0, 5), class = sd),
-  prior(normal(0, 5), class = sigma),
-  prior(lkj(1), class = cor)
+  prior(normal(0, 5), class = sigma)
 )
 
 
@@ -272,7 +267,6 @@ save_plot(path = "../plots_R/multilevel_weak_HDI_fixed.png")
 
 
 #' 
-#' prediction intervals
 #' 
 ## -----------------------------------------------------------------------------
 

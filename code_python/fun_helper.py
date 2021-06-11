@@ -68,26 +68,31 @@ def export_summary(m_idata, model_type, prior_level):
 # plot hdi & save
 def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_prob = (.95, .8)):
     
-    # take out ppc 
-    if kind == "full" or kind == "fixed":
-        ppc = m_idata.posterior_predictive
-    elif kind == "predictions": 
-        ppc = m_idata.predictions
-    
     # unpack tuple & get unique t. 
     high, low = hdi_prob
     t_unique = np.unique(t)
     n_time = len(t_unique)
     
-    # take out data from ppc.
-    y_pred = ppc["y_pred"].mean(axis = 0).values
-    y_mean = y_pred.mean(axis = (0, 1))
-
-    # here the plots differ
-    if kind == "full" or kind == "predictions": 
-        outcome = y_pred.reshape((4000*n_idx, n_time)) # 4000 = 2000 (draws) * 2 (chains)
+    # take out ppc 
+    if kind == "full":
+        ppc = m_idata.posterior_predictive
+        y_pred = ppc["y_pred"].mean(axis = 0).values
+        y_mean = y_pred.mean(axis = (0, 1))
+        outcome = y_pred.reshape((4000*n_idx, n_time))
+    
     elif kind == "fixed": 
-        outcome = (ppc.alpha.values + ppc.beta.values * t_unique[:, None]).T
+        # should be the same as just posterior here I think.
+        ppc = m_idata.posterior_predictive
+        alpha = ppc.alpha.values #shape: (1, 4.000)
+        beta = ppc.beta.values #shape: (1, 4.000)
+        outcome = (alpha + beta * t_unique[:, None]).T
+        y_mean = outcome.mean(axis = 0)
+        
+    elif kind == "predictions": 
+        ppc = m_idata.predictions
+        y_pred = ppc["y_pred"].mean(axis = 0).values
+        y_mean = y_pred.mean(axis = (0, 1))
+        outcome = y_pred.reshape((4000*n_idx, n_time))
     
     # set-up plot
     fig, ax = plt.subplots(figsize = (10, 7))  
@@ -127,6 +132,7 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
                 dpi = 300)
 
 # HDI for parameters
+# consider alpha vs. alpha-mu.
 def hdi_param(m_idata, model_type, prior_level):
     
     fig, ax = plt.subplots(figsize = (10, 7))

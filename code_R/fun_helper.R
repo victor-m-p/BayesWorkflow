@@ -29,8 +29,7 @@ prediction_interval_pool <- function(fit, title, data = train, n_time = 100){
     ggplot(aes(x = t, y = y)) +
     stat_lineribbon(aes(y = .prediction), 
                     .width = c(.95, .8),
-                    color = "#08519C",
-                    point_interval = median_hdi) +
+                    color = "#08519C") + # hdi interval?
     geom_jitter(data = data, 
                 color = "navyblue", 
                 shape = 1, 
@@ -51,8 +50,7 @@ fixed_interval_pool <- function(fit, title, data = train, n_time = 100){
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = .value), 
                     .width = c(.95, .8), 
-                    color = "#08519C",
-                    point_interval = median_hdi) +
+                    color = "#08519C") + # hdi interval?
     geom_jitter(data = data, 
                 color = "navyblue", 
                 shape = 1,
@@ -89,12 +87,12 @@ prediction_interval_groups <- function(fit, title, data = train, n_time = 100){
   
   data %>%
     data_grid(t = seq_range(t, n = n_time), idx) %>%
-    add_predicted_draws(fit) %>%
+    add_predicted_draws(fit,
+                        allow_new_levels = T) %>%
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = .prediction), 
                     .width = c(.95, .8), 
-                    color = "#08519C",
-                    point_interval = median_hdi) +
+                    color = "#08519C") + #hdi interval?
     geom_jitter(data = data, 
                 color = "navyblue", 
                 shape = 1, 
@@ -115,8 +113,7 @@ fixed_interval_groups <- function(fit, title, data = train, n_time = 100){
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = .value), 
                     .width = c(.95, .8), 
-                    color = "#08519C",
-                    point_interval = median_hdi) +
+                    color = "#08519C") + #hdi interval?
     geom_jitter(data = data, 
                 color = "navyblue", 
                 shape = 1,
@@ -154,8 +151,7 @@ plot_predicted_groups <- function(fit, title, data = train, n_time = 100){
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = .prediction), 
                     .width = c(.95, .8), 
-                    color = "#08519C",
-                    point_interval = median_hdi) +
+                    color = "#08519C") + # hdi interval?
     geom_jitter(data = data, 
                 color = "navyblue", 
                 shape = 1, 

@@ -46,7 +46,7 @@ train <- read_csv("../data/train.csv") %>%
 ## -----------------------------------------------------------------------------
 
 #formula 
-f_pooled <- bf(y ~ 1 + t) # complete pooling 
+f_pooled <- bf(y ~ 0 + Intercept + t) # complete pooling 
 
 
 #' 
@@ -63,20 +63,20 @@ get_prior(formula = f_pooled,
 
 # set priors: three levels.
 prior_pooled_specific <- c(
-  prior(normal(0, 0.05), class = b),
-  prior(normal(1.5, 0.05), class = Intercept),
+  prior(normal(0, 0.05), class = b, coef = t),
+  prior(normal(1.5, 0.05), class = b, coef = Intercept),
   prior(normal(0, 0.05), class = sigma)
 )
 
 prior_pooled_generic <- c(
-  prior(normal(0, 0.5), class = b),
-  prior(normal(1.5, 0.5), class = Intercept),
+  prior(normal(0, 0.5), class = b, coef = t),
+  prior(normal(1.5, 0.5), class = b, coef = Intercept),
   prior(normal(0, 0.5), class = sigma)
 )
 
 prior_pooled_weak <- c(
-  prior(normal(0, 5), class = b),
-  prior(normal(1.5, 5), class = Intercept),
+  prior(normal(0, 5), class = b, coef = t),
+  prior(normal(1.5, 5), class = b, coef = Intercept),
   prior(normal(0, 5), class = sigma)
 )
 

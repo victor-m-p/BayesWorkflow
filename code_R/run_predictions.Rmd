@@ -24,7 +24,7 @@ load the model
 ```{r}
 
 # sampled models
-m_pooled_posterior <- readRDS("../models_R/m_multilevel_generic_fit.rds")
+m_covariation_posterior <- readRDS("../models_R/m_covariation_generic_fit.rds")
 
 ```
 
@@ -43,13 +43,13 @@ generate and plot predictions
 ```{r}
 
 plot_predicted_groups(
-  fit = m_pooled_posterior,
+  fit = m_covariation_posterior,
   title = "R/brms: Predictions intervals (predictions)",
   data = test
 )
 
 save_plot(
-  path = "../plots_R/multilevel_generic_HDI_predictions.png"
+  path = "../plots_R/covariation_generic_HDI_predictions.png"
 )
 
 ```
