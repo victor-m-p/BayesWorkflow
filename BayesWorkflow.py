@@ -65,11 +65,23 @@ choice = st.sidebar.radio('Sections:', ["Introduction", "Simulation & EDA", "Com
 if choice == "Introduction":
     
     '''
+    # Get in touch
+
+    [![Github Follow](https://img.shields.io/github/followers/victor-m-p?style=social)](https://github.com/victor-m-p/BayesWorkflow) &nbsp; [![Twitter Follow](https://img.shields.io/twitter/follow/vic_moeller?style=social)](https://twitter.com/vic_moeller)
+    
+    Please get in touch if you find the app interesting or have suggestions for improvements, have hit upon bugs or would like to see 
+    something covered which is not implemented at present. The app is a work in progress (and will probably stay that way) so I 
+    am very interested in feedback which can help me to improve this ressource.
+    
+    '''
+    
+    
+    '''
     # Purpose 
     
-    This notebook attempts to show how to carry out two (almost) identical bayesian analyses, using python (pyMC3) and R (brms). 
+    This notebook attempts to show how to carry out two (almost) identical bayesian analyses, using **pyMC3** (python) and **brms** (R). 
     The main purpose of this app is to show users with experience in one language how to carry out a bayesian analysis in the other. 
-    I have specifically had people who are looking to transition from R/brms to python/pyMC3 in mind, but people coming from python should also find the app interesting.
+    I have specifically had people who are looking to transition from brms to pyMC3 in mind, but people coming from python should also find the app interesting.
     I have tried to explain the code and concepts in selected parts, but this is not supposed to be an exhaustive guide to bayesian statistics nor pyMC3 or brms. 
     If you want to dive deeper into either bayesian statistics or more advanced analyses I have provided a list of good resources in the appendix (References & Inspiration).
     
@@ -80,18 +92,18 @@ if choice == "Introduction":
     
     For all parts of the analysis (for both languages) you can access reproducible code, and easily copy it to clipboard.
     I hope that this will encourage you to run the code alongside the app, since this is the only way to really understand what is going on.
-    While building a bridge between python/pyMC3 and R/brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better bayesin workflow.
+    While building a bridge between pyMC3 and brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better bayesin workflow.
     
     '''
     
     '''
     # Functionality 
     
-    You will see boxes with the titles *Code-Monkey*, *Language-Learner* and *Concept-Guru*. These let you dive deeper into the material:
+    You will see boxes with the titles **Code-Monkey**, **Language-Learner** and **Concept-Guru**. These let you dive deeper into the material:
     
-    * :monkey: "Code-Monkey": Display code to reproduce analysis
-    * :keyboard: "Language-Learner": Explanations of code-implementation differences between python/pyMC3 & R/brms
-    * :male_mage: "Concept-Guru": Conceptual deep-dives
+    * :monkey: *Code-Monkey*: Display code to reproduce analysis
+    * :keyboard: *Language-Learner*: Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * :male_mage: *Concept-Guru*: Conceptual deep-dives
 
     '''
     
@@ -117,7 +129,9 @@ if choice == "Introduction":
         
         6. Posterior predictive checks
         
-        7. Prediction
+        7. Model Comparison
+        
+        8. Prediction on unseen data
         
         '''
     with col2: 
@@ -131,18 +145,18 @@ elif choice == "Simulation & EDA":
     '''
     # Data (Simulation)
 
-    For this analysis we will simulate our own data. This is nice, because we will know the "true" parameter values. 
+    For this analysis we will simulate our own data. This is nice, because we will know the *true* parameter values. 
     We can spin our own story about what the data corresponds to. 
     
-    * *x-value* corresponds to consecutive years (t) 
+    * ```x-value``` corresponds to consecutive years (t) 
     
-    * *y-value* corresponds to grading on the danish citizenship test
+    * ```y-value``` corresponds to grading on the danish citizenship test
     
-    * *ID-value* corresponds to individual aliens
+    * ```ID-value``` corresponds to individual aliens
     
     Based on 15 consecutive years of data (t) and corresponding gradings (y) and a sample of 15 aliens (ID) we want to infer how fast how aliens learn about danish culture (beta), and how much they know when they arrive (alpha). 
     We might also be interested in the variability between aliens or our left-over uncertainty, but let's table that for now. 
-    Remember to check out the :monkey: Code-Monkey boxes to follow along with the code. 
+    Remember to check out the :monkey: *Code-Monkey* boxes to follow along with the code. 
     
     '''
     
@@ -206,7 +220,8 @@ elif choice == "Complete Pooling (model 1)":
     
     Our first candidate model will be a complete pooling model. 
     This model treats each observation at each time-point as if it belongs to the same alien (ID). 
-    You might already feel that this is not a satisfactory model, but bear with me. 
+    You might already feel that this is not a satisfactory model, but bear with me for now.
+    We will build on top of what we have learned and get to more complex models in the next sections. 
     
     '''
     
@@ -239,7 +254,7 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Model specification (math)
     
-    We can formulate the complete pooling model (with generic priors):
+    We can formulate the complete pooling model (with generic priors)
     
     '''
     
@@ -256,6 +271,9 @@ elif choice == "Complete Pooling (model 1)":
     
     Now we need to translate this into pyMC3 and brms code. 
     Throughout the app you can choose which prior-level to display code & plots for. 
+    I have run all analysis for three levels of priors, a generic prior (sigma and sd = 0.5)
+    is shown by default, a specific prior (sigma and sd = 0.05) and a weak prior (sigma and sd = 5).
+    For more on priors, see [Gelman's prior choice recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
     
     '''
     
@@ -320,8 +338,8 @@ elif choice == "Complete Pooling (model 1)":
     # Plate Notation 
     
     Something that is really nice in pyMC3 is that we can check whether we specified the model as we intended to. 
-    Our model is shown in plate notation, and which I think is less intuitive than the awesome Kruschke diagrams/plots (link). 
-    Once we learn to read them however, it is a useful check. 
+    Our model is shown in plate notation, and which I think is less intuitive than the awesome [Kruschke diagrams](http://www.sumsar.net/blog/2013/10/diy-kruschke-style-diagrams/).
+    They basically communicate the same though, and once we learn to read them they are a great sanity check.
     
     '''
     
@@ -340,9 +358,10 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Prior predictive checks
     
-    There are different levels of priors, see: https://jrnold.github.io/bayesian_notes/priors.html.
-    By default I will show the code and plots for what they refer to as a "generic weakly informative prior".
-    Feel free to explore what happens with a much more informative prior, or with a very weak prior.
+    The next thing we will want to assess is whether our priors are on a reasonable scale
+    as compared to the data. We can get nice *prior predictive checks* in both pyMC3 and brms. 
+    Here we plot 100 draws from our prior predictive (blue lines) against the true distribution of the data (black line).
+    In pyMC3 a blue dotted line shows the mean draws from our prior. 
     
     '''
     
@@ -399,7 +418,10 @@ elif choice == "Complete Pooling (model 1)":
     # Check traces (sampling)
     
     The first thing we might want to check now is wheather the sampling/computation was successfull. 
-    I like to generate *trace plots* at this point. There are nice in depth diagnostic plots available in both R and brms if we see issues (link). 
+    I like to generate *trace plots* at this point. 
+    If we observe issues at this point (e.g. divergences, poor mixing) 
+    there are good in diagnostic tools available for [pyMC3 models](https://docs.pymc.io/notebooks/Diagnosing_biased_Inference_with_Divergences.html)
+    and for [brms models](https://mc-stan.org/bayesplot/).
     
     '''
     
@@ -435,17 +457,17 @@ elif choice == "Complete Pooling (model 1)":
     For all prior levels we see healthy traces to the right (catterpillars),
     and we see reasonably smooth and well-mixed KDE/histograms to the right. 
     However, notice that the values for our parameters differ based on our priors.
-    The models fitted with either "Very Weak" or "Generic" priors are close, 
-    but the "Specific" priors bias the model heavily towards our priors. 
-    see: https://oriolabril.github.io/oriol_unraveled/python/arviz/matplotlib/2020/06/20/plot-trace.html
-    for more details on Arviz' plot_trace() and customization.  
+    The models fitted with either *weak* or *generic* priors have estimated the
+    parameters similarly, 
+    but the model fitted with *specific* priors restrict the posterior
+    (i.e. the priors constrain the posterior unduly). 
     '''
     
     '''
     # Summary
     
     We can now (optionally) check the summary of the model. We might not be interested in the estimated parameters (yet)
-    but the summary also gives us information about the number of effective samples and R-hat values. 
+    but the summary also gives us information about the number of **effective samples** and **R-hat values**. 
     
     '''
     
@@ -475,6 +497,10 @@ elif choice == "Complete Pooling (model 1)":
     # Posterior Predictive checks 
     
     If all is well so far we should now generate *posterior predictive checks*.  
+    Similarly to *prior predictive checks* we have blue draws and a black line
+    showing the true distribution. Check the *specific* prior and notice that 
+    the posterior has not adapted well here (too constrained by the strong prior
+    as discussed earlier).
     
     '''
     
@@ -516,7 +542,7 @@ elif choice == "Complete Pooling (model 1)":
     with expander: 
         
         '''
-        **QUIZ**: Based on the posterior predictive check, which do you think is an appropriate response? (choose one)
+        **QUIZ**: Based on the *posterior predictive check*, which do you think is an appropriate response? (choose one)
         '''
         
         option_a = st.checkbox('The model reliably captures the important patterns in the data (accept model)')
@@ -969,7 +995,7 @@ elif choice == "Multilevel Covariation (model 3)":
     data_type = "train"
     idata_name = "covariation_idata"
     
-    r'''
+    '''
     # Candidate model 3 (Random intercepts and slopes with covariation)
     Our third candidate model will be a multilevel model with both random
     intercepts and random slopes. The model will also model the covariance
@@ -978,9 +1004,9 @@ elif choice == "Multilevel Covariation (model 3)":
     In pyMC3 we have to build this ourselves of course. There is still a lot I 
     don't understand with regards to this, so do correct me & check the example docs.
     
-    for R/brms, check: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html 
+    for R/brms, check [ajkurz CH13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html)
     
-    for python/pyMC3, check: https://docs.pymc.io/notebooks/multilevel_modeling.html 
+    for python/pyMC3, check [pyMC3 docs](https://docs.pymc.io/notebooks/multilevel_modeling.html)
     
     '''
     
@@ -1015,7 +1041,7 @@ elif choice == "Multilevel Covariation (model 3)":
     
     Here, we specify our new model with random intercepts and slopes,
     as well as the covariance/correlation distributed as LKJ.
-    For a more thorough explanation and reference, see: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction
+    For a more thorough explanation and reference, see [ajkurz CH 13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction)
     
     '''
     
@@ -1035,7 +1061,7 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     Where **S** is the covariance matrix and **R** is the corresponding correlation matrix. 
     **R** is distributed as **LKJcorr(2)**.
-    Again, see: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction
+    Again, see [ajkurz CH13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction)
     '''
     
     '''
