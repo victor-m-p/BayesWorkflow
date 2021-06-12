@@ -31,18 +31,18 @@ translation_uncertainty = {
 
 translation_model = {
     'Pooled': 'pooled',
-    'Multilevel': 'intercept',
-    'Student-t': 'covariation'}
+    'Intercept': 'intercept',
+    'Covariation': 'covariation'}
 
 translation_mod_name = {
     'Pooled': 'm_pooled',
-    'Multilevel': 'm_intercept',
-    'Student-t': 'm_covariation'}
+    'Intercept': 'm_intercept',
+    'Covariation': 'm_covariation'}
 
 translation_idata = {
     'Pooled': 'pooled_idata',
-    'Multilevel': 'intercept_idata',
-    'Student-t': 'covariation_idata'
+    'Intercept': 'intercept_idata',
+    'Covariation': 'covariation_idata'
 }
 
 translation_code = {
@@ -1383,7 +1383,7 @@ elif choice == "Model Comparison":
     ### plot ### 
     selection_pp = st.radio(
         "Choose model type to display posterior predictive checks for ", 
-        ("Pooled", "Multilevel", "Student-t"),
+        ("Pooled", "Intercept", "Covariation"),
         index = 1)
     
     col1_pp, col2_pp = st.beta_columns(2)
@@ -1426,7 +1426,7 @@ elif choice == "Model Comparison":
     with col1_hdi1:
         selection_hdi1 = st.radio(
             "Choose model type to display HDI prediction intervals for", 
-            ("Pooled", "Multilevel", "Student-t"),
+            ("Pooled", "Intercept", "Covariation"),
             index = 1)
     
     with col2_hdi1: 
