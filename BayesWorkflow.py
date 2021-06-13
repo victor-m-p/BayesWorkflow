@@ -69,9 +69,9 @@ if choice == "Introduction":
 
     [![Github Follow](https://img.shields.io/github/followers/victor-m-p?style=social)](https://github.com/victor-m-p/BayesWorkflow) &nbsp; [![Twitter Follow](https://img.shields.io/twitter/follow/vic_moeller?style=social)](https://twitter.com/vic_moeller)
     
-    Please get in touch if you find the app interesting or have suggestions for improvements, have hit upon bugs or would like to see 
+    Please get in touch if you find the app interesting, have suggestions for improvements, hit upon bugs or would like to see 
     something covered which is not implemented at present. The app is a work in progress (and will probably stay that way) so I 
-    am very interested in feedback which can help me to improve this ressource.
+    am eager to receive feedback to further develop this ressource.
     
     '''
     
@@ -81,7 +81,7 @@ if choice == "Introduction":
     
     This notebook attempts to show how to carry out two (almost) identical bayesian analyses, using **pyMC3** (python) and **brms** (R). 
     The main purpose of this app is to show users with experience in one language how to carry out a bayesian analysis in the other. 
-    I have specifically had people who are looking to transition from brms to pyMC3 in mind, but people coming from python should also find the app interesting.
+    I have specifically had people who are looking to transition from brms to pyMC3 in mind, but people coming from pyMC3 should also find the app interesting.
     I have tried to explain the code and concepts in selected parts, but this is not supposed to be an exhaustive guide to bayesian statistics nor pyMC3 or brms. 
     If you want to dive deeper into either bayesian statistics or more advanced analyses I have provided a list of good resources in the appendix (References & Inspiration).
     
@@ -101,9 +101,9 @@ if choice == "Introduction":
     
     You will see boxes with the titles **Code-Monkey**, **Language-Learner** and **Concept-Guru**. These let you dive deeper into the material:
     
-    * :monkey: *Code-Monkey*: Display code to reproduce analysis
-    * :keyboard: *Language-Learner*: Explanations of code-implementation differences between python/pyMC3 & R/brms
-    * :male_mage: *Concept-Guru*: Conceptual deep-dives
+    * :monkey: **Code-Monkey**: Display code to reproduce analysis
+    * :keyboard: **Language-Learner**: Explanations of code-implementation differences between python/pyMC3 & R/brms
+    * :male_mage: **Concept-Guru**: Conceptual deep-dives
 
     '''
     
@@ -154,7 +154,10 @@ elif choice == "Simulation & EDA":
     
     * ```ID-value``` corresponds to individual aliens
     
-    Based on 15 consecutive years of data (t) and corresponding gradings (y) and a sample of 15 aliens (ID) we want to infer how fast how aliens learn about danish culture (beta), and how much they know when they arrive (alpha). 
+    Based on 15 consecutive years of data (t), corresponding gradings (y) and a sample of 15 aliens (ID) 
+    we want to infer how fast how aliens learn about danish culture (slope/beta), and how much they know when they arrive (intercept/alpha). 
+    Notice that our true *alpha* is equal to 1 and our true *beta* is equal to 0.3. These are the underlying values that we would ideally
+    like our model to be able to infer from the data.
     We might also be interested in the variability between aliens or our left-over uncertainty, but let's table that for now. 
     Remember to check out the :monkey: *Code-Monkey* boxes to follow along with the code. 
     
@@ -219,7 +222,8 @@ elif choice == "Complete Pooling (model 1)":
     # Candidate model 1 (Complete Pooling)
     
     Our first candidate model will be a complete pooling model. 
-    This model treats each observation at each time-point as if it belongs to the same alien (ID). 
+    This model treats each observation at each time-point as if it belongs to the same alien (ID),
+    and will only estimate one intercept (alpha) and one slope (beta). 
     You might already feel that this is not a satisfactory model, but bear with me for now.
     We will build on top of what we have learned and get to more complex models in the next sections. 
     
@@ -251,6 +255,30 @@ elif choice == "Complete Pooling (model 1)":
         with col2: 
             st.code(R_preprocessing) 
     
+    expander = st.beta_expander("⌨️ Language-Learner: Coords & dims?")
+    
+    with expander: 
+        '''
+        The preprocessing for the pyMC3 analysis is more extensive than the
+        proprocessing for the brms analysis. This is because we manually
+        specify the shape of our data, whereas this is handled
+        for us automatically in brms. 
+        
+        # Coords & dims 
+        I like to use labelled coords and dims instead of working with 
+        unlabelled arrays (which is also possible). It makes the whole analysis
+        pipeline a lot easier to handle if we invest some time in gathering our
+        data in the proper format before we start modeling. To really get familiar
+        with how to use labelled coords and dims for pyMC3 analyses check this
+        [great tutorial](https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html).
+        
+        # Python
+        If the python code looks unfamiliar I suggest checking out core libraries such
+        as [numpy](https://numpy.org/) and concepts such as [dictionaries](https://realpython.com/python-dicts/)
+        before proceeding. For bayesian analysis with pyMC3 and Arviz specifically, some knowledge
+        of [xarray](http://xarray.pydata.org/en/stable/) data structures is also helpful. 
+        '''
+    
     '''
     # Model specification (math)
     
@@ -271,9 +299,10 @@ elif choice == "Complete Pooling (model 1)":
     
     Now we need to translate this into pyMC3 and brms code. 
     Throughout the app you can choose which prior-level to display code & plots for. 
-    I have run all analysis for three levels of priors, a generic prior (sigma and sd = 0.5)
-    is shown by default, a specific prior (sigma and sd = 0.05) and a weak prior (sigma and sd = 5).
-    For more on priors, see [Gelman's prior choice recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
+    I have run all analysis for three levels of priors. A *generic prior* (sigma and sd = 0.5)
+    is shown by default, with the option of displaying a *specific prior* (sigma and sd = 0.05) 
+    or a *weak prior* (sigma and sd = 5).
+    For more on priors, see [Gelman's prior choice recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations).
     
     '''
     
@@ -306,40 +335,41 @@ elif choice == "Complete Pooling (model 1)":
 
             '''
             
-            # model formula vs. manual specification: 
+            # Model formula vs. manual specification
             
-            In brms we specify our model via a model formula (see right). In pyMC3 we can either explicitly specify our model,
-            or we can do it via a model formula (implemented in the glm module). I will use the explicit notation here, because it 
-            forces me to understand how the model works. The model formula might seem more intuitive or user friendly, 
-            but I think that it is too easy to go wrong when we do not know what is happening under the hood. 
+            In brms we specify our model via a model formula (to the right in the expandable section above). In pyMC3 we can either explicitly specify our model,
+            or we can do it via a model formula (implemented in the ```glm``` module). I will use the explicit notation here, because it 
+            forces me to understand how the model works and is more flexible. The model formula might seem more intuitive or user friendly, 
+            but I think that it is easy to go wrong when we do not know what is happening under the hood. 
             
-            for example, notice that we have specified the intercept with the special 0 + Intercept syntax, rather than the more common 1 + ... syntax. 
-            We should do this if we have not mean-centered our predictors and are creating a model that is not an intercept only model (which is the case here).
-            You can read more about this here: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/horoscopes-insights.html#use-the-0-intercept-syntax
+            for example, notice that we have specified the intercept with the special ```0 + Intercept``` syntax, rather than the more common ```1 + ... ``` syntax. 
+            We should do this if we have not mean-centered our predictors (which brms expects) and are creating a model that is not an intercept only model (ours is not).
+            Something like this is easy to miss (which I actually did at first). You can read more about the ```0 + Intercept``` syntax in [ajkurz CH15](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/horoscopes-insights.html#use-the-0-intercept-syntax).
             
-            # Shared Variables: 
+            # Shared Variables 
             
-            In the pyMC3 code (left) we have created something called a shared variable for our x variable, time (t). 
+            In the pyMC3 code (left) we have created something called a *shared variable* for our x variable, time (t) with the ```pm.Data()``` function.
             This has to be done if we want to generate predictions based on new data (data that the model was not trained on).
             We only need to create a shared variable for t here, because it is the only predictor variable in the model. 
-            pyMC3 relies on theano as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change in a different format. 
+            pyMC3 relies on **theano** as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change later in a different format. 
             
-            # Sigma (Normal or HalfNormal?): 
+            # Sigma (Normal or HalfNormal?) 
             
-            We have specified a normal distribution for the sigma distribution in the brms priors (right), but we have specified a half-normal distribution for the sigma distribution i pyMC3 (left). 
+            We have specified a *Normal distribution* for the sigma parameter in the brms priors (right), but we have specified a *Half-normal distribution* for the sigma parameter i pyMC3 (left). 
             This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow negative values). 
             The reason why we can do this in brms is because it realizes that draws from the sigma distribution have to be positive. 
-            So, when it encounters a negative value it throws away that sample. This will then effectively give us a half-normal distribution. 
+            So, when it encounters a negative value it throws away that sample and tries again. This will then effectively give us a Half-normal distribution. 
             pyMC3 does not baby-sit in this way, and will throw an error if we try to specify a normal distribution for the sigma parameter. 
-            You can try this for yourself. 
+            You can try this for yourself and see the machinery break down! 
             '''
     
     '''
     # Plate Notation 
     
-    Something that is really nice in pyMC3 is that we can check whether we specified the model as we intended to. 
-    Our model is shown in plate notation, and which I think is less intuitive than the awesome [Kruschke diagrams](http://www.sumsar.net/blog/2013/10/diy-kruschke-style-diagrams/).
-    They basically communicate the same though, and once we learn to read them they are a great sanity check.
+    Something that is really nice in pyMC3 is that we can check whether we specified our model as we intended to. 
+    The ```model_to_graphviz()``` function from pyMC3 shows the model we have specified in plate notation, which is regrettably less intuitive than the awesome [Kruschke diagrams](http://www.sumsar.net/blog/2013/10/diy-kruschke-style-diagrams/).
+    They basically communicate the same though, and once we learn to read them they are a great sanity check. Here we can see that we have estimated just one *alpha* distribution
+    and one *beta* distribution, as well as an overall model error *sigma*. 
     
     '''
     
@@ -359,7 +389,10 @@ elif choice == "Complete Pooling (model 1)":
     # Prior predictive checks
     
     The next thing we will want to assess is whether our priors are on a reasonable scale
-    as compared to the data. We can get nice *prior predictive checks* in both pyMC3 and brms. 
+    as compared to the data. We can get nice *prior predictive checks* in both pyMC3 with and brms.
+    In pyMC3 we use the ```plot_ppc()``` function from the **Arviz** plotting library, and in brms we rely on the ```pp_check()``` function.
+    Both ```plot_ppc()``` and ```pp_check()``` are used for both prior predictive checks and posterior predictive checks
+    (depending on the data that we input to the functions).  
     Here we plot 100 draws from our prior predictive (blue lines) against the true distribution of the data (black line).
     In pyMC3 a blue dotted line shows the mean draws from our prior. 
     
@@ -392,12 +425,36 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_pp)
         with col2:
             st.code(R_pp) 
-            
+    
+    expander = st.beta_expander("⌨️ Language-Learner: Prior predictive checks")
+    
+    with expander: 
+        '''
+        # brms 
+        In the brms code (right) we simply pass our model fitted with 
+        ```sample_prior = "only"``` to the ```pp_check()``` function.
+        The ```pp_check()``` function will visualize prior predictive draws
+        because this is what is available (i.e. we have not sampled the posterior yet). 
+        I am not sure whether it is possible to force ```pp_check()``` to show
+        prior draws once we have sampled the posterior with ```sample_prior = TRUE```.
+        Let me know if this is indeed possible. 
+        
+        # pyMC3
+        In pyMC3 we have only compiled our model so far. Whereas model compilation & 
+        sampling happens in the same step for brms, they are separate steps in pyMC3.
+        This means that we now have to sample the prior predictive with the 
+        ```sample_prior_predictive()``` function from pyMC3 before we can visualize
+        draws from the prior predictive. 
+        
+        '''
+        
+        
     '''
     # Sample posterior
     
-    We have now verified that the we have specified our model correctly (plate) and let's say that we are happy with our prior predictive checks.
-    We should now sample the posterior. 
+    We have now verified that the we have specified our model correctly with the plate diagram,
+    and let's say that we are happy with our prior predictive checks.
+    We should now press the inference button and sample the posterior. 
     
     '''
     
@@ -413,14 +470,40 @@ elif choice == "Complete Pooling (model 1)":
         with col2:
             st.code(R_sample) 
     
+    expander = st.beta_expander("⌨️ Language-Learner: Inference button")
+    
+    with expander:
+        '''
+        # Overall structure
+        As we noted in the *Language-Learner* section for prior predictive checks,
+        the model compilation and model sampling steps are separated in pyMC3 
+        whereas they are not in brms. This means that we now have to recompile our
+        model in brms with ```sample_prior = TRUE``` whereas we continue to use
+        our compiled model from pyMC3 and now sample the posterior (just as we 
+        sampled the prior before). Notice that we keep adding our data objects
+        (prior predictive, posterior, etc.) to our idata object, which I just find
+        much easier than having one array of samples for each. This follows the 
+        great workflow of [oriol](https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html).
+        
+        # Tuning
+        For all models in this tutorial, I will be using some model tuning
+        settings that I have adopted from Riccardo Fusaroli. 
+        Specifically, we set the ```target_accept``` (pyMC3) and 
+        ```adapt_delta``` (brms) to .99 and the ```max_treedepth``` (pyMC3 & brms) to 20. 
+        Both will mean that our samples will be more expensive (computationally)
+        but they will also be of higher quality, and might save us time in the long
+        run, by avoiding the need to re-run models with divergences. 
+        
+        '''
     
     '''
     # Check traces (sampling)
     
-    The first thing we might want to check now is wheather the sampling/computation was successfull. 
-    I like to generate *trace plots* at this point. 
-    If we observe issues at this point (e.g. divergences, poor mixing) 
-    there are good in diagnostic tools available for [pyMC3 models](https://docs.pymc.io/notebooks/Diagnosing_biased_Inference_with_Divergences.html)
+    The first thing we might want to check after sampling the posterior is wheather computation was successfull. 
+    I like to generate *trace plots* at this point. In pyMC3 we can use the ```plot_trace()```
+    function from **Arviz** and in brms we can use the ```plot()``` function from **brms**. 
+    If we observe issues at this point (e.g. divergences, poor mixing, etc.) 
+    there are good diagnostic tools available for both [pyMC3 models](https://docs.pymc.io/notebooks/Diagnosing_biased_Inference_with_Divergences.html)
     and for [brms models](https://mc-stan.org/bayesplot/).
     
     '''
@@ -454,13 +537,14 @@ elif choice == "Complete Pooling (model 1)":
     
     '''
     
-    For all prior levels we see healthy traces to the right (catterpillars),
-    and we see reasonably smooth and well-mixed KDE/histograms to the right. 
+    For all prior levels we see healthy traces to the right (caterpillars),
+    and we see reasonably smooth and well-mixed KDE/histograms to the left. 
     However, notice that the values for our parameters differ based on our priors.
     The models fitted with either *weak* or *generic* priors have estimated the
     parameters similarly, 
-    but the model fitted with *specific* priors restrict the posterior
-    (i.e. the priors constrain the posterior unduly). 
+    but the model fitted with *specific* priors visibly restrict the posterior
+    (i.e. the priors constrain the posterior unduly). One could use *updating checks*
+    to visualize how constrained the posterior is by the prior. 
     '''
     
     '''
@@ -468,6 +552,8 @@ elif choice == "Complete Pooling (model 1)":
     
     We can now (optionally) check the summary of the model. We might not be interested in the estimated parameters (yet)
     but the summary also gives us information about the number of **effective samples** and **R-hat values**. 
+    We can note already that the model with generic priors has inferred *alpha* to be 1.1 (vs. actual 1) and *beta* to be 0.2 (vs. actual 0.3).
+    Note that our actual data might not have mean *alpha* equal to 1 and mean *beta* equal to 0.3. 
     
     '''
     
@@ -496,11 +582,9 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Posterior Predictive checks 
     
-    If all is well so far we should now generate *posterior predictive checks*.  
-    Similarly to *prior predictive checks* we have blue draws and a black line
+    If all is well so far we should now generate *posterior predictive checks*. Similarly to *prior predictive checks* we have blue draws and a black line
     showing the true distribution. Check the *specific* prior and notice that 
-    the posterior has not adapted well here (too constrained by the strong prior
-    as discussed earlier).
+    the posterior has not adapted well here (too constrained by the strong prior to properly learn from the data).
     
     '''
     
@@ -533,48 +617,37 @@ elif choice == "Complete Pooling (model 1)":
             st.code(R_pp2) 
     
     
-    ### Quiz ###
-    expander = st.beta_expander("🧙‍♂️ Concept-Guru: Posterior Predictive Checks")
-    #selection_quiz = st.multiselect(
-    #    "QUIZ: The posterior predictive check indicates our model:", 
-    #    ("reasonably captures patterns in the data (accept model)", "does not reliably capture patterns in the data (reject model)"),
-    #    index = 1)
+    
+    ### language learner ###
+    expander = st.beta_expander("⌨️ Language-Learner: Posterior predictive checks")
+    
     with expander: 
-        
         '''
-        **QUIZ**: Based on the *posterior predictive check*, which do you think is an appropriate response? (choose one)
+        Just as with the prior predictive checks we need to sample the 
+        posterior predictive before we can visualize it in pyMC3. This happens with
+        the ```sample_posterior_predictive()``` function from pyMC3.
         '''
-        
-        option_a = st.checkbox('The model reliably captures the important patterns in the data (accept model)')
-        option_b =  st.checkbox('The model does not reliably capture the important patterns in the data (reject model)')
-        
-        if option_a: 
-        
-            '''
+    
+    ### concept guru ###
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: Posterior predictive checks")
+
+    with expander: 
+        '''
+        We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
+        The posterior has long tails which is not well captured by our model. 
+        We should reject this model, and consider what we have missed. I often find that the issue is that the *likelihood-function*
+        is improper, or that the model has not been specified with the appropriate *random effects structure*. 
             
-            I disagree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
-            The posterior has long tails (is not normally distributed) which is not well captured by our model. 
-            We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
-            is improper, or that the model has not been specified with the appropriate random effects structure. 
-            
-            '''
-        
-        if option_b: 
-            '''
-            I agree: We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
-            The posterior has long tails (is not normally distributed) which is not well captured by our model. 
-            We should reject this model, and consider what we have missed. I often find that the issue is that the likelihood-function
-            is improper, or that the model has not been specified with the appropriate random effects structure. 
-            '''
+        '''
     
     '''
     # HDI (vs. data)
-    
+
     We can also now run the model forward (i.e. generate predictions from the model). 
     We can compare these model predictions with the data that the model is trained on, to check whether the model has captured the patterns in the data.
-    We can do this either for (a) fixed effects only or (b) with the full model uncertainty. 
+    We can do this either for (a) **fixed effects** only or (b) with the **full model uncertainty**. 
     If we generate predictions for fixed effects only, we will get predictions for the *mean* of the population. 
-    If we generate predictions with the full model uncertainty  (incl. sigma) we will get predictions for individuals.
+    If we generate predictions with the full model uncertainty  (incl. sigma and potential random effects) we will get predictions for individuals.
     '''
     
     ### plot ###
@@ -620,12 +693,55 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_hdi)
         with col2:
             st.code(R_hdi) 
-            
+    
+    # language learner #
+    expander = st.beta_expander("⌨️ Language-Learner: Posterior Predictive (& HDI)")
+    
+    with expander: 
+        '''
+        # brms 
+        In brms, we use the convenience functions ```add_fitted_draws()``` and 
+        ```add_predicted_draws``` from the [tidybayes package](http://mjskay.github.io/tidybayes/articles/tidy-brms.html).
+        The functions allow us to gather draws in a tidy format 
+        for either fixed effects, or with the full uncertainty of the model.
+        For an example of how to do this with both tidybayes (as here) and 
+        manually in R, see [ajkurz CH12](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/multilevel-models.html).
+        
+        # pyMC3
+        for the *fixed effects only* predictions in pyMC3 we extract 
+        our posterior predictive draws of the *alpha* and *beta* parameters
+        and multiply *beta* with our x-variable time (t). 
+        For the *full uncertainty* predictions we simply use our y predictions
+        from the posterior predictive. Note that we have to do a little bit
+        of reshaping (data wrangling) to make the dimensions compatible. 
+        
+        '''
+    # concept guru #
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: HDI intervals")
+    
+    with expander: 
+        '''
+        Do you think the posterior predictive (and HDI intervals) do a good job of reproducing the data?
+        
+        Something we might note for the *fixed effects only* predictions is that the trend looks right,
+        but that the HDI intervals are very narrow. Models that do not use the proper hierarchical structure
+        of the data are typically over confident because they do not incorporate the proper uncertainty. 
+        
+        For the *full uncertainty* predictions we see that the HDI intervals appear sufficiently wide,
+        but we also notice that the uncertainty intervals are constant throughout the time-points -
+        even though we observe that the data-points (observations) are more spread out for the later time-points.
+        The reason that we observe this is that the model has no parameter which allows it to become more uncertain
+        for later time-points. The model only has three parameters; *alpha*, *beta* and *sigma* and we might
+        now start to wonder how to improve the model to capture the fact that observations spread out with time. 
+
+        '''
+    
     '''
     # HDI (parameters)
     
     The last thing we might want to inspect at this point is the estimated distributions (and HDI intervals) for our inferred parameters. 
-    
+    In pyMC3 this can be achieved with the ```plot_forest()``` function from **Arviz** and in brms it can be achieved with the
+    ```mcmc_areas()``` function from the **bayesplot** library. 
     '''
     
     ### plot ###
@@ -655,6 +771,19 @@ elif choice == "Complete Pooling (model 1)":
         with col2:
             st.code(R_hdi_param) 
     
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: inferred distributions")
+    
+    with expander: 
+        '''
+        The HDI intervals for our parameters *alpha*, *beta* and *sigma*
+        are much narrower for the model fitted with a *specific* prior 
+        than for models fitted with the *generic* and *weak* prior. 
+        This is not because the model has good reason to be this sure about 
+        our parameters given the data, but because we have specified extremely
+        restrictive priors which force the model to be falsely certain about
+        (wrong) parameter values. 
+        '''
+    
 elif choice == "Random Intercepts (model 2)":
     
     # for f-strings.
@@ -668,8 +797,8 @@ elif choice == "Random Intercepts (model 2)":
     
     r'''
     # Candidate model 2 (Random intercepts)
-    Our second candidate model will extend the first to include random intercepts ($\alpha$),
-    and thus be our first multilevel (hierarchical) model. 
+    Our second candidate model will extend on the complete pooling model to also include *random intercepts* ($\alpha$),
+    for each alien (ID). It will thus be our first *multilevel* (*hierarchical*) model. 
     
     '''
     
@@ -702,24 +831,28 @@ elif choice == "Random Intercepts (model 2)":
     '''
     # Model specification (math) 
     
-    Specification is for the pyMC3 model without parameter for the 
-    correlation between random effects (lkj). Also here concretely
-    specified for the generic prior. 
+    Our new model can be formulated in mathematical (pseudo-code) notation as below.
+    We are now estimating an intercept distribution for each alien (ID) and this
+    distribution is based on an underlying distribution for the population.
+    As we know, it is distributions all the way down. 
     
     '''
     
     st.latex(r''' 
         y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
         \mu_{i, j} = \alpha_{var_j} + \beta \cdot x_i \\
-        \alpha_{var_j} \sim Normal(\alpha_j, \alpha_{sigma_j}) \\
+        \alpha_{var_j} \sim Normal(\alpha_j, \alpha_{\sigma_j}) \\
         \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
-        \alpha_{sigma} \sim HalfNormal(0, 0.5) \\
+        \alpha_{\sigma} \sim HalfNormal(0.5) \\
         \sigma \sim HalfNormal(0.5)
         ''')
     
     '''
     # Model specification (code)
+    
+    Again, we need to translate this into code in pyMC3 and brms. 
+    
     '''
     
     ### code prep ###
@@ -744,9 +877,38 @@ elif choice == "Random Intercepts (model 2)":
         with col2_model: 
             st.code(r_model)
     
+    expander = st.beta_expander("⌨️: Language-Learner: Model specification")
+    
+    with expander: 
+        '''
+        # Shared Variables (again)
+        In the pyMC3 code (left) we now have *two* rather than one shared variable. 
+        In addition to the x-variable time (t) we have now also specified ID as a shared variable.
+        This is because ID is now a part of our model (random intercepts for IDs). 
+        As such, if we wish to generate predictions for our IDs (or new IDs) we will want to
+        be able to feed the model new data for this variable. 
+        
+        # Dims 
+        Another thing to note in the pyMC3 code is that we have specified 
+        ```dims = "idx"``` for the varying intercepts parameter (alpha_var). 
+        This tells the model that we wish to estimate one distribution (parameter)
+        for each of the IDs that we supplied in our ```coords``` earlier. 
+        
+        # Inheritance
+        Note that the ```alpha_var``` parameter inherits *sigma* and *mu* from the population
+        distributions. Each IDs intercept is drawn from these population distributions for 
+        *mu* and *sigma*. This is less obvious from the brms implementation (right) but the 
+        same thing is happening under the hood.  
+        
+        '''
+        
     '''
     # Plate Notation 
     
+    The structure of the model has changed as reflected in the plate diagram. 
+    There is still only one *beta* and overall error *sigma* for the model. 
+    However, we now estimate 15 *alpha* values, one for each alien (ID). 
+    These are shown to be drawn from the population level distributions. 
     '''
     
     ### plot ###
@@ -762,6 +924,9 @@ elif choice == "Random Intercepts (model 2)":
     
     '''
     # Prior predictive checks
+    
+    Again, we now generate prior predictive checks. 
+    The code to achieve this is the same as for the *complete pooling* model. 
     
     '''
     ### plot ###
@@ -794,6 +959,10 @@ elif choice == "Random Intercepts (model 2)":
     
     '''
     # Sample posterior
+    
+    And again, we now press the inference button after having checked the plate diagram
+    and found the prior predictive checks reasonable. The code to achieve this is the
+    same as for the *complete pooling* model. 
 
     '''
     
@@ -812,6 +981,12 @@ elif choice == "Random Intercepts (model 2)":
     
     '''
     # Check traces (sampling)
+    
+    We follow the workflow from the first model (complete pooling) and check our traces.
+    In the pyMC3 trace plot (left) we see that our ```alpha_var``` parameter shows us 
+    the intercept distributions for each ID. This is the middle distribution with a lot of lines/KDEs.
+    There are still no divergences for any of the models. So far so good. 
+    
     '''
     
     ### plot ###
@@ -844,6 +1019,13 @@ elif choice == "Random Intercepts (model 2)":
     '''
     # Summary
     
+    Again, we produce a summary to check **effective samples** (good) and 
+    **R-hat values** (good). We note that the estimation for our main parameters 
+    (*alpha*, *beta*) has not drastically changed, but our overall model error 
+    (*sigma*) has been reduced significantly as compared to the complete pooling model. 
+    in pyMC3 (which is shown) we also get estimations for the inferred intercept (*alpha*)
+    for each ID. 
+    
     '''
     
     ### plot ###
@@ -870,6 +1052,10 @@ elif choice == "Random Intercepts (model 2)":
 
     '''
     # Posterior Predictive checks 
+    
+    We now generate *posterior predictive checks*. 
+    They now look slightly better than the complete pooling model
+    that we did before, but there still appears to be a systematic issue. 
     
     '''
     
@@ -903,6 +1089,16 @@ elif choice == "Random Intercepts (model 2)":
 
     '''
     # HDI (vs. data)
+    
+    We now see wider HDI intervals for the *fixed effects* only posterior predictions
+    (for models fitted with *generic* and *weak* priors). This appears like a more 
+    reasonable uncertainty estimation (around the population mean) than what we had
+    for the *complete pooling* model. 
+    
+    Notice that the HDI intervals are still equally wide for all time-points (t). 
+    We still have not given the model room to accommodate the fact that our observations
+    are more spread out for later time-points than early time-points. We will tackle 
+    this issue in the next section (*multilevel covariation*).
     
     '''
     
@@ -954,6 +1150,11 @@ elif choice == "Random Intercepts (model 2)":
             
     '''
     # HDI (parameters)
+    
+    We observe chiefly that our uncertainty with regards to *alpha*
+    has now grown, while our model error *sigma* has been reduced. 
+    The *random intercepts* model appears to be more reasonable than the
+    *complete pooling* model (which it also should given our data generating process). 
     
     '''
     
@@ -997,16 +1198,16 @@ elif choice == "Multilevel Covariation (model 3)":
     
     '''
     # Candidate model 3 (Random intercepts and slopes with covariation)
-    Our third candidate model will be a multilevel model with both random
-    intercepts and random slopes. The model will also model the covariance
+    Our third candidate model will be a multilevel model with both *random
+    intercepts* and *random slopes*. The model will also model the *covariance*
     of the random intercepts and random slopes. This is almost always desirable,
-    and is what happens by default in brms when we specify the (1+t|idx) formula. 
-    In pyMC3 we have to build this ourselves of course. There is still a lot I 
-    don't understand with regards to this, so do correct me & check the example docs.
+    and is what happens by default in brms when we use the ```(1+t|idx)``` syntax in the model formula. 
+    In pyMC3 we have to build this ourselves of course. 
     
-    for R/brms, check [ajkurz CH13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html)
-    
-    for python/pyMC3, check [pyMC3 docs](https://docs.pymc.io/notebooks/multilevel_modeling.html)
+    *NB: There is still a lot I don't understand with regards to this, 
+    both mathematically and implementation wise. 
+    Do correct me & check the [example docs for pyMC3](https://docs.pymc.io/notebooks/multilevel_modeling.html) 
+    and [ajkurz for brms](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html) for yourselves!*
     
     '''
     
@@ -1041,7 +1242,7 @@ elif choice == "Multilevel Covariation (model 3)":
     
     Here, we specify our new model with random intercepts and slopes,
     as well as the covariance/correlation distributed as LKJ.
-    For a more thorough explanation and reference, see [ajkurz CH 13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction)
+    For a more thorough explanation and reference, see [ajkurz CH 13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction).
     
     '''
     
@@ -1067,7 +1268,7 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # Model specification (code)
     
-    As you will notice our code translation is not in both cases a one-to-one mapping.
+    As you will notice our code translation is not in both cases a one-to-one mapping of the pseudo-code.
     It is pretty complicated, and the implementation which appears to be most common
     in pyMC3 deviates slightly. As we will see from our plots and inference however, the
     two models we create (in brms and pyMC3) appear to be more or less identical. 
@@ -1099,6 +1300,9 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # Plate Notation 
     
+    This is getting more and more interesting. 
+    We now estimate *random intercepts* and *random slopes* as well as their *covariation* (LKJCholeskyCov).
+    
     '''
     
     ### plot ###
@@ -1114,6 +1318,8 @@ elif choice == "Multilevel Covariation (model 3)":
     
     '''
     # Prior predictive checks
+    
+    Run prior predictive checks. The code is the same as for both previous models. 
     
     '''
     ### plot ###
@@ -1147,6 +1353,9 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # Sample posterior
     
+    Press the inference button and sample!
+    The code is the same as for both previous models.
+    
     '''
     
     ### code ###
@@ -1164,6 +1373,16 @@ elif choice == "Multilevel Covariation (model 3)":
     
     '''
     # Check traces (sampling)
+    
+    We still do not get any divergences or observe any obvious issues.
+    Notice that we have been tuning our models for both pyMC3 and brms (when sampling). 
+    In particular we have set ```adapt_delta``` (pyMC3) and ```target_accept``` (brms) to .99
+    and ```max_treedepth``` to 20 (pyMC3 & brms). This is more costly (slow) than
+    relying on the baseline settings in either implementation, but gives us better samples,
+    and helps ensure that the models will diverge less (given that our specification is reasonable).
+    Especially the model with *specific* priors could give divergences without tuning
+    (in fact I think it does, but try it out for yourself).
+    
     '''
     
     ### plot ###
@@ -1196,6 +1415,10 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # Summary
     
+    Again, we observe that the estimation for our main parameters of interest, *alpha* and *beta*
+    remain largely unchanged (although there is more uncertainty for both *alpha* and *beta* now).
+    Our model error *sigma* is lower than for both the previous models.  
+    
     '''
     
     ### plot ###
@@ -1222,6 +1445,11 @@ elif choice == "Multilevel Covariation (model 3)":
 
     '''
     # Posterior Predictive checks 
+    
+    WOW! The posterior predictive checks are starting to look really good 
+    for the models fitted with *generic* and *weak* priors. 
+    We now appear to have a model which is reliably captures the main patterns 
+    in the data. 
     
     '''
     
@@ -1255,6 +1483,14 @@ elif choice == "Multilevel Covariation (model 3)":
 
     '''
     # HDI (vs. data)
+    
+    The posterior predictive for both *fixed effects* and *full uncertainty* 
+    now both show the really nice property that the HDI intervals are 
+    getting wider over time. 
+    
+    In addition, the HDI intervals are wider than for both the *complete pooling*
+    and the *random intercepts* models. Our model is generating better predictions
+    while also being more honest (uncertain) with regards to its capabilities. 
     
     '''
     
@@ -1307,6 +1543,12 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # HDI (parameters)
     
+    Our model now has the right *sigma*, which we specified as Normal(0, 0.5). 
+    It also has most uncertainty with regards to the *alpha* parameter, which is
+    also true to the data generating process (see Simulation & EDA). 
+    *beta* is slightly low, and *alpha* is slightly high, but this could be due
+    to random sampling variation in our simulation. 
+    
     '''
     
     ### plot ###
@@ -1344,39 +1586,51 @@ elif choice == "Model Comparison":
     '''
     # Model comparison
     
-    We will only now compare the models with what I have
-    
-    called "generic" priors (sigma, sd = 0.5). 
+    In this section we will do model comparison of the three kinds of models we have 
+    implemented so far; *complete pooling*, *random intercepts* and *multilevel covariation* models.
+    We will only compare models fitted with *generic* priors to keep it relatively clean. 
     
     I like to compare models in two ways: 
     
-    1. Using information criteria (loo). 
+    1. Using information criteria (LOO). 
     
-    2. Using posterior predictive checks (& potentially predictions on unseen data). 
-    
-    If you want to know more check the 🧙‍♂️ Concept-Guru section. 
+    2. Using posterior predictive checks and posterior predictive against data. 
     
     '''
     
-    expander = st.beta_expander("🧙‍♂️ Model Comparison")
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: Model Comparison")
     
     with expander: 
         
         '''
-        The second one always works (pp checks). Since Bayesian models are always generative (see McElreath)
-        we can simulate/generate new data based on our fitted distributions over parameters
-        and our likelihood function. 
-        The first is typically invalid if we want to compare models with different
-        likelihood functions. In our specific case however (Gaussian and Student-t) however,
-        it is valid (find source). 
+        # Posterior Predictive 
+        We can always evaluate model quality based on posterior predictive checks,
+        and based on how the data looks in the predictive posterior (i.e. the HDI plots we have been doing).
+        Since Bayesian models are always generative 
+        we can simulate/generate new data based on our estimated distributions over parameters
+        and our likelihood function (see "Statistical Rethinking" by Richard McElreath). 
+        We should be able to (forward) generate data which captures the main patterns in the data that 
+        the model is trained on. 
+        
+        # Information Criteria 
+        Information criteria attempt to approximate cross-validation results.
+        LOO-CV approximates leave-one-out cross validation, without actually 
+        performing *k* iterations (see "Bayesian Analysis with Python" by Osvaldo Martin). 
+        LOO is generally preferred over e.g. WAIC and is the baseline implementation. 
+        An issue with this kind of model comparison is that it is typically not valid
+        for comparing models with different *likelihood-functions* (a notable exception
+        is that it is valid for comparing models with *Gaussian* and *Student-t* 
+        likelihood functions). 
+        
         '''
     
     
     '''
     # Compare posterior predictive
     
-    Which one do you think looks the most reasonable?
-    Are there any of the models that look particularly worse?
+    From visually inspecting (and comparing) the posterior predictive checks,
+    the *multilevel covariation* model appears to reproduce the data much better
+    than both the *complete pooling* and the *random intercepts* models. 
     
     '''
     
@@ -1414,9 +1668,10 @@ elif choice == "Model Comparison":
     '''
     # Compare HDI
     
-    Now lets look at model predictions,
-    both for fixed effects only, and with the full uncertainty. 
-    Again: which model do you think we should prefer?
+    Here we observe (as we had already noted earlier) that only the 
+    *covariation* model seems to incorporate appropriate uncertainty,
+    while also capturing the essential pattern that the data is more
+    spread out for later time-points (t). 
     
     '''
     
@@ -1468,21 +1723,31 @@ elif choice == "Model Comparison":
             st.code(R_hdi) 
     
     '''
-    # Information criterion (loo)
+    # Information criterion (LOO)
     
-    We have now done some eye-balling and will now check what loo has to say. 
+    Indeed, when we compare the models using LOO, the *covariation* model
+    is heavily favored against both of the other models we have created. 
+    This suggests that the additional parameters that we have estimated are
+    supported by the data (they do not overfit). in the ```weight``` column,
+    we can see that the *covariation* model gets almost all of the weight
+    (indicating that our LOO comparison is very clearly in favor of this model). 
+    Only python (**Arviz**) output shown below.
     
     '''
     
     st.image(f"plots_python/loo_comparison.png")
     
-    '''
-    add "Concept-Guru", explaining that loo is leave-one-out approximation. 
-    Here it is indicated that pooled model "underfits" and that
-    student-t model "overfits" (i.e. the extra parameter (nu "v"))
-    is not giving us enough to earn its keep. 
+    # get the loo for python & R
+    R_loo = ct.R_loo()
+    py_loo = ct.py_loo()
     
-    '''
+    expander = st.beta_expander("🐒 Code-Monkey: LOO information criteria")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_loo)
+        with col2:
+            st.code(R_loo) 
 
 elif choice == "Prediction": 
     
@@ -1493,13 +1758,14 @@ elif choice == "Prediction":
     '''
     # Prediction on unseen data
     
-    This will be only a brief introduction to prediction in pyMC3/brms,
-    and will only cover predicting (1) groups that are already in the data
-    and (2) only the trend for the group (not clusters / individuals). 
-    If you want to see more prediction (e.g. on new groups or on individuals)
+    This will be only a brief introduction to prediction in *pyMC3* and *brms*.
+    We will only cover predicting (1) groups that are already in the data
+    and (2) only the trend for the population (not clusters or IDs). 
+    If you want to see more on prediction (e.g. on new groups or on IDs)
     Then please let me know. The process is largely the same though, and 
     you can check the "References & Inspiration" page to see where to go next. 
-    In this section we will only be predicting based on the "multilevel model". 
+    In this section we will only be predicting from the *covariation* model,
+    as we previously found that this was our most appropriate model. 
     
     '''
     
@@ -1515,11 +1781,30 @@ elif choice == "Prediction":
         with col2:
             st.code(R_prep) 
     
+    expander = st.beta_expander("⌨️ Language-Learner: Prediction & Shared variables")
+    
+    with expander: 
+        '''
+        in pyMC3 we finally have an excuse to use the shared variables that we 
+        implemented all the way back when we specified our models. Here, we change
+        the shared x-variable ```t_shared``` to be the test data rather than the
+        training data, and we change the ID variable ```idx_shared``` to be the
+        test IDs rather than the train IDs. 
+        
+        We specify prediction *coords* in order to keep the data format labelled and
+        clean and we add the predictions to our idata object. For more in depth
+        on *coords*, *dims* and prediction in pyMC3 check out the [example doc](https://docs.pymc.io/notebooks/multilevel_modeling.html)
+        and the guide by [oriol](https://oriolabril.github.io/oriol_unraveled/python/arviz/pymc3/xarray/2020/09/22/pymc3-arviz.html).
+        
+        '''
+        
     '''
     
     # HDI prediction interval 
     
-    NB: (perhaps we should at least have both mean forecast and individual forecast).
+    The HDI prediction intervals look reasonable (i.e. ~80% and ~95% of the actual
+    test data-points are inside the 80- and 95% HDI prediction intervals). We note again that it is
+    crucial that our uncertainty widens for later time-points. 
     
     '''
     
@@ -1551,13 +1836,8 @@ elif choice == "Prediction":
     
     
     '''
-    Should have some overthinking box with both (1) 
-    shared variables and (2) that prediction is basically
-    the same that we have been doing the whole time..
-    New data does not really alter the process. We still
-    just use our estimated parameters and our likelihood
-    function to generate predictions (just as with the 
-    posterior predictive). 
+    That concludes our example Bayesian analysis workflow in python (pyMC3) and R (brms). 
+    Please get in touch if you have suggestions for improvements. Happy coding & modeling! 
     '''
     
 elif choice == "References & Inspiration":
@@ -1565,19 +1845,19 @@ elif choice == "References & Inspiration":
     '''
     # Bayesian statistics
     
-    * Collection of good books: https://docs.pymc.io/learn.html
+    * Collection of [good Bayesian books](https://docs.pymc.io/learn.html).
     '''
     
     '''
     # python/pyMC3: 
     
-    * Collection of pyMC3 ressources, including recodings of Rethinking Statistics (McElreath): https://github.com/pymc-devs/resources
-    * Example notebooks (some more advanced analyses): https://docs.pymc.io/nb_examples/index.html
+    * Collection of [pyMC3 ressources](https://github.com/pymc-devs/resources), including re-coding of "Rethinking Statistics" (McElreath).
+    * [Example notebooks](https://docs.pymc.io/nb_examples/index.html) including some more advanced analyses.
     '''
     
     '''
     # R/brms: 
     
-    * Statistical Rethinking (McElreath) recoded in brms by Solomon Kurz: https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/
-    * List of blogposts (some advanced analyses): https://paul-buerkner.github.io/blog/brms-blogposts/
+    * Statistical Rethinking (McElreath) recoded in brms by [Solomon Kurz](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/). 
+    * List of [blogposts on brms](https://paul-buerkner.github.io/blog/brms-blogposts/) including some advanced analyses. 
     '''

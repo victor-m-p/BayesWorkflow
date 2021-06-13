@@ -488,6 +488,16 @@ lm.fig.suptitle("Python: Quick EDA") # add title
     '''
     return py_code 
 
+def py_loo(): 
+    py_code = f'''
+### python: model comparison ###
+loo_overview = az.compare({{
+    "m_pooled": idata_pooled,
+    "m_intercept": idata_intercept,
+    "m_covariation": idata_covariation}})
+    '''
+    return py_code
+    
 ### R functions ###
 # r reproducibility
 def R_reproducibility():
@@ -746,5 +756,34 @@ ggplot(data = train, aes(x = t, y = y, color = idx)) +
     geom_point() + 
     geom_smooth(method = "lm", aes(fill = idx), alpha = 0.2) + 
     ggtitle("R: Quick EDA")
+    '''
+    return R_code
+
+def R_loo(): 
+    R_code = f'''
+### R: run LOO comparison
+
+# add criterion
+m_pooled_posterior <- add_criterion(
+    m_pooled_posterior, 
+    criterion = c("loo", "bayes_R2"))
+
+m_intercept_posterior <- add_criterion(
+    m_intercept_posterior, 
+    criterion = c("loo", "bayes_R2"))
+
+m_covariation_posterior <- add_criterion(
+    m_covariation_posterior, 
+    criterion = c("loo", "bayes_R2"))
+
+# run loo compare
+loo_compare(m_pooled_posterior,
+            m_intercept_posterior,
+            m_covariation_posterior)
+            
+# model weights by stacking (as in pyMC3)
+loo_model_weights(m_pooled_posterior,
+                  m_intercept_posterior,
+                  m_covariation_posterior)
     '''
     return R_code
