@@ -6,7 +6,7 @@ import streamlit as st
 # python reproducibility
 def py_reproducibility():
     py_code = f'''
-## python: packages & reproducibility ##
+### python: packages & reproducibility ###
 import numpy as np # core library for vector/matrix handling
 import pandas as pd # core library for data-frames
 import matplotlib.pyplot as plt # core plotting library
@@ -23,37 +23,42 @@ RANDOM_SEED = 42
 def py_preprocessing(): 
     py_code = f'''
 ### python: preprocessing ###
-# read data
+# if you do not already have the train data from simulation
 train = pd.read_csv("../data/train.csv")
 
 # t & idx unique
-t_unique = np.unique(train.t.values)
-idx_unique = np.unique(train.idx.values)
+t_unique = np.unique(train.t.values) # unique t values (with numpy)
+idx_unique = np.unique(train.idx.values) # unique idx values (with numpy)
 
 # get n of unique for shapes
-n_time = len(t_unique)
-n_idx = len(idx_unique)
+n_time = len(t_unique) # length of t unique
+n_idx = len(idx_unique) # length of idx unique
 
 # create coords and dims 
 coords = {{
-    'idx': idx_unique,
+    'idx': idx_unique, 
     't': t_unique}}
 
 # take out dims 
-dims = coords.keys()
+dims = coords.keys() 
 
 # data in correct format. 
-t_train = train.t.values.reshape((n_idx, n_time))
-y_train = train.y.values.reshape((n_idx, n_time))
+t_train = train.t.values.reshape((n_idx, n_time)) # reshape format (numpy)
+y_train = train.y.values.reshape((n_idx, n_time)) # reshape format (numpy)
 idx_train = train.idx.values.reshape((n_idx, n_time)) # not relevant for pooled
 
-# gather dataset 
+# gather dataset with xarray
 dataset = xr.Dataset(
     {{'t_data': (dims, t_train),
     'y_data': (dims, y_train)}},
     coords = coords)
 
-# only relevant for covariation model
+'''
+    return py_code
+
+def py_preprocessing_cov(): 
+    py_code = f'''
+### python: additional preprocessing for covariation model ###
 coords["param"] = ["alpha", "beta"]
 coords["param_bis"] = ["alpha", "beta"]
 '''
@@ -63,105 +68,134 @@ coords["param_bis"] = ["alpha", "beta"]
 def py_pooled(model_name, sigma_choice):
     py_code = f'''
 ### python: specify model and compile ###
-with pm.Model(coords=coords) as {model_name}:
-    
-    # shared variables
-    t_ = pm.Data('t_shared', 
-                t_train, 
-                dims = dims)
-    
-    # specify priors for parameters & model error
-    beta = pm.Normal("beta", 
-                    mu = 0, 
-                    sigma = {sigma_choice})
-    alpha = pm.Normal("alpha", 
-                    mu = 1.5, 
-                    sigma = {sigma_choice})
-    sigma = pm.HalfNormal("sigma", 
-                        sigma = {sigma_choice})
-    
-    # calculate mu
-    mu = alpha + beta * t_
-    
-    # likelihood
-    y_pred = pm.Normal("y_pred", 
-                    mu = mu, 
-                    sigma = sigma, 
-                    observed = y_train)
+def pooled(): 
+    with pm.Model(coords=coords) as {model_name}:
+        
+        # shared variables
+        t_ = pm.Data('t_shared', t_train, dims = dims)
+        
+        # specify priors for parameters & model error
+        beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
+        alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
+        sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
+        
+        # calculate mu
+        mu = alpha + beta * t_
+        
+        # likelihood
+        y_pred = pm.Normal(
+            "y_pred",
+            mu = mu, 
+            sigma = sigma, 
+            observed = y_train)
+                        
+        # return the model                
+        return {model_name}
+
+# now run the function to compile the model
+{model_name} = pooled()
 '''
     return py_code
 
 def py_intercept(model_name, sigma_choice): 
     py_code = f'''
-with pm.Model(coords=coords) as {model_name}: 
+def intercept(): 
+    with pm.Model(coords=coords) as {model_name}: 
+            
+        # Inputs
+        idx_ = pm.Data('idx_shared', idx_train, dims = dims)
+        t_ = pm.Data('t_shared', t_train, dims = dims)
+
+        # hyper-priors (group-level effects)
+        alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
+        sigma_alpha = pm.HalfNormal("sigma_alpha", sigma = {sigma_choice})
         
-    # Inputs
-    idx_ = pm.Data('idx_shared', idx, dims = dims)
-    t_ = pm.Data('t_shared', t, dims = dims)
+        # fixed slope for beta
+        beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
+        
+        # varying intercepts & slopes for alpha
+        alpha_var = pm.Normal(
+            "alpha_var", 
+            mu = alpha, 
+            sigma = sigma_alpha, 
+            dims = "idx")
+        
+        # expected value per participant at each time-step
+        mu = alpha_var[idx_] + beta * t_ 
 
-    # hyper-priors (group-level effects)
-    alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
-    sigma_alpha = pm.HalfNormal("sigma_alpha", sigma = {sigma_choice})
-    
-    # fixed slope for beta
-    beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
-    
-    # varying intercepts & slopes for alpha
-    alpha_var = pm.Normal("alpha_var", mu = alpha, sigma = sigma_alpha, dims = "idx")
-    
-    # expected value per participant at each time-step
-    mu = alpha_var[idx_] + beta * t_ 
+        # model error
+        sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
+        
+        # likelihood
+        y_pred = pm.Normal(
+            "y_pred", 
+            mu = mu, 
+            sigma = sigma, 
+            observed = y_train, 
+            dims = dims)
+        
+        # return model
+        return {model_name}
 
-    # model error
-    sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
-    
-    # likelihood
-    y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y, dims = dims)
+# now run the function to compile the model
+{model_name} = intercept()
 '''
     return py_code
 
 
 def py_covariation(model_name, sigma_choice):
     py_code = f'''
-with pm.Model(coords=coords) as m: 
+def covariation(): 
+    with pm.Model(coords=coords) as {model_name}: 
+            
+        # Inputs
+        idx_ = pm.Data('idx_shared', idx_train, dims = ('idx', 't'))
+        t_ = pm.Data('t_shared', t_train, dims = ('idx', 't'))
+
         
-    # Inputs
-    idx_ = pm.Data('idx_shared', idx, dims = ('idx', 't'))
-    t_ = pm.Data('t_shared', t, dims = ('idx', 't'))
+        # prior stddev in intercepts & slopes (variation across counties):
+        sd_dist = pm.HalfNormal.dist({sigma_choice}) # distribution. 
 
-    
-    # prior stddev in intercepts & slopes (variation across counties):
-    sd_dist = pm.HalfNormal.dist({sigma_choice}) # distribution. 
+        # get back standard deviations and rho:
+        ## eta = 1: uniform (higher --> more weight on low cor.)
+        ## n = 2: number of predictors
+        chol, corr, stds = pm.LKJCholeskyCov(
+            "chol", 
+            n=2, 
+            eta=2, 
+            sd_dist=sd_dist, 
+            compute_corr = True) 
 
-    # get back standard deviations and rho:
-    ## eta = 1: uniform (higher --> more weight on low cor.)
-    ## n = 2: number of predictors
-    chol, corr, stds = pm.LKJCholeskyCov(
-        "chol", 
-        n=2, 
-        eta=2, 
-        sd_dist=sd_dist, 
-        compute_corr = True) 
+        # priors for mean effects
+        alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
+        beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
+        
+        # population of varying effects
+        alpha_beta = pm.MvNormal(
+            "alpha_beta", 
+            mu = tt.stack([alpha, beta]), 
+            chol = chol, 
+            dims=("idx", "param"))
 
-    # priors for mean effects
-    alpha = pm.Normal("alpha", mu = 1.5, sigma = {sigma_choice})
-    beta = pm.Normal("beta", mu = 0, sigma = {sigma_choice})
-    
-    # population of varying effects
-    alpha_beta = pm.MvNormal(
-        "alpha_beta", 
-        mu = tt.stack([alpha, beta]), 
-        chol = chol, 
-        dims=("idx", "param"))
+        # expected value per participant at each time-step
+        mu = alpha_beta[idx_, 0] + alpha_beta[idx_, 1] * t_
 
-    # expected value per participant at each time-step
-    mu = alpha_beta[idx_, 0] + alpha_beta[idx_, 1] * t_
+        # model error
+        sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
+        
+        # likelihood
+        y_pred = pm.Normal(
+            "y_pred", 
+            mu = mu, 
+            sigma = sigma, 
+            observed = y_train, 
+            dims = ('idx', 't'))
+        
+        # return the model
+        return {model_name}
 
-    # model error
-    sigma = pm.HalfNormal("sigma", sigma = {sigma_choice})
-    
-    # likelihood
-    y_pred = pm.Normal("y_pred", mu = mu, sigma = sigma, observed = y, dims = ('idx', 't'))
+# now run the function to compile the model
+{model_name} = covariation()
     '''
     return py_code
     
@@ -174,7 +208,7 @@ pm.model_to_graphviz({model_name})
     return py_code
 
 # prior predictive
-def py_pp(model_name, idata_name): # m_pooled, m_multilevel, m_student
+def py_pp(model_name, idata_name): 
     py_code = f'''
 ### python: prior predictive checks ###
 # sample prior predictive 
@@ -264,9 +298,9 @@ plt.plot();
 # hdi
 def py_hdi_data_fixed(hdi_type, idata_name): 
     py_code = f'''
-### plot hdi (fixed effects) ###
+### python: plot hdi (fixed effects) ###
 # take out posterior predictive from idata
-post_pred = m_idata.posterior_predictive
+post_pred = {idata_name}.posterior_predictive
 
 # take out alpha and beta values
 alpha = post_pred.alpha.values #shape: (1, 4.000)
@@ -327,7 +361,7 @@ plt.plot();
 
 def py_hdi_data_full(hdi_type, idata_name): 
     py_code = f'''
-### plot hdi (full uncertainty) ###
+### python: plot hdi (full uncertainty) ###
 # take posterior predictive out of idata for convenience
 ppc = {idata_name}.posterior_predictive
 
@@ -389,7 +423,7 @@ plt.plot();
 
 def py_hdi_param(idata_name): 
     py_code = f'''
-### HDI for parameters ###
+### python: HDI for parameters ###
 # set up matplotlib plot
 fig, ax = plt.subplots(figsize = (10, 7))
 
@@ -415,7 +449,7 @@ plt.plot();
 def py_pred_prep(model_name, idata_name): 
     py_code = f'''
 ### python: preprocessing & sampling ###
-# load test data
+# if you do not already have the test data from simulation
 test = pd.read_csv("../data/test.csv")
 
 # get unique values for shared. 
@@ -483,8 +517,9 @@ test.to_csv("../data/test.csv", index = False)
 def py_EDA(): 
     py_code = f'''
 ### python: quick EDA ###
-lm = sns.lmplot(x = "t", y = "y", hue = "idx", data = train)
+lm = sns.lmplot(x = "t", y = "y", hue = "idx", data = train) # seaborn
 lm.fig.suptitle("Python: Quick EDA") # add title
+plt.plot(); # show plot
     '''
     return py_code 
 
@@ -495,8 +530,11 @@ loo_overview = az.compare({{
     "m_pooled": idata_pooled,
     "m_intercept": idata_intercept,
     "m_covariation": idata_covariation}})
+    
+loo_overview
     '''
     return py_code
+
     
 ### R functions ###
 # r reproducibility
@@ -513,10 +551,39 @@ RANDOM_SEED = 42
 '''
     return R_code
 
+def R_sim(): 
+    R_code = f'''
+### R: simulate data ###
+set.seed(42)
+d <- tibble(idx = seq(0, 14),
+            t = seq(0, 14)) %>%
+  data_grid(idx, t) %>%
+  group_by(idx) %>%
+  mutate(a_real = rnorm(1, 1, 0.5),
+         b_real = rnorm(1, 0.3, 0.2),
+         eps_real = rnorm(15, 0, 0.5),
+         y = a_real + b_real * t + eps_real) %>%
+  select(c(idx, t, y)) %>%
+  mutate(idx = as_factor(idx))
+  
+# split into test & train
+train <- d %>%
+  filter(t <= 9)
+
+test <- d %>%
+  filter(t > 9)
+
+# save data (we use python data in the app)
+write_csv(train, "../data/train_R.csv")
+write_csv(test, "../data/test_R.csv")
+    '''
+    return R_code
+
 # r preprocessing
 def R_preprocessing():
     R_code = f'''
 ### R: preprocessing ###
+# we'll grab the training data from python for comparability
 train <- read_csv("../data/train.csv") %>%
     mutate(idx = as_factor(idx))
 '''
@@ -531,19 +598,19 @@ def R_pooled(model_name, model_formula, prior_name, sigma_choice):
 
 # set priors --> can use get_prior() if in doubt. 
 {prior_name} <- c(
-    prior(normal(0, {sigma_choice}), class = b),
-    prior(normal(1.5, {sigma_choice}), class = Intercept),
-    prior(normal(0, {sigma_choice}), class = sigma))
+    prior(normal(0, {sigma_choice}), class = b), # beta
+    prior(normal(1.5, {sigma_choice}), class = Intercept), # alpha
+    prior(normal(0, {sigma_choice}), class = sigma)) # sigma (model error)
 
 # compile model & sample prior
 {model_name} <- brm(
-    formula = {model_formula},
-    family = gaussian,
+    formula = {model_formula}, # model formula 
+    family = gaussian, # likelihood function
     data = train,
-    prior = {prior_name},
-    sample_prior = "only",
-    backend = "cmdstanr",
-    seed = RANDOM_SEED)
+    prior = {prior_name}, 
+    sample_prior = "only", # only sample prior (for pp checks)
+    backend = "cmdstanr", # faster than rstan
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility
 '''
     return R_code
 
@@ -551,25 +618,25 @@ def R_covariation(model_name, model_formula, prior_name, sigma_choice):
     R_code = f'''
 ### R: specify model & compile ###
 # formula 
-{model_formula} <- bf(y ~ 1 + t + (1+t|idx)) # random eff. structure 
+{model_formula} <- bf(y ~ 1 + t + (1+t|idx)) # random intercepts, slopes & cov./corr.
     
 # set priors --> can use get_prior() if in doubt. 
 {prior_name} <- c(
-    prior(normal(0, {sigma_choice}), class = b),
-    prior(normal(1.5, {sigma_choice}), class = Intercept),
-    prior(normal(0, {sigma_choice}), class = sd), # new
-    prior(normal(0, {sigma_choice}), class = sigma),
-    prior(lkj(2), class = cor) # new
+    prior(normal(0, {sigma_choice}), class = b), # beta
+    prior(normal(1.5, {sigma_choice}), class = Intercept), # alpha
+    prior(normal(0, {sigma_choice}), class = sd), # sd
+    prior(normal(0, {sigma_choice}), class = sigma), # sigma (model error)
+    prior(lkj(2), class = cor) # covariation/corr. of random eff. 
 )
 
 # compile model & sample prior
 {model_name} <- brm(
-    formula = {model_formula},
-    family = gaussian,
+    formula = {model_formula}, # model formula
+    family = gaussian, # likelihood function
     data = train,
     prior = {prior_name},
-    sample_prior = "only",
-    backend = "cmdstanr")
+    sample_prior = "only", # only sample prior 
+    backend = "cmdstanr") # faster than rstan
     '''
     return R_code
 
@@ -577,25 +644,25 @@ def R_intercept(model_name, model_formula, prior_name, sigma_choice):
     R_code = f'''
 ### R: specify model & compile ###
 # formula 
-{model_formula} <- bf(y ~ 1 + t + (1|idx)) # random eff. structure 
+{model_formula} <- bf(y ~ 1 + t + (1|idx)) # random intercepts
 
 # set priors --> can use get_prior() if in doubt. 
-prior_student_specific <- c(
-    prior(normal(0, {sigma_choice}), class = b),
-    prior(normal(1.5, {sigma_choice}), class = Intercept),
-    prior(normal(0, {sigma_choice}), class = sd),
-    prior(normal(0, {sigma_choice}), class = sigma)
+{prior_name} <- c(
+    prior(normal(0, {sigma_choice}), class = b), # beta
+    prior(normal(1.5, {sigma_choice}), class = Intercept), # alpha
+    prior(normal(0, {sigma_choice}), class = sd), # sd
+    prior(normal(0, {sigma_choice}), class = sigma) # model error (sigma)
 )
 
 # compile model & sample prior
 {model_name} <- brm(
-    formula = {model_formula},
-    family = gaussian,
+    formula = {model_formula}, # model formula 
+    family = gaussian, # likelihood function
     data = train,
     prior = {prior_name},
-    sample_prior = "only",
-    backend = "cmdstanr",
-    seed = RANDOM_SEED)
+    sample_prior = "only", # only sample prior
+    backend = "cmdstanr", # faster than rstan
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility
     '''
     return R_code
     
@@ -610,24 +677,26 @@ pp_check({model_name},
     return R_code
 
 # sample posterior
-def R_sample(model_name, model_formula, model_family, prior_name):
+def R_sample(model_name, model_formula, model_family, prior_name, model_context, prior):
     R_code = f'''
 ### R: sample posterior ###
 {model_name} <- brm(
-    formula = {model_formula},
-    family = {model_family},
+    formula = {model_formula}, # model formula
+    family = {model_family}, # likelihood function
     data = train,
-    prior = {prior_name},
-    sample_prior = TRUE, # only difference. 
-    backend = "cmdstanr",
+    prior = {prior_name}, 
+    sample_prior = TRUE, # sample prior and posterior 
+    backend = "cmdstanr", # faster than rstan
     chains = 2,
-    cores = 4,
+    cores = 4, # difference between prior/posterior sampling
     iter = 4000, 
     warmup = 2000,
     threads = threading(2), # not sure this can be done in pyMC3
     control = list(adapt_delta = .99,
                     max_treedepth = 20),
-    seed = RANDOM_SEED)
+    file = "../models_R/m_{model_context}_{prior}_fit", # name of saved model file
+    file_refit = "on_change", # refit on change, otherwise just compile
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility" 
 '''
     return R_code
 
@@ -689,8 +758,8 @@ def R_hdi_fixed_groups(model_name, pred_type, data_type, function, title):
 ### R: HDI prediction intervals ###
 {data_type} %>%
     data_grid(t = seq_range(t, n = 100), idx) %>%
-    {function}({model_name}) %>%
-    ggplot(aes(x = t, y = y, re_formula = NA)) + 
+    {function}({model_name}, re_formula = NA) %>%
+    ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = {pred_type}), 
                     .width = c(.95, .8), # Intervals
                     color = "#08519C") + 
@@ -745,6 +814,7 @@ ggtitle("R/brms: HDI intervals for parameters")
 def R_pred_prep(): 
     R_code = f'''
 ### R: read test data ###
+# if you do not have the test data from the simulation in your workspace
 test <- read_csv("../data/test.csv") %>%
     mutate(idx = as_factor(idx))
     '''
@@ -764,26 +834,28 @@ def R_loo():
 ### R: run LOO comparison
 
 # add criterion
-m_pooled_posterior <- add_criterion(
-    m_pooled_posterior, 
+m_pooled <- add_criterion(
+    m_pooled, 
     criterion = c("loo", "bayes_R2"))
 
-m_intercept_posterior <- add_criterion(
-    m_intercept_posterior, 
+m_intercept <- add_criterion(
+    m_intercept, 
     criterion = c("loo", "bayes_R2"))
 
-m_covariation_posterior <- add_criterion(
-    m_covariation_posterior, 
+m_covariation <- add_criterion(
+    m_covariation, 
     criterion = c("loo", "bayes_R2"))
 
 # run loo compare
-loo_compare(m_pooled_posterior,
-            m_intercept_posterior,
-            m_covariation_posterior)
+loo_compare(m_pooled,
+            m_intercept,
+            m_covariation)
             
 # model weights by stacking (as in pyMC3)
-loo_model_weights(m_pooled_posterior,
-                  m_intercept_posterior,
-                  m_covariation_posterior)
+loo_model_weights(m_pooled,
+                  m_intercept,
+                  m_covariation)
     '''
     return R_code
+
+

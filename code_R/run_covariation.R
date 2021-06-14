@@ -65,7 +65,7 @@ prior_covariation_specific <- c(
   prior(normal(1.5, 0.05), class = b, coef = Intercept),
   prior(normal(0, 0.05), class = sd),
   prior(normal(0, 0.05), class = sigma),
-  prior(lkj(1), class = cor)
+  prior(lkj(2), class = cor)
 )
 
 prior_covariation_generic <- c(

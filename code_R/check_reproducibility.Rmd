@@ -1,0 +1,474 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+checking reproducibility on the app
+
+# SIMULATION & EDA
+
+```{r}
+### R: packages & reproducibility ###
+pacman::p_load(
+    tidyverse, 
+    brms,
+    modelr,
+    tidybayes,
+    bayesplot)
+RANDOM_SEED = 42
+
+### R: simulate data ###
+set.seed(42)
+d <- tibble(idx = seq(0, 14),
+            t = seq(0, 14)) %>%
+  data_grid(idx, t) %>%
+  group_by(idx) %>%
+  mutate(a_real = rnorm(1, 1, 0.5),
+         b_real = rnorm(1, 0.3, 0.2),
+         eps_real = rnorm(15, 0, 0.5),
+         y = a_real + b_real * t + eps_real) %>%
+  select(c(idx, t, y)) %>%
+  mutate(idx = as_factor(idx))
+
+# split into test & train
+train <- d %>%
+  filter(t <= 9)
+
+test <- d %>%
+  filter(t > 9)
+
+# save data (we use python data in the app)
+write_csv(train, "../data/train_R.csv")
+write_csv(test, "../data/test_R.csv")
+
+ggplot(data = train, aes(x = t, y = y, color = idx)) +
+    geom_point() + 
+    geom_smooth(method = "lm", aes(fill = idx), alpha = 0.2) + 
+    ggtitle("R: Quick EDA")
+```
+
+# model 1
+
+```{r}
+### R: preprocessing ###
+# we'll grab the training data from python for comparability
+train <- read_csv("../data/train.csv") %>%
+    mutate(idx = as_factor(idx))
+
+### R: specify model & compile ###
+# formula 
+f_pooled <- bf(y ~ 1 + t) # complete pooling 
+
+# set priors --> can use get_prior() if in doubt. 
+prior_pooled <- c(
+    prior(normal(0, 0.5), class = b), # beta
+    prior(normal(1.5, 0.5), class = Intercept), # alpha
+    prior(normal(0, 0.5), class = sigma)) # sigma (model error)
+
+# compile model & sample prior
+m_pooled <- brm(
+    formula = f_pooled, # model formula 
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_pooled, 
+    sample_prior = "only", # only sample prior (for pp checks)
+    backend = "cmdstanr", # faster than rstan
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility
+
+### R: Prior predictive checks ###
+pp_check(m_pooled, 
+        nsamples = 100) +
+    labs(title = "R/brms: prior predictive check") 
+
+### R: sample posterior ###
+m_pooled <- brm(
+    formula = f_pooled, # model formula
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_pooled, 
+    sample_prior = TRUE, # sample prior and posterior 
+    backend = "cmdstanr", # faster than rstan
+    chains = 2,
+    cores = 4, # difference between prior/posterior sampling
+    iter = 4000, 
+    warmup = 2000,
+    threads = threading(2), # not sure this can be done in pyMC3
+    control = list(adapt_delta = .99,
+                    max_treedepth = 20),
+    file = "../models_R/m_pooled_generic_fit", # name of saved model file
+    file_refit = "on_change", # refit on change, otherwise just compile
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility" 
+
+### R: plot trace ###
+plot(m_pooled,
+    N = 10) # N param per plot. 
+
+### R: get summary (not displayed) ###
+summary(m_pooled)
+
+### R: Posterior predictive checks ###
+pp_check(m_pooled, 
+        nsamples = 100) + 
+labs(title = "R/brms: posterior predictive check") 
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100)) %>%
+    add_fitted_draws(m_pooled) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), # intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (fixed)")
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100)) %>%
+    add_predicted_draws(m_pooled) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), # intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (full)")
+
+### R: HDI for parameters ###
+mcmc_areas(
+m_pooled,
+pars = c("b_Intercept",
+        "b_t",
+        "sigma"),
+prob = 0.8, # 80% intervals
+prob_outer = 0.99, # 99%
+point_est = "mean") + # or median?
+ggtitle("R/brms: HDI intervals for parameters")
+
+
+```
+
+# model 2
+
+```{r}
+### R: specify model & compile ###
+# formula 
+f_intercept <- bf(y ~ 1 + t + (1|idx)) # random intercepts
+
+# set priors --> can use get_prior() if in doubt. 
+prior_intercept <- c(
+    prior(normal(0, 0.5), class = b), # beta
+    prior(normal(1.5, 0.5), class = Intercept), # alpha
+    prior(normal(0, 0.5), class = sd), # sd
+    prior(normal(0, 0.5), class = sigma) # model error (sigma)
+)
+
+# compile model & sample prior
+m_intercept <- brm(
+    formula = f_intercept, # model formula 
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_intercept,
+    sample_prior = "only", # only sample prior
+    backend = "cmdstanr", # faster than rstan
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility
+
+### R: Prior predictive checks ###
+pp_check(m_intercept, 
+        nsamples = 100) +
+    labs(title = "R/brms: prior predictive check") 
+
+### R: sample posterior ###
+m_intercept <- brm(
+    formula = f_intercept, # model formula
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_intercept, 
+    sample_prior = TRUE, # sample prior and posterior 
+    backend = "cmdstanr", # faster than rstan
+    chains = 2,
+    cores = 4, # difference between prior/posterior sampling
+    iter = 4000, 
+    warmup = 2000,
+    threads = threading(2), # not sure this can be done in pyMC3
+    control = list(adapt_delta = .99,
+                    max_treedepth = 20),
+    file = "../models_R/m_intercept_generic_fit", # name of saved model file
+    file_refit = "on_change", # refit on change, otherwise just compile
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility" 
+
+### R: plot trace ###
+plot(m_intercept,
+    N = 10) # N param per plot. 
+
+### R: get summary (not displayed) ###
+summary(m_intercept)
+
+### R: Posterior predictive checks ###
+pp_check(m_intercept, 
+        nsamples = 100) + 
+labs(title = "R/brms: posterior predictive check") 
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_fitted_draws(m_intercept, re_formula = NA) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (fixed)")
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_predicted_draws(m_intercept) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (full)")
+
+### R: HDI for parameters ###
+mcmc_areas(
+m_intercept,
+pars = c("b_Intercept",
+        "b_t",
+        "sigma"),
+prob = 0.8, # 80% intervals
+prob_outer = 0.99, # 99%
+point_est = "mean") + # or median?
+ggtitle("R/brms: HDI intervals for parameters")
+
+
+```
+
+# model 3
+
+```{r}
+
+### R: specify model & compile ###
+# formula 
+f_covariation <- bf(y ~ 1 + t + (1+t|idx)) # random intercepts, slopes & cov./corr.
+
+# set priors --> can use get_prior() if in doubt. 
+prior_covariation <- c(
+    prior(normal(0, 0.5), class = b), # beta
+    prior(normal(1.5, 0.5), class = Intercept), # alpha
+    prior(normal(0, 0.5), class = sd), # sd
+    prior(normal(0, 0.5), class = sigma), # sigma (model error)
+    prior(lkj(2), class = cor) # covariation/corr. of random eff. 
+)
+
+# compile model & sample prior
+m_covariation <- brm(
+    formula = f_covariation, # model formula
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_covariation,
+    sample_prior = "only", # only sample prior 
+    backend = "cmdstanr") # faster than rstan
+
+### R: Prior predictive checks ###
+pp_check(m_covariation, 
+        nsamples = 100) +
+    labs(title = "R/brms: prior predictive check") 
+
+### R: sample posterior ###
+m_covariation <- brm(
+    formula = f_covariation, # model formula
+    family = gaussian, # likelihood function
+    data = train,
+    prior = prior_covariation, 
+    sample_prior = TRUE, # sample prior and posterior 
+    backend = "cmdstanr", # faster than rstan
+    chains = 2,
+    cores = 4, # difference between prior/posterior sampling
+    iter = 4000, 
+    warmup = 2000,
+    threads = threading(2), # not sure this can be done in pyMC3
+    control = list(adapt_delta = .99,
+                    max_treedepth = 20),
+    file = "../models_R/m_covariation_generic_fit", # name of saved model file
+    file_refit = "on_change", # refit on change, otherwise just compile
+    seed = RANDOM_SEED) # set in "Packages & Reproducibility" 
+
+### R: plot trace ###
+plot(m_covariation,
+    N = 10) # N param per plot. 
+
+### R: get summary (not displayed) ###
+summary(m_covariation)
+
+### R: Posterior predictive checks ###
+pp_check(m_covariation, 
+        nsamples = 100) + 
+labs(title = "R/brms: posterior predictive check") 
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_predicted_draws(m_covariation) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (full)")
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_fitted_draws(m_covariation, re_formula = NA) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (fixed)")
+
+### R: HDI for parameters ###
+mcmc_areas(
+m_covariation,
+pars = c("b_Intercept",
+        "b_t",
+        "sigma"),
+prob = 0.8, # 80% intervals
+prob_outer = 0.99, # 99%
+point_est = "mean") + # or median?
+ggtitle("R/brms: HDI intervals for parameters")
+
+
+```
+
+# model comparison
+
+```{r}
+### R: plot trace ###
+plot(m_intercept,
+    N = 10) # N param per plot. 
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_fitted_draws(m_intercept, re_formula = NA) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .value), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (fixed)")
+
+### R: HDI prediction intervals ###
+train %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_predicted_draws(m_intercept) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = train, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (full)")
+
+### R: run LOO comparison
+
+# add criterion
+m_pooled <- add_criterion(
+    m_pooled, 
+    criterion = c("loo", "bayes_R2"))
+
+m_intercept <- add_criterion(
+    m_intercept, 
+    criterion = c("loo", "bayes_R2"))
+
+m_covariation <- add_criterion(
+    m_covariation, 
+    criterion = c("loo", "bayes_R2"))
+
+# run loo compare
+loo_compare(m_pooled,
+            m_intercept,
+            m_covariation)
+
+# model weights by stacking (as in pyMC3)
+loo_model_weights(m_pooled,
+                  m_intercept,
+                  m_covariation)
+
+```
+
+# prediction
+
+```{r}
+### R: read test data ###
+# if you do not have the test data from the simulation in your workspace
+test <- read_csv("../data/test.csv") %>%
+    mutate(idx = as_factor(idx))
+
+### R: HDI prediction intervals ###
+test %>%
+    data_grid(t = seq_range(t, n = 100), idx) %>%
+    add_predicted_draws(m_covariation) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_lineribbon(aes(y = .prediction), 
+                    .width = c(.95, .8), # Intervals
+                    color = "#08519C") + 
+    geom_jitter(data = test, 
+                color = "navyblue", 
+                shape = 1,
+                alpha = 0.5, 
+                size = 2, 
+                width = 0.1) + 
+    scale_fill_brewer() + 
+    ggtitle("R/brms: Prediction intervals (full)")
+```
+

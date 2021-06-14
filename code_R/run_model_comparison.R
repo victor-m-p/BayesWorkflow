@@ -26,11 +26,9 @@ source("fun_helper.R")
 ## -----------------------------------------------------------------------------
 
 # load data
-train <- read_csv("../data/train.csv")
-
-# make sure that data format is okay
-train <- train %>%
+train <- read_csv("../data/train.csv") %>%
   mutate(idx = as_factor(idx))
+
 
 
 #' 
@@ -55,10 +53,10 @@ m_pooled_posterior <- add_criterion(m_pooled_posterior,
                                     criterion = c("loo", "bayes_R2"))
 
 m_intercept_posterior <- add_criterion(m_intercept_posterior, 
-                                        criterion = c("loo", "bayes_R2"))
+                                       criterion = c("loo", "bayes_R2"))
 
 m_covariation_posterior <- add_criterion(m_covariation_posterior, 
-                                     criterion = c("loo", "bayes_R2")) # one problematic observation.
+                                         criterion = c("loo", "bayes_R2")) # one problematic observation.
 
 # run loo compare
 loo_compare(m_pooled_posterior,

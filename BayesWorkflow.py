@@ -1,4 +1,5 @@
 # import packages
+from google.protobuf.reflection import ParseMessage
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -40,9 +41,9 @@ translation_mod_name = {
     'Covariation': 'm_covariation'}
 
 translation_idata = {
-    'Pooled': 'pooled_idata',
-    'Intercept': 'intercept_idata',
-    'Covariation': 'covariation_idata'
+    'Pooled': 'idata_pooled',
+    'Intercept': 'idata_intercept',
+    'Covariation': 'idata_covariation'
 }
 
 translation_code = {
@@ -92,7 +93,8 @@ if choice == "Introduction":
     
     For all parts of the analysis (for both languages) you can access reproducible code, and easily copy it to clipboard.
     I hope that this will encourage you to run the code alongside the app, since this is the only way to really understand what is going on.
-    While building a bridge between pyMC3 and brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better bayesin workflow.
+    The app is meant to be followed sequentially as a cohesive introduction & the code in later parts rely on earlier parts of the pipeline.
+    While building a bridge between pyMC3 and brms is the main objective, I hope that parts of the analysis & workflow might also lead you to a better Bayesin workflow.
     
     '''
     
@@ -166,22 +168,33 @@ elif choice == "Simulation & EDA":
     ### code ###
     expander = st.beta_expander("🐒 Code-Monkey: Reproducibility")
     py_reproducibility = ct.py_reproducibility()
+    R_reproducibility = ct.R_reproducibility()
     
     with expander: 
-        st.code(py_reproducibility)
+        col1, col2 = st.beta_columns(2)
+        with col1:
+            st.code(py_reproducibility)
+        with col2: 
+            st.code(R_reproducibility)
         
     
     ### code ##
     expander = st.beta_expander('🐒 Code-Monkey: Simulation')
     py_sim = ct.py_sim()
+    R_sim = ct.R_sim()
     
     with expander: 
-        st.code(py_sim)
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            st.code(py_sim)
+        with col2: 
+            st.code(R_sim)
             
     '''
     # Quick EDA
     
     Below is a scatter plot of the *training* data, where a regression line is showed for each alien (ID). 
+    We use the data generated in python for all subsequent analysis. 
     
     '''
     
@@ -216,7 +229,7 @@ elif choice == "Complete Pooling (model 1)":
     model_family = "gaussian" 
     prior_name = "prior_pooled" # should be in args
     data_type = "train"
-    idata_name = "pooled_idata"
+    idata_name = "idata_pooled"
     
     '''
     # Candidate model 1 (Complete Pooling)
@@ -227,21 +240,12 @@ elif choice == "Complete Pooling (model 1)":
     You might already feel that this is not a satisfactory model, but bear with me for now.
     We will build on top of what we have learned and get to more complex models in the next sections. 
     
+    Note on **Reproducibility** and **Preprocessing**: The code in **Packages & Reproducibility** is
+    the same for each section, so if you are running all sections in one document you will
+    not need to copy-paste the contents of this chunk every time. In *Preprocessing* much of the
+    code is typically also redundant, but is there to make sure that each section is stand-alone.
     '''
-    
-    ### code ###
-    py_reproducibility = ct.py_reproducibility()
-    R_reproducibility = ct.R_reproducibility()
-    
-    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
-    
-    with expander: 
-        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
-        with col1_reproducibility:
-            st.code(py_reproducibility)
-        with col2_reproducibility: 
-            st.code(R_reproducibility) 
-    
+
     ### code ###
     py_preprocessing = ct.py_preprocessing()
     R_preprocessing = ct.R_preprocessing()
@@ -460,7 +464,7 @@ elif choice == "Complete Pooling (model 1)":
     
     ### code ###
     py_sample = ct.py_sample(model_name, idata_name)
-    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name, model_context, prior_pp_pool)
     
     expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
@@ -615,8 +619,6 @@ elif choice == "Complete Pooling (model 1)":
             st.code(py_pp2)
         with col2:
             st.code(R_pp2) 
-    
-    
     
     ### language learner ###
     expander = st.beta_expander("⌨️ Language-Learner: Posterior predictive checks")
@@ -784,6 +786,25 @@ elif choice == "Complete Pooling (model 1)":
         (wrong) parameter values. 
         '''
     
+    '''
+    # Save idata 
+    
+    Now we might want to make sure that we save our model (or samples)
+    so that we can avoid sampling our model next time we open the project.
+    In brms (as we have seen) we can save our model and with 
+    ```file_refit = "on_change"``` brms will only recompile if we have made changes.
+    
+    In brms we manually save the **idata object** which contains all our samples
+    (prior predictive, posterior, posterior predictive) and then recompile the
+    model with the function we made earlier. 
+    
+    We will not do this here, but to check out ```arviz.to_netcdf()``` and 
+    ```arviz.from_netcdf()``` for a convenient way to [save](https://arviz-devs.github.io/arviz/api/generated/arviz.to_netcdf.html)
+    and [load](https://arviz-devs.github.io/arviz/api/generated/arviz.from_netcdf.html)
+    **idata objects**. 
+    
+    '''
+    
 elif choice == "Random Intercepts (model 2)":
     
     # for f-strings.
@@ -793,40 +814,17 @@ elif choice == "Random Intercepts (model 2)":
     model_family = "gaussian" 
     prior_name = "prior_intercept" # should be in args
     data_type = "train"
-    idata_name = "intercept_idata"
+    idata_name = "idata_intercept"
     
     r'''
     # Candidate model 2 (Random intercepts)
     Our second candidate model will extend on the complete pooling model to also include *random intercepts* ($\alpha$),
     for each alien (ID). It will thus be our first *multilevel* (*hierarchical*) model. 
     
+    No additional preprocessing is necessary (if you have been following the code
+    in the earlier sections). 
     '''
-    
-    ### code ###
-    py_reproducibility = ct.py_reproducibility()
-    R_reproducibility = ct.R_reproducibility()
-    
-    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
-    
-    with expander: 
-        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
-        with col1_reproducibility:
-            st.code(py_reproducibility)
-        with col2_reproducibility: 
-            st.code(R_reproducibility) 
-    
-    ### code ###
-    py_preprocessing = ct.py_preprocessing()
-    R_preprocessing = ct.R_preprocessing()
-    
-    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing")
-    
-    with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1:
-            st.code(py_preprocessing)
-        with col2: 
-            st.code(R_preprocessing) 
+
     
     '''
     # Model specification (math) 
@@ -968,7 +966,7 @@ elif choice == "Random Intercepts (model 2)":
     
     ### code ###
     py_sample = ct.py_sample(model_name, idata_name)
-    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name, model_context, prior_pp_pool)
     
     expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
@@ -1185,6 +1183,14 @@ elif choice == "Random Intercepts (model 2)":
         with col2:
             st.code(R_hdi_param) 
     
+    '''
+    # Save idata 
+    
+    Again we could save our **Arviz** idata object at this point,
+    before moving on to the next candidate model. 
+    
+    '''
+        
 elif choice == "Multilevel Covariation (model 3)":
     
     # for f-strings.
@@ -1194,7 +1200,7 @@ elif choice == "Multilevel Covariation (model 3)":
     model_family = "gaussian" 
     prior_name = "prior_covariation" # should be in args
     data_type = "train"
-    idata_name = "covariation_idata"
+    idata_name = "idata_covariation"
     
     '''
     # Candidate model 3 (Random intercepts and slopes with covariation)
@@ -1212,30 +1218,13 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     
     ### code ###
-    py_reproducibility = ct.py_reproducibility()
-    R_reproducibility = ct.R_reproducibility()
+    py_preprocessing = ct.py_preprocessing_cov()
     
-    expander = st.beta_expander("🐒 Code-Monkey: Packages & Reproducibility")
-    
-    with expander: 
-        col1_reproducibility, col2_reproducibility = st.beta_columns(2)
-        with col1_reproducibility:
-            st.code(py_reproducibility)
-        with col2_reproducibility: 
-            st.code(R_reproducibility) 
-    
-    ### code ###
-    py_preprocessing = ct.py_preprocessing()
-    R_preprocessing = ct.R_preprocessing()
-    
-    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing")
+    expander = st.beta_expander("🐒 Code-Monkey: Additional preprocessing (python)")
     
     with expander: 
-        col1, col2 = st.beta_columns(2)
-        with col1:
-            st.code(py_preprocessing)
-        with col2: 
-            st.code(R_preprocessing) 
+        st.code(py_preprocessing)
+
     
     '''
     # Model specification (math)
@@ -1354,13 +1343,17 @@ elif choice == "Multilevel Covariation (model 3)":
     # Sample posterior
     
     Press the inference button and sample!
-    The code is the same as for both previous models.
+    The code is the same as for both previous models,
+    but if you are running the code yourself, be prepared
+    that this model will take longer to sample from.
+    If it is excessively slow, you could drop the tuning
+    that we have been doing.
     
     '''
     
     ### code ###
     py_sample = ct.py_sample(model_name, idata_name)
-    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name)
+    R_sample = ct.R_sample(model_name, model_formula, model_family, prior_name, model_context, prior_pp_pool)
     
     expander = st.beta_expander("🐒 Code-Monkey: Sample posterior")
     with expander: 
@@ -1578,6 +1571,13 @@ elif choice == "Multilevel Covariation (model 3)":
         with col2:
             st.code(R_hdi_param) 
 
+    '''
+    # Save idata 
+    
+    We could now save our **Arviz** idata object for later. 
+    
+    '''
+        
 elif choice == "Model Comparison":
     
     prior_context = "generic"
@@ -1623,8 +1623,7 @@ elif choice == "Model Comparison":
         likelihood functions). 
         
         '''
-    
-    
+
     '''
     # Compare posterior predictive
     
@@ -1754,6 +1753,8 @@ elif choice == "Prediction":
     model_name = "m_covariation"
     idata_name = "covariation_idata"
     data_type = "test"
+    model_context = "covariation"
+    idata_name = "idata_covariation"
     
     '''
     # Prediction on unseen data
@@ -1768,18 +1769,27 @@ elif choice == "Prediction":
     as we previously found that this was our most appropriate model. 
     
     '''
+
+    '''
+    # Preprocessing 
+    
+    We need some additional preprocessing for this step in pyMC3,
+    whereas we just need to make sure that we have the *test* data
+    loaded in brms. 
+    
+    '''
     
     ### code ###
-    py_prep = ct.py_pred_prep(model_name, idata_name)
-    R_prep = ct.R_pred_prep()
+    py_prep2 = ct.py_pred_prep(model_name, idata_name)
+    R_prep2 = ct.R_pred_prep()
     
-    expander = st.beta_expander("🐒 Code-Monkey: preprocessing & sampling")
+    expander = st.beta_expander("🐒 Code-Monkey: Preprocessing (test data)")
     with expander: 
         col1, col2 = st.beta_columns(2)
         with col1: 
-            st.code(py_prep)
+            st.code(py_prep2)
         with col2:
-            st.code(R_prep) 
+            st.code(R_prep2) 
     
     expander = st.beta_expander("⌨️ Language-Learner: Prediction & Shared variables")
     

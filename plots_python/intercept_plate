@@ -1,26 +1,26 @@
 digraph {
 	subgraph "cluster15 x 10" {
-		idx_shared [label="idx_shared
-~
-Data" shape=box style="rounded, filled"]
 		t_shared [label="t_shared
 ~
 Data" shape=box style="rounded, filled"]
 		y_pred [label="y_pred
 ~
 Normal" style=filled]
+		idx_shared [label="idx_shared
+~
+Data" shape=box style="rounded, filled"]
 		label="15 x 10" labeljust=r labelloc=b style=rounded
 	}
-	beta [label="beta
-~
-Normal"]
 	sigma_alpha [label="sigma_alpha
 ~
 HalfNormal"]
+	alpha [label="alpha
+~
+Normal"]
 	sigma [label="sigma
 ~
 HalfNormal"]
-	alpha [label="alpha
+	beta [label="beta
 ~
 Normal"]
 	subgraph cluster15 {
@@ -32,8 +32,8 @@ Normal"]
 	sigma_alpha -> alpha_var
 	alpha -> alpha_var
 	t_shared -> y_pred
-	beta -> y_pred
-	sigma -> y_pred
 	idx_shared -> y_pred
+	sigma -> y_pred
 	alpha_var -> y_pred
+	beta -> y_pred
 }

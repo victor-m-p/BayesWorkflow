@@ -8,12 +8,47 @@
 ## -----------------------------------------------------------------------------
 
 # packages
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse, 
+               brms,
+               modelr,
+               tidybayes,
+               bayesplot)
+
 source("fun_helper.R")
 
 
 #' 
-#' read data
+#' generate data (not saved)
+#' 
+## -----------------------------------------------------------------------------
+
+### R: simulate data ###
+set.seed(42)
+d <- tibble(idx = seq(0, 14),
+            t = seq(0, 14)) %>%
+  data_grid(idx, t) %>%
+  group_by(idx) %>%
+  mutate(a_real = rnorm(1, 1, 0.5),
+         b_real = rnorm(1, 0.3, 0.2),
+         eps_real = rnorm(15, 0, 0.5),
+         y = a_real + b_real * t + eps_real) %>%
+  select(c(idx, t, y)) %>%
+  mutate(idx = as_factor(idx))
+  
+# split into test & train
+train <- d %>%
+  filter(t <= 9)
+
+test <- d %>%
+  filter(t > 9)
+
+# save data (we use python data in the app)
+write_csv(train, "../data/train_R.csv")
+write_csv(test, "../data/test_R.csv")
+
+
+#' 
+#' read data from python simulation
 #' 
 ## -----------------------------------------------------------------------------
 
