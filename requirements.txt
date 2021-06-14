@@ -6,4 +6,4 @@ matplotlib==3.3.4
 xarray==0.17.0
 pymc3==3.11.2
 streamlit==0.82.0
-theano_pymc=1.1.2
+theano_pymc==1.1.2
