@@ -1,9 +1,7 @@
 # BayesWorkflow
 Bayesian workflow in R (brms) and Python (PyMC3).
-
 Made for the user who wants to transition from R (brms) to Python (pyMC3) or
 the other way.
-
 Originates as exam project for Cognitive Science Master's course Human
 Computer Interaction (HCI).
 
