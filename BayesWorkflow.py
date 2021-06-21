@@ -240,10 +240,6 @@ elif choice == "Complete Pooling (model 1)":
     You might already feel that this is not a satisfactory model, but bear with me for now.
     We will build on top of what we have learned and get to more complex models in the next sections. 
     
-    Note on **Reproducibility** and **Preprocessing**: The code in **Packages & Reproducibility** is
-    the same for each section, so if you are running all sections in one document you will
-    not need to copy-paste the contents of this chunk every time. In *Preprocessing* much of the
-    code is typically also redundant, but is there to make sure that each section is stand-alone.
     '''
 
     ### code ###
@@ -286,7 +282,7 @@ elif choice == "Complete Pooling (model 1)":
     '''
     # Model specification (math)
     
-    We can formulate the complete pooling model (with generic priors)
+    We can formulate the complete pooling model (with generic priors).
     
     '''
     
@@ -355,16 +351,24 @@ elif choice == "Complete Pooling (model 1)":
             In the pyMC3 code (left) we have created something called a *shared variable* for our x variable, time (t) with the ```pm.Data()``` function.
             This has to be done if we want to generate predictions based on new data (data that the model was not trained on).
             We only need to create a shared variable for t here, because it is the only predictor variable in the model. 
-            pyMC3 relies on **theano** as the backend (just as brms relies on stan), and theano needs to encode variables that we might want to change later in a different format. 
+            pyMC3 relies on **theano** as the backend (just as brms relies on **stan**), and theano needs to encode variables that we might want to change later in a different format. 
             
             # Sigma (Normal or HalfNormal?) 
             
             We have specified a *Normal distribution* for the sigma parameter in the brms priors (right), but we have specified a *Half-normal distribution* for the sigma parameter i pyMC3 (left). 
-            This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow negative values). 
+            This might seem confusing, but the prior for the sigma distribution cannot actually be a normal distribution (as this would allow for negative values). 
             The reason why we can do this in brms is because it realizes that draws from the sigma distribution have to be positive. 
             So, when it encounters a negative value it throws away that sample and tries again. This will then effectively give us a Half-normal distribution. 
             pyMC3 does not baby-sit in this way, and will throw an error if we try to specify a normal distribution for the sigma parameter. 
             You can try this for yourself and see the machinery break down! 
+            
+            # The model as a function? 
+            
+            In pyMC3 I have specified the model inside a function. This might seem weird,
+            and it is also not necessary. The benefit of doing it is that when we have finished
+            modeling we can save our idata (to be introduced shortly) but we will still have to 
+            recompile our model when we return to our project. At this point we can just re-run 
+            the function that we have already specified. 
             '''
     
     '''
@@ -374,6 +378,8 @@ elif choice == "Complete Pooling (model 1)":
     The ```model_to_graphviz()``` function from pyMC3 shows the model we have specified in plate notation, which is regrettably less intuitive than the awesome [Kruschke diagrams](http://www.sumsar.net/blog/2013/10/diy-kruschke-style-diagrams/).
     They basically communicate the same though, and once we learn to read them they are a great sanity check. Here we can see that we have estimated just one *alpha* distribution
     and one *beta* distribution, as well as an overall model error *sigma*. 
+    In addition, we the model informs us that the data has shape $15 \cdot 10$ which
+    is correct because we have $15$ aliens (ID) and $10$ time-points (t) for each. 
     
     '''
     
@@ -452,7 +458,44 @@ elif choice == "Complete Pooling (model 1)":
         
         '''
         
+    expander = st.beta_expander("🧙‍♂️ Concept-Guru: Prior predictive checks")
+    
+    with expander: 
+        '''
+        # Reasonable scale for priors
+        A reasonable scale for our priors will ideally be informed by 
+        our a priori knowledge of the phenomenon that we are modeling. 
+        We might for instance know that plausible human heights range 
+        somewhere between $1.5$ 
+        and $2.5$ meters, and incorporate this
+        knowledge in to our model by specifying priors which assign most
+        probability density to this region of observations. 
         
+        In our case of aliens' knowledge of danish it is slightly more
+        tricky, and we might want to inspect our data to figure out what
+        a reasonable range is (if we assume that we do not have any prior
+        knowledge). We almost always know something however, and 
+        say that we know the danish test scores knowledge between 
+        $-5$ and $+10$ points (which is consistent with our observations). 
+        Then the prior predictive check for the "generic" priors is 
+        reasonable, placing most probability density in the $-1$
+        to $+3$ range, but reserving some probability for more extreme 
+        outcomes. The prior predictive check for the "weak" priors is
+        too broad, with a range of $-100$ to $+100$, while the prior
+        predictive check for the "specific" priors is too restrictive,
+        placing almost all of the probability density in the region
+        between $1$ and $2$. 
+        
+        In many cases (when we have enough observations) it is not 
+        too problematic to have vague (or "weak") priors, and you
+        will generally notice that the model with "weak" priors 
+        infers parameter values that are close to the model fitted 
+        with "generic" priors. However, the "specific" priors should
+        only be used if we have strong reason to bias the model
+        (e.g. based on a meta-analysis). You will see that the 
+        parameter values that this model infers differ significantly from the
+        parameter values of the two other models. 
+        '''
     '''
     # Sample posterior
     
@@ -587,9 +630,12 @@ elif choice == "Complete Pooling (model 1)":
     # Posterior Predictive checks 
     
     If all is well so far we should now generate *posterior predictive checks*. Similarly to *prior predictive checks* we have blue draws and a black line
-    showing the true distribution. Check the *specific* prior and notice that 
-    the posterior has not adapted well here (too constrained by the strong prior to properly learn from the data).
-    
+    showing the true distribution. We see that the model has not quite captured the shape of 
+    the posterior distribution (e.g. the modes differ). We see that the posterior predictive checks look
+    particularly bad for the *specific* prior. Here we have constrained the model with very strong priors,
+    where almost all of the probability mass for the prior predictive check was in the $[1, 2]$ range. The model has learned from the
+    data and now places the majority of its weight in the $[1, 3]$ range, but this is still not 
+    ideal, unless we have a strong reason to bias the model this heavily. 
     '''
     
     ### plot ### 
@@ -635,10 +681,14 @@ elif choice == "Complete Pooling (model 1)":
 
     with expander: 
         '''
+        # What went wrong?
         We see that the mode of the true posterior distribution and the mode of our predictive draws differ systematically. 
-        The posterior has long tails which is not well captured by our model. 
-        We should reject this model, and consider what we have missed. I often find that the issue is that the *likelihood-function*
-        is improper, or that the model has not been specified with the appropriate *random effects structure*. 
+        The posterior has long tails which is not well captured by our model. Posterior predictive checks are not in themselves
+        sufficient to accept or reject a model. Sometimes we can reasonably approximate e.g. a non-Gaussian distribution with a 
+        Gaussian, and sometimes even when the posterior predictive looks really good we could face other issues.
+        However, generally they do provide a good idea about whether our model-structure is proper. 
+        Often when the posterior predictive check is bad it is because we have either (1) not implemented a proper
+        *random effects structure* or (2) not specified a proper *likelihood function*. 
             
         '''
     
@@ -647,7 +697,7 @@ elif choice == "Complete Pooling (model 1)":
 
     We can also now run the model forward (i.e. generate predictions from the model). 
     We can compare these model predictions with the data that the model is trained on, to check whether the model has captured the patterns in the data.
-    We can do this either for (a) **fixed effects** only or (b) with the **full model uncertainty**. 
+    We can do this either for (a) **fixed effects only** or (b) with the **full model uncertainty**. 
     If we generate predictions for fixed effects only, we will get predictions for the *mean* of the population. 
     If we generate predictions with the full model uncertainty  (incl. sigma and potential random effects) we will get predictions for individuals.
     '''
@@ -820,6 +870,14 @@ elif choice == "Random Intercepts (model 2)":
     # Candidate model 2 (Random intercepts)
     Our second candidate model will extend on the complete pooling model to also include *random intercepts* ($\alpha$),
     for each alien (ID). It will thus be our first *multilevel* (*hierarchical*) model. 
+    *Richard McElreath* argues in *Statistical Rethinking* that 
+    "multilevel regression deserves to be the default form of regression". 
+    Some often highlighted (e.g. *Richard McElreath*, *Riccardo Fusaroli*, *Osvaldo Martin*) advantages are:
+    
+    1. Accounting for repeated measures 
+    2. Modeling individual-level effects 
+    3. Partial Pooling (shrinkage) 
+    
     
     No additional preprocessing is necessary (if you have been following the code
     in the earlier sections). 
@@ -832,7 +890,7 @@ elif choice == "Random Intercepts (model 2)":
     Our new model can be formulated in mathematical (pseudo-code) notation as below.
     We are now estimating an intercept distribution for each alien (ID) and this
     distribution is based on an underlying distribution for the population.
-    As we know, it is distributions all the way down. 
+    We now have two **hyper-priors** which will influence our intercept parameter (see e.g. *Bayesian Analysis with Python* by *Osvaldo Martin*)
     
     '''
     
@@ -840,8 +898,8 @@ elif choice == "Random Intercepts (model 2)":
         y_{i, j} \sim Normal(\mu_{i, j}, \sigma) \\
         \mu_{i, j} = \alpha_{var_j} + \beta \cdot x_i \\
         \alpha_{var_j} \sim Normal(\alpha_j, \alpha_{\sigma_j}) \\
-        \alpha \sim Normal(1.5, 0.5) \\
         \beta \sim Normal(0, 0.5) \\
+        \alpha \sim Normal(1.5, 0.5) \\
         \alpha_{\sigma} \sim HalfNormal(0.5) \\
         \sigma \sim HalfNormal(0.5)
         ''')
@@ -888,7 +946,7 @@ elif choice == "Random Intercepts (model 2)":
         
         # Dims 
         Another thing to note in the pyMC3 code is that we have specified 
-        ```dims = "idx"``` for the varying intercepts parameter (alpha_var). 
+        ```dims = "idx"``` for the varying intercepts parameter. 
         This tells the model that we wish to estimate one distribution (parameter)
         for each of the IDs that we supplied in our ```coords``` earlier. 
         
@@ -905,8 +963,8 @@ elif choice == "Random Intercepts (model 2)":
     
     The structure of the model has changed as reflected in the plate diagram. 
     There is still only one *beta* and overall error *sigma* for the model. 
-    However, we now estimate 15 *alpha* values, one for each alien (ID). 
-    These are shown to be drawn from the population level distributions. 
+    However, we now estimate 15 *alpha* (intercept) values, one for each alien (ID). 
+    These are shown to be drawn from the population level distributions (hyper-priors).
     '''
     
     ### plot ###
@@ -925,6 +983,10 @@ elif choice == "Random Intercepts (model 2)":
     
     Again, we now generate prior predictive checks. 
     The code to achieve this is the same as for the *complete pooling* model. 
+    The prior predictive checks are also similar to those from earlier 
+    in that the "generic" prior predictive checks look ok, while both the
+    "weak" and the "specific" prior predictive checks are problematic
+    (in different ways). 
     
     '''
     ### plot ###
@@ -1053,7 +1115,9 @@ elif choice == "Random Intercepts (model 2)":
     
     We now generate *posterior predictive checks*. 
     They now look slightly better than the complete pooling model
-    that we did before, but there still appears to be a systematic issue. 
+    that we did before, but we still notice the issue that the mode
+    of the true posterior distribution and the mode of our posterior 
+    predictive draws are systematically different. 
     
     '''
     
@@ -1206,7 +1270,8 @@ elif choice == "Multilevel Covariation (model 3)":
     # Candidate model 3 (Random intercepts and slopes with covariation)
     Our third candidate model will be a multilevel model with both *random
     intercepts* and *random slopes*. The model will also model the *covariance*
-    of the random intercepts and random slopes. This is almost always desirable,
+    of the random intercepts and random slopes. This is almost always better than
+    modeling random slopes and intercepts independently, 
     and is what happens by default in brms when we use the ```(1+t|idx)``` syntax in the model formula. 
     In pyMC3 we have to build this ourselves of course. 
     
@@ -1231,6 +1296,8 @@ elif choice == "Multilevel Covariation (model 3)":
     
     Here, we specify our new model with random intercepts and slopes,
     as well as the covariance/correlation distributed as LKJ.
+    LKJ(1) is a flat prior (all correlations equally likely) but I will stick to the brms/stan baseline recommendation
+    of using an LKJ(2) prior (where extreme correlations are treated as less likely). 
     For a more thorough explanation and reference, see [ajkurz CH 13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction).
     
     '''
@@ -1251,7 +1318,7 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     Where **S** is the covariance matrix and **R** is the corresponding correlation matrix. 
     **R** is distributed as **LKJcorr(2)**.
-    Again, see [ajkurz CH13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction)
+    Again, see [ajkurz CH13](https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/adventures-in-covariance.html#varying-slopes-by-construction).
     '''
     
     '''
@@ -1291,7 +1358,8 @@ elif choice == "Multilevel Covariation (model 3)":
     
     This is getting more and more interesting. 
     We now estimate *random intercepts* and *random slopes* as well as their *covariation* (LKJCholeskyCov).
-    
+    Notice that the *alpha_beta* parameter now has dimension $15 \cdot 2$ because we have $15$ random slopes
+    and $15$ random intercepts (one for each participant). 
     '''
     
     ### plot ###
@@ -1309,6 +1377,10 @@ elif choice == "Multilevel Covariation (model 3)":
     # Prior predictive checks
     
     Run prior predictive checks. The code is the same as for both previous models. 
+    Because we have been increasing the amount of parameters in the model, we will by chance sample increasingly 
+    extreme positive and negative values (there are many possible combinations of parameter values,
+    some of which are extreme). 
+    However, most of the probability density is still in the same regions as for previous models. 
     
     '''
     ### plot ###
@@ -1441,8 +1513,9 @@ elif choice == "Multilevel Covariation (model 3)":
     
     WOW! The posterior predictive checks are starting to look really good 
     for the models fitted with *generic* and *weak* priors. 
-    We now appear to have a model which is reliably captures the main patterns 
-    in the data. 
+    The models now reliably capture the shape of the posterior, and the 
+    mode of the true posterior and the posterior predictive draws are now
+    almost identical. 
     
     '''
     
@@ -1536,7 +1609,7 @@ elif choice == "Multilevel Covariation (model 3)":
     '''
     # HDI (parameters)
     
-    Our model now has the right *sigma*, which we specified as Normal(0, 0.5). 
+    Our model now has the right estimation for *sigma*, which we specified to be distributed as Normal(0, 0.5) in the simulation. 
     It also has most uncertainty with regards to the *alpha* parameter, which is
     also true to the data generating process (see Simulation & EDA). 
     *beta* is slightly low, and *alpha* is slightly high, but this could be due
@@ -1608,19 +1681,20 @@ elif choice == "Model Comparison":
         and based on how the data looks in the predictive posterior (i.e. the HDI plots we have been doing).
         Since Bayesian models are always generative 
         we can simulate/generate new data based on our estimated distributions over parameters
-        and our likelihood function (see "Statistical Rethinking" by Richard McElreath). 
+        and our likelihood function (see *Statistical Rethinking* by *Richard McElreath*). 
         We should be able to (forward) generate data which captures the main patterns in the data that 
         the model is trained on. 
         
         # Information Criteria 
         Information criteria attempt to approximate cross-validation results.
         LOO-CV approximates leave-one-out cross validation, without actually 
-        performing *k* iterations (see "Bayesian Analysis with Python" by Osvaldo Martin). 
+        performing *k* iterations (see *Bayesian Analysis with Python* by *Osvaldo Martin*). 
         LOO is generally preferred over e.g. WAIC and is the baseline implementation. 
         An issue with this kind of model comparison is that it is typically not valid
         for comparing models with different *likelihood-functions* (a notable exception
         is that it is valid for comparing models with *Gaussian* and *Student-t* 
-        likelihood functions). 
+        likelihood functions). Since we have stuck with a *Gaussian* likelihood-function throughout
+        it is not an issue in our case. 
         
         '''
 
@@ -1628,7 +1702,7 @@ elif choice == "Model Comparison":
     # Compare posterior predictive
     
     From visually inspecting (and comparing) the posterior predictive checks,
-    the *multilevel covariation* model appears to reproduce the data much better
+    the *multilevel covariation* model clearly reproduces the posterior shape much better
     than both the *complete pooling* and the *random intercepts* models. 
     
     '''
@@ -1730,7 +1804,7 @@ elif choice == "Model Comparison":
     supported by the data (they do not overfit). in the ```weight``` column,
     we can see that the *covariation* model gets almost all of the weight
     (indicating that our LOO comparison is very clearly in favor of this model). 
-    Only python (**Arviz**) output shown below.
+    Only python (*Arviz*) output shown below.
     
     '''
     
