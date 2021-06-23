@@ -94,7 +94,7 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
         y_mean = y_pred.mean(axis = (0, 1))
         outcome = y_pred.reshape((4000*n_idx, n_time))
     
-    # set-up plot
+    # set up plot
     fig, ax = plt.subplots(figsize = (10, 7))  
 
     # plot data
@@ -130,6 +130,44 @@ def plot_hdi(t, y, n_idx, m_idata, model_type, prior_level, kind = "all", hdi_pr
     fig.tight_layout()
     plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_{kind}.jpeg",
                 dpi = 300)
+
+# HDI individual
+def hdi_ID(t_unique, y, hdi1, hdi2, model_type, prior_level, type, ID):
+    
+    # set up plot 
+    fig, ax = plt.subplots(figsize = (10, 7)) 
+    
+    # plot data-points
+    ax.scatter(
+        t_unique, 
+        y, 
+        color = "darkorange",
+        s = 50)
+    
+    # plot 80% CI
+    ax.vlines(
+        t_unique, 
+        hdi1.sel(hdi = "lower"), 
+        hdi1.sel(hdi = "higher"), 
+        color = "orange", 
+        alpha = 0.5,
+        linewidth = 15)
+    
+    # plot 95% CI
+    ax.vlines(
+        t_unique, 
+        hdi2.sel(hdi = "lower"), 
+        hdi2.sel(hdi = "higher"), 
+        color = "orange", 
+        alpha = 0.3,
+        linewidth = 15)
+    
+    # aesthetics & save
+    plt.xticks(t_unique)
+    fig.suptitle(f"Python/pyMC3: HDI prediction intervals (Alien {ID})")
+    fig.tight_layout()
+    plt.savefig(f"../plots_python/{model_type}_{prior_level}_HDI_individual{ID}_{type}.jpeg",
+                    dpi = 300)
 
 # HDI for parameters
 # consider alpha vs. alpha-mu.

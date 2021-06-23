@@ -1,12 +1,11 @@
 ---
-title: "Model Comparison (VMP)"
+title: "Untitled"
 output: html_document
 ---
 
 set-up
 
 ```{r}
-
 # packages
 pacman::p_load(tidyverse, 
                brms,
@@ -15,57 +14,44 @@ pacman::p_load(tidyverse,
                webshot,
                modelr,
                tidybayes)
-
 # load functions from fun_helper.R
 source("fun_helper.R")
-
 ```
 
 load data 
 
 ```{r}
-
 # load data
 train <- read_csv("../data/train.csv") %>%
   mutate(idx = as_factor(idx))
-
-
 ```
 
 load models 
 
 ```{r}
-
 # sampled models
 m_pooled_posterior <- readRDS("../models_R/m_pooled_generic_fit.rds")
 m_intercept_posterior <- readRDS("../models_R/m_intercept_generic_fit.rds")
 m_covariation_posterior <- readRDS("../models_R/m_covariation_generic_fit.rds")
-
 ```
 
 loo comparison (might not go in report). 
 but we could try to get it to work with saving..
 
 ```{r}
-
 # add criterions 
 m_pooled_posterior <- add_criterion(m_pooled_posterior, 
                                     criterion = c("loo", "bayes_R2"))
-
 m_intercept_posterior <- add_criterion(m_intercept_posterior, 
                                        criterion = c("loo", "bayes_R2"))
-
 m_covariation_posterior <- add_criterion(m_covariation_posterior, 
                                          criterion = c("loo", "bayes_R2")) # one problematic observation.
-
 # run loo compare
 loo_compare(m_pooled_posterior,
             m_intercept_posterior,
             m_covariation_posterior)
-
 # also uses stacking (and gives the same as pyMC3)
 loo_model_weights(m_pooled_posterior,
                   m_intercept_posterior,
                   m_covariation_posterior)
-
 ```

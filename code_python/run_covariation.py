@@ -150,6 +150,28 @@ for sigma, prior_level in [(0.05, "specific"), (0.5, "generic"), (5, "weak")]:
         prior_level = prior_level,
         kind = "full"
     )
+    
+    # plot hdi for individual aliens
+    for ID in idx_unique: 
+        # only relevant idx
+        ID_tmp = m_idata.posterior_predictive.sel(idx = ID)
+
+        # small and large hdi interval
+        hdi1 = az.hdi(ID_tmp, hdi_prob = 0.8)["y_pred"]
+        hdi2 = az.hdi(ID_tmp, hdi_prob = 0.95)["y_pred"]
+
+        # y values for the right idx
+        y = train[train["idx"] == ID].y.values
+        
+        fh.hdi_ID(
+            t_unique = t_unique, 
+            y = y, 
+            hdi1 = hdi1, 
+            hdi2 = hdi2, 
+            model_type = model_type, 
+            prior_level = prior_level,
+            type = "train",
+            ID = ID)
 
     # hdi for parameters
     fh.hdi_param(

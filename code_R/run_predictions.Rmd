@@ -1,7 +1,8 @@
 ---
-title: "run_predictions"
+title: "Untitled"
 output: html_document
 ---
+
 
 setup
 
@@ -12,11 +13,13 @@ pacman::p_load(tidyverse,
                brms,
                modelr,
                tidybayes,
-               bayesplot)
+               bayesplot,
+               glue)
 
 # load functions from fun_models.R
 source("fun_models.R")
 source("fun_helper.R")
+
 ```
 
 load the model
@@ -42,7 +45,7 @@ generate and plot predictions
 
 ```{r}
 
-plot_predicted_groups(
+prediction_interval_groups(
   fit = m_covariation_posterior,
   title = "R/brms: Predictions intervals (predictions)",
   data = test
@@ -54,4 +57,24 @@ save_plot(
 
 ```
 
+idx predictions
+
+```{r}
+
+# get unique idx
+idx_unique <- as.numeric(unique(test$idx)) - 1
+
+# loop over idx and use function
+for (ID in idx_unique){
+  
+  # generate plot
+  hdi_ID(fit = m_covariation_posterior,
+         data = test,
+         ID = ID)
+  
+  # save plot
+  save_plot(path = glue("../plots_R/covariation_generic_HDI_individual{ID}_test.png"))
+}
+
+```
 

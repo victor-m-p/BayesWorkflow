@@ -736,7 +736,7 @@ elif choice == "Complete Pooling (model 1)":
     if hdi_type == "fixed": 
         py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name, "posterior_predictive")
     
     expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
     with expander: 
@@ -1199,7 +1199,7 @@ elif choice == "Random Intercepts (model 2)":
         py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
         R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name, "posterior_predictive")
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
     expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
@@ -1209,7 +1209,62 @@ elif choice == "Random Intercepts (model 2)":
             st.code(py_hdi)
         with col2:
             st.code(R_hdi) 
+    
+    '''
+    # HDI (individual aliens) 
+    We have mainly been looking at whether the model reproduces the macro-patterns in the
+    data so far (i.e. the posterior shape and the data from all groups). However, it is possible
+    to have a model which satisfactorily reproduce these without actually fitting the data well.
+    What we will want to do is to zoom in and predict for individual clusters in our data (here IDs).
+    The process is largely the same as for the HDI plots above, we just subset the data, and in R
+    I have also added distributions (see the amazing [tidybayes package](http://mjskay.github.io/tidybayes/)).
+    Dark dots are actual observations and in both *python/pyMC3* and *R/brms* we show 80- and 95% HDIs. 
+    Note that we could not do this for the first model (pooled) because we only estimated population parameters.
+    
+    '''
+    
+    col1_ind, col2_ind = st.beta_columns(2)
+    
+    with col1_ind: 
+        selection_ind1 = st.radio("Choose prior level for individual HDI plots", 
+            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+            index = 1)
+        
+    with col2_ind: 
+        selection_ind2 = st.slider("Choose Alien",
+                           min_value = 0,
+                           max_value = 14,
+                           value = 0,
+                           step = 1)
+    
+    prior_level_ind = translation_prior.get(selection_ind1)
+    
+    ind_img1, ind_img2 = st.beta_columns(2)
+    
+    with ind_img1:
+        st.image(f"plots_python/{model_context}_{prior_level_ind}_HDI_individual{selection_ind2}_train.jpeg")
+        
+    with ind_img2: 
+        st.image(f"plots_R/{model_context}_{prior_level_ind}_HDI_individual{selection_ind2}_train.png")
+    
+    # CODE #
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals (IDs)")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            py_hdi_ID = ct.py_hdi_ID(
+                ID = selection_ind2,
+                data_type = data_type,
+                idata_name = idata_name,
+                pred_type = "posterior_predictive")
+            st.code(py_hdi_ID)
+        with col2: 
+            R_hdi_ID = ct.R_hdi_ID(ID = selection_ind2, 
+                                    data_type = data_type,
+                                    model_name = model_name)
+            st.code(R_hdi_ID)
             
+    
     '''
     # HDI (parameters)
     
@@ -1595,7 +1650,7 @@ elif choice == "Multilevel Covariation (model 3)":
         py_hdi = ct.py_hdi_data_fixed(hdi_type, idata_name)
         R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, hdi_type)
     elif hdi_type == "full": 
-        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name)
+        py_hdi = ct.py_hdi_data_full(hdi_type, idata_name, "posterior_predictive")
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, hdi_type)
     
     expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
@@ -1605,7 +1660,54 @@ elif choice == "Multilevel Covariation (model 3)":
             st.code(py_hdi)
         with col2:
             st.code(R_hdi) 
-            
+    
+    
+    '''
+    
+    # HDI prediction intervals (individual aliens) 
+    
+    '''
+    
+    col1_ind, col2_ind = st.beta_columns(2)
+    with col1_ind: 
+        selection_ind1 = st.radio("Choose prior level for individual HDI plots", 
+            ("Weak (sd = 5)", "Generic (sd = 0.5)", "Specific (sd = 0.05)"),
+            index = 1)
+        
+    with col2_ind: 
+        selection_ind2 = st.slider("Choose Alien",
+                           min_value = 0,
+                           max_value = 14,
+                           value = 0,
+                           step = 1)
+    
+    prior_level_ind = translation_prior.get(selection_ind1)
+    
+    ind_img1, ind_img2 = st.beta_columns(2)
+    
+    with ind_img1:
+        st.image(f"plots_python/{model_context}_{prior_level_ind}_HDI_individual{selection_ind2}_train.jpeg")
+        
+    with ind_img2: 
+        st.image(f"plots_R/{model_context}_{prior_level_ind}_HDI_individual{selection_ind2}_train.png")
+    
+    # CODE #
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals (IDs)")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            py_hdi_ID = ct.py_hdi_ID(
+                ID = selection_ind2,
+                data_type = data_type,
+                idata_name = idata_name,
+                pred_type = "posterior_predictive")
+            st.code(py_hdi_ID)
+        with col2: 
+            R_hdi_ID = ct.R_hdi_ID(ID = selection_ind2, 
+                                    data_type = data_type,
+                                    model_name = model_name)
+            st.code(R_hdi_ID)
+    
     '''
     # HDI (parameters)
     
@@ -1784,7 +1886,7 @@ elif choice == "Model Comparison":
         py_hdi = ct.py_hdi_data_fixed(uncertainty, idata_name)
         R_hdi = ct.R_hdi_fixed_groups(model_name, R_type, data_type, R_function, uncertainty)
     elif uncertainty == "full": 
-        py_hdi = ct.py_hdi_data_full(uncertainty, idata_name)
+        py_hdi = ct.py_hdi_data_full(uncertainty, idata_name, "posterior_predictive")
         R_hdi = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
     
     expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
@@ -1834,9 +1936,8 @@ elif choice == "Prediction":
     # Prediction on unseen data
     
     This will be only a brief introduction to prediction in *pyMC3* and *brms*.
-    We will only cover predicting (1) groups that are already in the data
-    and (2) only the trend for the population (not clusters or IDs). 
-    If you want to see more on prediction (e.g. on new groups or on IDs)
+    We will only cover predicting the population (mean) trend and groups that are already in the data.
+    If you want to see more on prediction (e.g. on new groups)
     Then please let me know. The process is largely the same though, and 
     you can check the "References & Inspiration" page to see where to go next. 
     In this section we will only be predicting from the *covariation* model,
@@ -1884,7 +1985,7 @@ elif choice == "Prediction":
         
     '''
     
-    # HDI prediction interval 
+    # HDI prediction intervals
     
     The HDI prediction intervals look reasonable (i.e. ~80% and ~95% of the actual
     test data-points are inside the 80- and 95% HDI prediction intervals). We note again that it is
@@ -1907,7 +2008,7 @@ elif choice == "Prediction":
     R_type = ".prediction" 
     R_function = "add_predicted_draws" 
     
-    py_pred = ct.py_hdi_data_full(uncertainty, idata_name)
+    py_pred = ct.py_hdi_data_full(uncertainty, idata_name, "predictions")
     R_pred = ct.R_hdi_full_groups(model_name, R_type, data_type, R_function, uncertainty)
     
     expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals")
@@ -1917,6 +2018,47 @@ elif choice == "Prediction":
             st.code(py_pred)
         with col2:
             st.code(R_pred) 
+    
+    '''
+    
+    # HDI prediction intervals (individual aliens)
+    
+    We can also check how well our model predicts individual clusters (here IDs) in the data.
+    Overall, it seems as if around 80- and 95% of observations are indeed inside the 80- and
+    95% prediction intervals. 
+    
+    ''' 
+
+    selection_ind2 = st.slider("Choose Alien",
+                        min_value = 0,
+                        max_value = 14,
+                        value = 0,
+                        step = 1)
+    
+    ind_img1, ind_img2 = st.beta_columns(2)
+    
+    with ind_img1:
+        st.image(f"plots_python/covariation_generic_HDI_individual{selection_ind2}_test.jpeg")
+        
+    with ind_img2: 
+        st.image(f"plots_R/covariation_generic_HDI_individual{selection_ind2}_test.png")
+    
+    # CODE #
+    expander = st.beta_expander("🐒 Code-Monkey: HDI prediction intervals (IDs)")
+    with expander: 
+        col1, col2 = st.beta_columns(2)
+        with col1: 
+            py_hdi_ID = ct.py_hdi_ID(
+                ID = selection_ind2,
+                data_type = data_type,
+                idata_name = idata_name,
+                pred_type = "predictions")
+            st.code(py_hdi_ID)
+        with col2: 
+            R_hdi_ID = ct.R_hdi_ID(ID = selection_ind2, 
+                                    data_type = data_type,
+                                    model_name = model_name)
+            st.code(R_hdi_ID)
     
     
     '''

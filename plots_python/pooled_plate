@@ -11,14 +11,14 @@ Data" shape=box style="rounded, filled"]
 	sigma [label="sigma
 ~
 HalfNormal"]
-	alpha [label="alpha
-~
-Normal"]
 	beta [label="beta
 ~
 Normal"]
-	sigma -> y_pred
+	alpha [label="alpha
+~
+Normal"]
+	t_shared -> y_pred
 	alpha -> y_pred
 	beta -> y_pred
-	t_shared -> y_pred
+	sigma -> y_pred
 }

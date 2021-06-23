@@ -104,3 +104,28 @@ fh.plot_hdi(
     prior_level = "generic",
     kind = "predictions"
 )
+
+model_type = "covariation"
+prior_level = "generic"
+
+# plot hdi for individual aliens
+for ID in idx_unique_test: 
+    # only relevant idx
+    ID_tmp = m_idata.predictions.sel(idx = ID)
+
+    # small and large hdi interval
+    hdi1 = az.hdi(ID_tmp, hdi_prob = 0.8)["y_pred"]
+    hdi2 = az.hdi(ID_tmp, hdi_prob = 0.95)["y_pred"]
+
+    # y values for the right idx
+    y = test[test["idx"] == ID].y.values
+    
+    fh.hdi_ID(
+        t_unique = t_unique_test, 
+        y = y, 
+        hdi1 = hdi1, 
+        hdi2 = hdi2, 
+        model_type = model_type, 
+        prior_level = prior_level,
+        type = "test",
+        ID = ID)

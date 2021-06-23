@@ -27,4 +27,3 @@ fit_mod <- function(formula,
   return(b)
   
 }
-

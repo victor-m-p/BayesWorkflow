@@ -3,6 +3,7 @@ title: "Untitled"
 output: html_document
 ---
 
+
 set-up
 
 ```{r}
@@ -12,7 +13,8 @@ pacman::p_load(tidyverse,
                brms,
                modelr,
                tidybayes,
-               bayesplot)
+               bayesplot,
+               glue)
 
 RANDOM_SEED = 42
 
@@ -296,6 +298,52 @@ save_plot(path = "../plots_R/intercept_weak_HDI_full.png")
 
 ```
 
+individual (idx) HDI intervals
+
+```{r}
+
+
+# get unique idx
+idx_unique <- as.numeric(unique(train$idx)) - 1
+
+# specific
+for (ID in idx_unique){
+  
+  # generate predictions
+  hdi_ID(fit = m_intercept_specific_fit,
+         data = train,
+         ID = ID)
+  
+  # save plot
+  save_plot(path = glue("../plots_R/intercept_specific_HDI_individual{ID}_train.png"))
+}
+
+# generic
+for (ID in idx_unique){
+  
+  # generate predictions
+  hdi_ID(fit = m_intercept_generic_fit,
+         data = train,
+         ID = ID)
+  
+  # save plot
+  save_plot(path = glue("../plots_R/intercept_generic_HDI_individual{ID}_train.png"))
+}
+
+# weak
+for (ID in idx_unique){
+  
+  # generate predictions
+  hdi_ID(fit = m_intercept_weak_fit,
+         data = train,
+         ID = ID)
+  
+  # save plot
+  save_plot(path = glue("../plots_R/intercept_weak_HDI_individual{ID}_train.png"))
+} 
+  
+```
+
 ### MCMC (hdi for parameters) ###
 uses the bayesplot package. 
 
@@ -331,5 +379,3 @@ save_plot(path = "../plots_R/intercept_weak_HDI_param.png",
           height = height)
 
 ```
-
-

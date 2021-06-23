@@ -1,27 +1,23 @@
 #' ---
-#' title: "run_data"
+#' title: "Untitled"
 #' output: html_document
 #' ---
 #' 
 #' set-up
 #' 
 ## -----------------------------------------------------------------------------
-
 # packages
 pacman::p_load(tidyverse, 
                brms,
                modelr,
                tidybayes,
                bayesplot)
-
 source("fun_helper.R")
-
 
 #' 
 #' generate data (not saved)
 #' 
 ## -----------------------------------------------------------------------------
-
 ### R: simulate data ###
 set.seed(42)
 d <- tibble(idx = seq(0, 14),
@@ -38,38 +34,29 @@ d <- tibble(idx = seq(0, 14),
 # split into test & train
 train <- d %>%
   filter(t <= 9)
-
 test <- d %>%
   filter(t > 9)
-
 # save data (we use python data in the app)
 write_csv(train, "../data/train_R.csv")
 write_csv(test, "../data/test_R.csv")
-
 
 #' 
 #' read data from python simulation
 #' 
 ## -----------------------------------------------------------------------------
-
 # read train data
 train <- read_csv("../data/train.csv") %>%
   mutate(idx = as_factor(idx))
 
-
 #' 
 ## -----------------------------------------------------------------------------
-
 # quick EDA
 ggplot(data = train, aes(x = t, y = y, color = idx)) +
   geom_point() + 
   geom_smooth(method = "lm", aes(fill = idx), alpha = 0.2) + 
   ggtitle("R: Quick EDA")
-
 # save 
 save_plot(
   path = "../plots_R/EDA.png"
 )
 
-
-#' 

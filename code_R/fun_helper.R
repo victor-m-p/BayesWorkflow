@@ -37,6 +37,7 @@ prediction_interval_pool <- function(fit, title, data = train, n_time = 100){
                 size = 2, 
                 width = 0.1) + 
     scale_fill_brewer() +
+    theme_minimal() +
     ggtitle(title)
   
 }
@@ -58,6 +59,7 @@ fixed_interval_pool <- function(fit, title, data = train, n_time = 100){
                 size = 2, 
                 width = 0.1) + 
     scale_fill_brewer() + 
+    theme_minimal() + 
     ggtitle(title)
   
 }
@@ -79,6 +81,7 @@ fixed_kruschke_pool <- function(fit, title, data = train, n_time = 100){
     geom_line(aes(y = .value, group = .draw), 
               alpha = 1/20, 
               color = "#08519C") +
+    theme_minimal() + 
     ggtitle(title)
 }
 
@@ -100,6 +103,7 @@ prediction_interval_groups <- function(fit, title, data = train, n_time = 100){
                 size = 2, 
                 width = 0.1) + 
     scale_fill_brewer() +
+    theme_minimal() + 
     ggtitle(title)
   
 }
@@ -121,6 +125,7 @@ fixed_interval_groups <- function(fit, title, data = train, n_time = 100){
                 size = 2, 
                 width = 0.1) + 
     scale_fill_brewer() +
+    theme_minimal() + 
     ggtitle(title)
   
 }
@@ -136,30 +141,32 @@ mcmc_hdi <- function(fit, title){
     prob = 0.8, # 80% intervals
     prob_outer = 0.99, # 99%
     point_est = "mean") + 
+    theme_minimal() + 
     ggtitle(title)
   
 }
 
-### Predictions on unseen data ###
 
-# only for multilevel (because it is best). 
-plot_predicted_groups <- function(fit, title, data = train, n_time = 100){
+# idx predictions 
+hdi_ID <- function(fit, data = train, ID){
   
-  data %>%
-    data_grid(t = seq_range(t, n = n_time), idx) %>%
-    add_predicted_draws(fit) %>%
+  data %>% 
+    data_grid(t = t, idx = ID) %>%
+    add_predicted_draws(fit,
+                        allow_new_levels = T) %>%
     ggplot(aes(x = t, y = y)) + 
-    stat_lineribbon(aes(y = .prediction), 
-                    .width = c(.95, .8), 
-                    color = "#08519C") + # hdi interval?
-    geom_jitter(data = data, 
-                color = "navyblue", 
-                shape = 1, 
-                alpha = 0.5, 
-                size = 2, 
-                width = 0.1) + 
-    scale_fill_brewer() +
-    ggtitle(title)
+    stat_interval(aes(y = .prediction), .width = c(.95, .8)) + 
+    stat_slab(aes(y = .prediction), 
+              .width = c(.95, .8), 
+              position = position_nudge(x = 0.1),
+              fill = "#08519C",
+              alpha = 0.3) +
+    geom_point(data = data %>% filter(idx == ID),
+               color = "navyblue",
+               size = 2) +
+    scale_x_continuous(breaks = seq(0, 9, 1)) + 
+    scale_color_brewer() +
+    theme_minimal() +
+    ggtitle(glue("R/brms: HDI prediction intervals (Alien {ID})"))
   
 }
-

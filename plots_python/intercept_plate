@@ -11,16 +11,16 @@ Normal" style=filled]
 Data" shape=box style="rounded, filled"]
 		label="15 x 10" labeljust=r labelloc=b style=rounded
 	}
-	sigma_alpha [label="sigma_alpha
-~
-HalfNormal"]
-	alpha [label="alpha
-~
-Normal"]
 	sigma [label="sigma
 ~
 HalfNormal"]
+	sigma_alpha [label="sigma_alpha
+~
+HalfNormal"]
 	beta [label="beta
+~
+Normal"]
+	alpha [label="alpha
 ~
 Normal"]
 	subgraph cluster15 {
@@ -31,9 +31,9 @@ Normal"]
 	}
 	sigma_alpha -> alpha_var
 	alpha -> alpha_var
-	t_shared -> y_pred
-	idx_shared -> y_pred
-	sigma -> y_pred
-	alpha_var -> y_pred
 	beta -> y_pred
+	idx_shared -> y_pred
+	alpha_var -> y_pred
+	sigma -> y_pred
+	t_shared -> y_pred
 }

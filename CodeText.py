@@ -359,11 +359,11 @@ plt.plot();
 '''
     return py_code 
 
-def py_hdi_data_full(hdi_type, idata_name): 
+def py_hdi_data_full(hdi_type, idata_name, context): 
     py_code = f'''
 ### python: plot hdi (full uncertainty) ###
-# take posterior predictive out of idata for convenience
-ppc = {idata_name}.posterior_predictive
+# take {context} out of idata for convenience
+ppc = {idata_name}.{context}
 
 # take out predictions (mean over chains). 
 y_pred = ppc["y_pred"].mean(axis = 0).values
@@ -535,6 +535,55 @@ loo_overview
     '''
     return py_code
 
+def py_hdi_ID(ID, data_type, idata_name, pred_type): 
+    py_code = f'''
+### python: HDI intervals for IDs ###
+# take out idata for specific ID 
+ID_tmp = {idata_name}.{pred_type}.sel(idx = {ID})
+
+# small and large hdi interval
+hdi1 = az.hdi(ID_tmp, hdi_prob = 0.8)["y_pred"]
+hdi2 = az.hdi(ID_tmp, hdi_prob = 0.95)["y_pred"]
+
+# y values for the right idx
+y = {data_type}[{data_type}["idx"] == {ID}].y.values
+
+# set up plot 
+fig, ax = plt.subplots(figsize = (10, 7)) 
+
+# plot data-points
+ax.scatter(
+    t_unique, 
+    y, 
+    color = "darkorange",
+    s = 50)
+
+# plot 80% CI
+ax.vlines(
+    t_unique, 
+    hdi1.sel(hdi = "lower"), 
+    hdi1.sel(hdi = "higher"), 
+    color = "orange", 
+    alpha = 0.5,
+    linewidth = 15)
+
+# plot 95% CI
+ax.vlines(
+    t_unique, 
+    hdi2.sel(hdi = "lower"), 
+    hdi2.sel(hdi = "higher"), 
+    color = "orange", 
+    alpha = 0.3,
+    linewidth = 15)
+
+# aesthetics & save
+plt.xticks(t_unique)
+fig.suptitle("Python/pyMC3: HDI prediction intervals (Alien {ID})")
+fig.tight_layout()
+plt.plot();
+    '''
+    return py_code
+
     
 ### R functions ###
 # r reproducibility
@@ -546,7 +595,8 @@ pacman::p_load(
     brms,
     modelr,
     tidybayes,
-    bayesplot)
+    bayesplot,
+    glue)
 RANDOM_SEED = 42
 '''
     return R_code
@@ -779,7 +829,7 @@ def R_hdi_full_groups(model_name, pred_type, data_type, function, title):
 ### R: HDI prediction intervals ###
 {data_type} %>%
     data_grid(t = seq_range(t, n = 100), idx) %>%
-    {function}({model_name}) %>%
+    {function}({model_name}, allow_new_levels = T) %>%
     ggplot(aes(x = t, y = y)) + 
     stat_lineribbon(aes(y = {pred_type}), 
                     .width = c(.95, .8), # Intervals
@@ -858,4 +908,29 @@ loo_model_weights(m_pooled,
     '''
     return R_code
 
+def R_hdi_ID(ID, data_type, model_name): 
+    R_code = f'''
+### R: HDI intervals (IDs) ###
+# get unique idx
+idx_unique <- as.numeric(unique({data_type}$idx)) - 1
 
+{data_type} %>% 
+    data_grid(t = t, idx = {ID}) %>%
+    add_predicted_draws({model_name},
+                        allow_new_levels = T) %>%
+    ggplot(aes(x = t, y = y)) + 
+    stat_interval(aes(y = .prediction), .width = c(.95, .8)) + 
+    stat_slab(aes(y = .prediction), 
+                .width = c(.95, .8), 
+                position = position_nudge(x = 0.1),
+                fill = "#08519C",
+                alpha = 0.3) +
+    geom_point(data = {data_type} %>% filter(idx == {ID}),
+                color = "navyblue",
+                size = 2) +
+    scale_x_continuous(breaks = seq(0, 9, 1)) + 
+    scale_color_brewer() +
+    theme_minimal() +
+    ggtitle(glue("R/brms: HDI prediction intervals (Alien {ID})"))
+    '''
+    return R_code
